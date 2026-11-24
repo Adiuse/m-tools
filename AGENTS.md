@@ -20,7 +20,7 @@ Use [Scientific Engine & Technology Specification](docs/marketing-scientific-eng
 ## Scientific technology baseline and verification
 
 - Read `docs/marketing-scientific-engine-specification.md` before selecting or changing a scientific method, library, model or API for any of the 29 tools.
-- Scientific runtime baseline is CPython 3.13.x. Candidate pins are not considered validated until the `Scientific stack compatibility` GitHub Actions workflow passes.
-- The smoke tests verify package installation/API compatibility only; they do not establish scientific validity on real business data. Persian model-weight benchmarks and MMM/CLV/causal empirical validation remain separate gates.
+- Scientific runtime baseline is CPython 3.13.x; pandas 2.3.3 is selected because StatsForecast 2.1.1 requires pandas<3.0. The selected stack passed the `Scientific stack compatibility` workflow on Linux/CPython 3.13.18, including one combined install, `pip check`, representative API fixtures and Qwen3 Persian embedding generation. See the recorded run in the scientific-engine specification.
+- The smoke tests verify package installation/API compatibility and representative fixtures only; they do not establish scientific validity on real business data or prove all 29 tools are implemented. Persian semantic-quality benchmarks, full 29-tool golden tests, MMM/CLV sampling and causal validation remain separate gates.
 - Do not add Numba as a direct StatsForecast dependency without evidence; StatsForecast 2.1.1's published dependency metadata uses coreforecast/utilsforecast. Numba is required by other optional stacks where their metadata specifies it.
 - Keep Chronos-2, Meridian (محیط جداگانه Python 3.12), BERTopic, SHAP and other heavy/optional stacks as conditional challengers; do not load model weights or execute expensive inference in the core path without a benchmark and user data/privacy review.
