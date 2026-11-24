@@ -102,7 +102,7 @@ jobs:
 
   nlp:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -111,3 +111,4 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: python -m pip install sentence-transformers bertopic==0.17.4
       - run: python tests/scientific_stack_smoke.py nlp
+      - run: python tests/scientific_stack_smoke.py nlp_model
