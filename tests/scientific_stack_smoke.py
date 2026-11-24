@@ -184,8 +184,8 @@ def nlp() -> None:
 
     assert BERTopic is not None
     assert SentenceTransformer is not None
-    # Model weights are intentionally not downloaded in CI. Qwen3 Persian quality
-    # requires a separate, versioned benchmark on a human-labelled Persian corpus.
+    # Package import only; the separate nlp_model suite downloads Qwen3 weights.
+    # Persian semantic quality still requires a human-labelled benchmark.
 
 
 
@@ -221,7 +221,7 @@ if __name__ == "__main__":
         "analytics": analytics,
         "ml": ml,
         "nlp": nlp,
-    "nlp_model": nlp_model,
+        "nlp_model": nlp_model,
     }
     selected = sys.argv[1] if len(sys.argv) > 1 else "core"
     if selected not in suites:
