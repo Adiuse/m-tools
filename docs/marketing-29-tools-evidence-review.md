@@ -100,7 +100,7 @@
 ### M05 — بخش‌بندی و هدف‌گیری
 **روش:** RFM/rule-based به‌عنوان baseline قابل فهم؛ سپس الگوریتم با نوع داده انتخاب شود: K-Means برای ویژگی‌های عددی مناسب و مقیاس‌بندی‌شده؛ K-Prototypes/K-Modes برای ترکیب عددی و categorical؛ HDBSCAN برای خوشه‌های با چگالی متفاوت و noise. پایداری، اندازه بخش، قابلیت اقدام و ارزش تجاری همراه با شاخص‌های داخلی سنجیده شوند.
 
-**فناوری:** Pandas برای RFM؛ scikit-learn KMeans/HDBSCAN برای داده عددی؛ برای داده mixed، clustMixType 0.5-2 (R) برای k-prototypes با پشتیبانی متغیر ordinal؛ KAMILA 0.2.0 challenger برای ترکیب continuous/nominal. اگر اجرای R worker مطلوب نیست، Gower distance و HDBSCAN با metric precomputed در Python گزینه ساده‌تر است. بسته Python به‌نام kmodes را به‌دلیل release قدیمی و metadata کم‌اعتماد، default نمی‌کنیم. Silhouette به‌تنهایی کافی نیست و برای خوشه‌های چگالی‌محور می‌تواند گمراه‌کننده باشد.
+**فناوری:** Pandas برای RFM؛ scikit-learn KMeans/HDBSCAN برای داده عددی؛ برای داده mixed، clustMixType 0.5-2 (R) برای k-prototypes با پشتیبانی متغیر ordinal و KAMILA 0.2.0 challenger برای ترکیب continuous/nominal. اگر اجرای R worker مطلوب نیست، Gower distance و HDBSCAN با metric precomputed در Python گزینه ساده‌تر است. بسته Python به‌نام kmodes را به‌دلیل release قدیمی و metadata کم‌اعتماد default نمی‌کنیم. Silhouette به‌تنهایی کافی نیست و برای خوشه‌های چگالی‌محور می‌تواند گمراه‌کننده باشد.
 
 **دلیل و شواهد:** مطالعه مقایسه‌ای ۲۰۲۵ برای داده mixed نشان می‌دهد روش‌های distance-based و probabilistic بسته به نسبت ویژگی‌های عددی/دسته‌ای، هم‌پوشانی و اندازه نمونه رفتار متفاوت دارند. [Mixed-type clustering comparative study (2025)](https://doi.org/10.1155/jpas/2242100)؛ [K-prototypes initialization study (2025)](https://doi.org/10.1007/s11634-025-00639-4)؛ [scikit-learn clustering guide](https://scikit-learn.org/stable/modules/clustering.html)؛ [HDBSCAN API](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html)؛ [clustMixType 0.5-2 (CRAN, 2026)](https://cran.r-project.org/web/packages/clustMixType/index.html)؛ [KAMILA 0.2.0 (CRAN, 2026)](https://cran.r-project.org/web/packages/kamila/index.html)؛ [kmodes PyPI metadata](https://pypi.org/project/kmodes/).
 
@@ -276,7 +276,7 @@
 - [scikit-learn dependency table](https://scikit-learn.org/stable/min_dependency_table.html)
 - [DoWhy v0.14 release notes](https://github.com/py-why/dowhy/releases/tag/v0.14)
 - [EconML 0.17.1](https://pypi.org/project/econml/0.17.1/)
-- [PyMC-Marketing 1.5.0 metadata](https://pypi.org/project/pymc-marketing/1.5.0/) و [pyproject](https://github.com/pymc-labs/pymc-marketing/blob/main/pyproject.toml)
+- [PyMC-Marketing 1.5.0 metadata](https://pypi.org/project/pymc-marketing/1.5.0/) و [pyproject at the exact 1.5.0 build commit](https://github.com/pymc-labs/pymc-marketing/blob/ede5d75a0d1ba880c61467aaaa7760182b00e1de/pyproject.toml)
 - [Google Meridian 2.2.1 (released 19 Nov 2026)](https://pypi.org/project/google-meridian/2.2.1/)؛ [Meridian installation requirements](https://developers.google.com/meridian/docs/user-guide/installing)؛ [dependency metadata](https://github.com/google/meridian/blob/main/pyproject.toml)
 - [StatsForecast 2.1.1 metadata](https://pypi.org/project/statsforecast/2.1.1/)
 - [Statsmodels 0.14.5](https://pypi.org/project/statsmodels/0.14.5/)؛ [SciPy 1.15.3](https://pypi.org/project/scipy/1.15.3/)؛ [NumPy 2.3.5](https://pypi.org/project/numpy/2.3.5/)؛ [pandas 2.3.3](https://pypi.org/project/pandas/2.3.3/)
