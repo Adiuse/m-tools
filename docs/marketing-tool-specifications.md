@@ -95,4 +95,4 @@ AI برای دسته‌بندی متن، ساخت فرضیه و پیش‌نوی�
 
 ## مرجع روش‌ها و کتابخانه‌ها
 
-برای هر ۲۹ ابزار، روش پایه و پیشرفته، کتابخانه منتخب، بازه سازگاری، پیش‌شرط داده، API و fixture آزمون در [Scientific Engine & Technology Specification](marketing-scientific-engine-specification.md) تعریف شده است. انتخاب‌ها باید با همان سند و workflow سازگاری Python 3.13 هماهنگ بمانند؛ PASS فقط پس از اجرای موفق تست ثبت می‌شود.
+برای هر ۲۹ ابزار، روش پایه و پیشرفته، کتابخانه منتخب، بازه سازگاری، پیش‌شرط داده، API و fixture آزمون در [Scientific Engine & Technology Specification](marketing-scientific-engine-specification.md) تعریف شده است. انتخاب‌ها باید با همان سند و workflow سازگاری Python 3.12 هماهنگ بمانند؛ PASS فقط پس از اجرای موفق تست ثبت می‌شود.
