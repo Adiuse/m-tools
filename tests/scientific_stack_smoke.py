@@ -188,6 +188,29 @@ def nlp() -> None:
     # requires a separate, versioned benchmark on a human-labelled Persian corpus.
 
 
+
+def nlp_model() -> None:
+    import numpy as np
+    from sentence_transformers import SentenceTransformer
+
+    model = SentenceTransformer("Qwen/Qwen3-Embedding-0.6B", device="cpu")
+    texts = [
+        "مشتریان از تأخیر در تحویل سفارش ناراضی هستند.",
+        "مشتریان از دیر رسیدن سفارش‌ها شکایت دارند.",
+        "کیفیت بسته‌بندی محصول پایین است.",
+    ]
+    embeddings = model.encode(
+        texts,
+        normalize_embeddings=True,
+        convert_to_numpy=True,
+        show_progress_bar=False,
+    )
+    assert embeddings.shape[0] == len(texts)
+    assert embeddings.ndim == 2 and embeddings.shape[1] > 0
+    assert np.isfinite(embeddings).all()
+    print(f"Loaded Qwen3-Embedding-0.6B; Persian embedding shape={embeddings.shape}")
+
+
 if __name__ == "__main__":
     suites = {
         "core": core,
@@ -198,6 +221,7 @@ if __name__ == "__main__":
         "analytics": analytics,
         "ml": ml,
         "nlp": nlp,
+    "nlp_model": nlp_model,
     }
     selected = sys.argv[1] if len(sys.argv) > 1 else "core"
     if selected not in suites:
