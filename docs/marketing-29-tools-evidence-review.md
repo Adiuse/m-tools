@@ -15,7 +15,7 @@
 | حوزه | انتخاب اصلی | گزینه مشروط / challenger |
 |---|---|---|
 | استراتژی و حل مسئله | منطق اختصاصی شفاف، Pydantic، NumPy/Decimal | pymcdm برای MCDA؛ DoWhy فقط برای سؤال علّی |
-| بازار و مشتری | SurveyJS، svy، Pandas، Qwen3 Embedding، scikit-learn | Biogeme، BERTopic، kmodes، lifelines، PM4Py |
+| بازار و مشتری | SurveyJS، svy، Pandas، Qwen3 Embedding، scikit-learn | Biogeme، BERTopic، clustMixType/KAMILA، lifelines، PM4Py |
 | تحلیل تجاری | Decimal، Pandas، Statsmodels، scikit-learn | PyMC-Marketing، StatsForecast، DoWhy/EconML، CatBoost |
 | مدیریت و اجرا | Pydantic، NetworkX، OR-Tools، Pandera | Meridian/Robyn برای MMM، PM4Py، ruptures |
 
@@ -100,9 +100,9 @@
 ### M05 — بخش‌بندی و هدف‌گیری
 **روش:** RFM/rule-based به‌عنوان baseline قابل فهم؛ سپس الگوریتم با نوع داده انتخاب شود: K-Means برای ویژگی‌های عددی مناسب و مقیاس‌بندی‌شده؛ K-Prototypes/K-Modes برای ترکیب عددی و categorical؛ HDBSCAN برای خوشه‌های با چگالی متفاوت و noise. پایداری، اندازه بخش، قابلیت اقدام و ارزش تجاری همراه با شاخص‌های داخلی سنجیده شوند.
 
-**فناوری:** Pandas برای RFM؛ scikit-learn KMeans/HDBSCAN؛ kmodes برای k-modes/k-prototypes؛ Gower distance و HDBSCAN با metric precomputed برای بعضی داده‌های مختلط. Silhouette به‌تنهایی کافی نیست و برای خوشه‌های چگالی‌محور می‌تواند گمراه‌کننده باشد.
+**فناوری:** Pandas برای RFM؛ scikit-learn KMeans/HDBSCAN برای داده عددی؛ برای داده mixed، clustMixType 0.5-2 (R) برای k-prototypes با پشتیبانی متغیر ordinal؛ KAMILA 0.2.0 challenger برای ترکیب continuous/nominal. اگر اجرای R worker مطلوب نیست، Gower distance و HDBSCAN با metric precomputed در Python گزینه ساده‌تر است. بسته Python به‌نام kmodes را به‌دلیل release قدیمی و metadata کم‌اعتماد، default نمی‌کنیم. Silhouette به‌تنهایی کافی نیست و برای خوشه‌های چگالی‌محور می‌تواند گمراه‌کننده باشد.
 
-**دلیل و شواهد:** مطالعه مقایسه‌ای ۲۰۲۵ برای داده mixed نشان می‌دهد روش‌های distance-based و probabilistic بسته به نسبت ویژگی‌های عددی/دسته‌ای، هم‌پوشانی و اندازه نمونه رفتار متفاوت دارند. [Mixed-type clustering comparative study (2025)](https://doi.org/10.1155/jpas/2242100)؛ [K-prototypes initialization study (2025)](https://doi.org/10.1007/s11634-025-00639-4)؛ [scikit-learn clustering guide](https://scikit-learn.org/stable/modules/clustering.html)؛ [HDBSCAN API](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html)؛ [kmodes package](https://pypi.org/project/kmodes/).
+**دلیل و شواهد:** مطالعه مقایسه‌ای ۲۰۲۵ برای داده mixed نشان می‌دهد روش‌های distance-based و probabilistic بسته به نسبت ویژگی‌های عددی/دسته‌ای، هم‌پوشانی و اندازه نمونه رفتار متفاوت دارند. [Mixed-type clustering comparative study (2025)](https://doi.org/10.1155/jpas/2242100)؛ [K-prototypes initialization study (2025)](https://doi.org/10.1007/s11634-025-00639-4)؛ [scikit-learn clustering guide](https://scikit-learn.org/stable/modules/clustering.html)؛ [HDBSCAN API](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html)؛ [clustMixType 0.5-2 (CRAN, 2026)](https://cran.r-project.org/web/packages/clustMixType/index.html)؛ [KAMILA 0.2.0 (CRAN, 2026)](https://cran.r-project.org/web/packages/kamila/index.html)؛ [kmodes PyPI metadata](https://pypi.org/project/kmodes/).
 
 ### M06 — جایگاه‌یابی و ارزش پیشنهادی
 **روش:** STP و بیانیه جایگاه از شواهد تمایز، منافع و بخش هدف؛ نقشه ادراکی فقط از ماتریس شباهت/عدم‌شباهت پاسخ‌دهندگان واقعی؛ برای trade-off ویژگی/قیمت، conjoint/discrete choice با طراحی آزمایش و انتخاب واقعی‌تر.
@@ -206,7 +206,7 @@
 - **PyMC-Marketing 1.5.0:** گزینه انعطاف‌پذیر برای مدل سفارشی Bayesian، time-varying media و یکپارچگی با CLV؛ برای زنجیره کامل MMM و بودجه‌ریزی به کدنویسی/تخصص بیشتر نیاز دارد.
 - **Meta Robyn:** challenger خودکارتر و سریع‌تر برای مدل‌های time-series، اما مقاله ۲۰۲۶ اجزای multi-objective calibration آن را کمتر بررسی‌شده می‌داند و محدودیت‌هایی در geo-panel می‌بیند.
 
-**محدودیت زیرساخت:** Meridian و PyMC-Marketing نباید کورکورانه در یک environment نصب شوند؛ metadata فعلی Meridian بازه ArviZ کمتر از 0.20 می‌خواهد، درحالی‌که PyMC-Marketing 1.5.0 به ArviZ 1.2 یا بالاتر متکی است. اگر هر دو انتخاب شوند، worker/environment جدا لازم است. این جداسازی به‌دلیل dependency واقعی است، نه سلیقه معماری.
+**محدودیت زیرساخت:** Meridian و PyMC-Marketing نباید کورکورانه در یک environment نصب شوند؛ metadata نسخه Meridian 2.2.1 بازه ArviZ کمتر از 0.20 می‌خواهد، درحالی‌که PyMC-Marketing 1.5.0 به ArviZ 1.2 یا بالاتر متکی است. اگر هر دو انتخاب شوند، worker/environment جدا لازم است. این جداسازی به‌دلیل dependency واقعی است، نه سلیقه معماری.
 
 **دلیل و شواهد:** مرور ۲۰۲۶ مقایسه مستقیم سه پروژه را ارائه می‌کند: Robyn خودکارتر، Meridian بسته‌بندی‌شده‌تر با گزینه‌های budget optimization گسترده‌تر، PyMC-Marketing انعطاف‌پذیرتر برای متخصص Bayesian. هیچ‌کدام فرض causal را حذف نمی‌کنند. [Runge & Pauwels, Open-Source Media and MMM (2026)](https://doi.org/10.1007/s40547-026-00161-4)؛ [Meridian installation](https://developers.google.com/meridian/docs/user-guide/installing)؛ [Meridian causal assumptions](https://developers.google.com/meridian/docs/causal-inference/about-mmm-causal-inference-methodology)؛ [Meridian model debugging](https://developers.google.com/meridian/docs/post-modeling/model-debugging)؛ [PyMC-Marketing](https://www.pymc-marketing.io/en/stable/)؛ [Robyn docs](https://facebookexperimental.github.io/Robyn/).
 
@@ -250,7 +250,7 @@
 ## تصمیم نهایی فناوری و سازگاری نسخه‌ها
 
 ### baseline مشترک پیشنهادی برای هسته Python
-مرور metadata رسمی نشان می‌دهد baseline قبلی Python 3.13 / NumPy 2.5.5 / SciPy 1.18.1 / Statsmodels 0.15.0 بیش از حد خوش‌بینانه بوده است: PyMC-Marketing 1.5.0 در pyproject فعلی NumPy کمتر از 2.5 می‌خواهد؛ Google Meridian به NumPy کمتر از 2.4 و Statsmodels کمتر از 0.15 نیاز دارد؛ و DoWhy 0.14 در Python 3.12 سقف SciPy برابر 1.15.3 دارد. برای هم‌پوشانی این اجزا، baseline محافظه‌کارانه‌تر زیر پیشنهاد می‌شود:
+مرور metadata رسمی نشان می‌دهد baseline قبلی Python 3.13 / NumPy 2.5.5 / SciPy 1.18.1 / Statsmodels 0.15.0 برای مجموعه هدف مناسب نیست: PyMC-Marketing 1.5.0 در release metadata به NumPy کمتر از 2.6 نیاز دارد؛ Google Meridian 2.2.1 به NumPy کمتر از 2.4، pandas کمتر از 3، SciPy کمتر از 2 و Statsmodels کمتر از 0.15 نیاز دارد؛ و DoWhy 0.14 در Python 3.12 سقف SciPy برابر 1.15.3 دارد. برای هم‌پوشانی این اجزا، baseline محافظه‌کارانه‌تر زیر پیشنهاد می‌شود:
 
 | جزء | baseline پیشنهادی | دلیل |
 |---|---|---|
@@ -277,15 +277,15 @@
 - [DoWhy v0.14 release notes](https://github.com/py-why/dowhy/releases/tag/v0.14)
 - [EconML 0.17.1](https://pypi.org/project/econml/0.17.1/)
 - [PyMC-Marketing 1.5.0 metadata](https://pypi.org/project/pymc-marketing/1.5.0/) و [pyproject](https://github.com/pymc-labs/pymc-marketing/blob/main/pyproject.toml)
-- [Meridian installation requirements](https://developers.google.com/meridian/docs/user-guide/installing) و [dependency metadata](https://github.com/google/meridian/blob/main/pyproject.toml)
+- [Google Meridian 2.2.1 release metadata](https://pypi.org/project/google-meridian/2.2.1/)؛ [Meridian installation requirements](https://developers.google.com/meridian/docs/user-guide/installing)؛ [dependency metadata](https://github.com/google/meridian/blob/main/pyproject.toml)
 - [StatsForecast 2.1.1 metadata](https://pypi.org/project/statsforecast/2.1.1/)
 - [Statsmodels 0.14.5](https://pypi.org/project/statsmodels/0.14.5/)
-- [PyMCDM 1.4.0](https://pypi.org/project/pymcdm/)
+- [PyMCDM 1.4.0](https://pypi.org/project/pymcdm/)؛ [clustMixType 0.5-2](https://cran.r-project.org/web/packages/clustMixType/index.html)؛ [KAMILA 0.2.0](https://cran.r-project.org/web/packages/kamila/index.html)
 - [svy 0.36.0](https://pypi.org/project/svy/)
 - [Biogeme](https://pypi.org/project/biogeme/)
 - [BERTopic 0.17.4](https://pypi.org/project/bertopic/0.17.4/)
 - [lifelines 0.30.3](https://lifelines.readthedocs.io/en/latest/)
-- [PM4Py release history](https://pypi.org/project/pm4py/)
+- [PM4Py release history](https://pypi.org/project/pm4py/)؛ [Meta Robyn 3.12.1 stable R package](https://cran.r-project.org/web/packages/Robyn/index.html)؛ [Robyn Python beta status](https://facebookexperimental.github.io/Robyn/docs/robyn-api/)
 - [Pandera](https://pandera.readthedocs.io/en/stable/)
 - [DuckDB Python API](https://duckdb.org/docs/stable/clients/python/overview)
 - [Polars](https://docs.pola.rs/)
