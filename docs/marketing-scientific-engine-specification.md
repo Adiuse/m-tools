@@ -1,4 +1,4 @@
-# Scientific Engine & Technology Specification — M-Tools v1.1
+# Scientific Engine & Technology Specification — M-Tools v1.2
 
 تاریخ بازبینی منابع رسمی: ۲۴ نوامبر ۲۰۲۶؛ نسخه 1.1 پس از تطبیق API و فراداده انتشار. مکمل [معماری فنی](marketing-system-architecture-v1.md)، [مشخصات ابزارها](marketing-tool-specifications.md) و [UX](marketing-ux-design-v1.md). سند طراحی و برنامه آزمون است؛ هیچ‌کدام از ۲۹ ابزار پیاده‌سازی یا آزمون انتهابه‌انتها نشده‌اند. نمونه‌های زیر fixture مصنوعی و خروجی مورد انتظار هستند، نه گزارش تست اجراشده. سیاست Capability-First در AGENTS.md برقرار است.
 
@@ -112,7 +112,7 @@
 - https://sbert.net/docs/sentence_transformer/usage/semantic_textual_similarity.html و https://sbert.net/docs/sentence_transformer/pretrained_models.html — embeddings/تشابه چندزبانه.
 - https://pypi.org/project/statsforecast/ ، https://pypi.org/project/dowhy/ ، https://pypi.org/project/econml/ ، https://pypi.org/project/pymc-marketing/ — قابلیت خانواده مدل‌ها؛ نه اثبات صحت روی داده M-Tools.
 
-**محدودیت نهایی:** این سند مرجع انتخاب و معیار اثبات است؛ اعتبار تجربی محصول، سازگاری دقیق نسخه‌ها و اجرای تست‌ها همچنان NOT_RUN هستند. معیارهای پذیرش پیشرفته وابسته به داده و سؤال، قبل از هر آزمایش تعیین و مستند می‌شوند. هیچ فناوری صرفاً به علت جدید بودن یا رایگان بودن اجباری نیست.
+**محدودیت نهایی:** پشته منتخب در CI ترکیبی نصب و smoke-tested شده است؛ lockfile تولیدی هنوز ساخته نشده. اعتبار تجربی مدل‌ها روی داده واقعی، benchmark کیفیت فارسی، fit/sampling مدل‌های MMM/CLV، اجرای Chronos-2 و Meridian، و پوشش کامل ۲۹ الگوریتم هنوز باقی است. معیارهای پذیرش پیشرفته وابسته به داده و سؤال، قبل از هر آزمایش تعیین و مستند می‌شوند. هیچ فناوری صرفاً به علت جدید بودن یا رایگان بودن اجباری نیست.
 
 
 ## ۷. تطبیق دقیق با مستندات رسمی و تصمیم‌های اصلاحی — ۲۴ نوامبر ۲۰۲۶
@@ -133,11 +133,11 @@
 | PyMC-Marketing 1.5.0 | Python >=3.12؛ PyMC >=6.0 و ArviZ >=1.2؛ NumPy <2.6 در pyproject فعلی | NumPy 2.5.5 در بازه |
 | Google Meridian | فقط Python 3.11 یا 3.12؛ JAX backend پیش‌فرض | خارج از محیط اصلی 3.13؛ در صورت نیاز، worker/محیط مقایسه‌ای Python 3.12 جدا |
 | StatsForecast 2.1.1 | Python >=3.11؛ pandas<3.0؛ statsmodels >=0.14.5 و SciPy >=1.7.3 | Python 3.13 + pandas 2.3.3 سازگار از نظر شروط اعلام‌شده |
-| Numba 0.68.1 | Python 3.10 تا قبل از 3.16؛ NumPy 2.0 تا قبل از 2.6 | با NumPy 2.5.5 سازگار |
+| Numba (resolver-managed؛ در CI لینوکس 0.68.0) | وابستگی انتقالی DoWhy/EconML/PyTensor؛ NumPy 2.5.5 در بازه مجاز | نصب و import در محیط ترکیبی موفق؛ نسخه را دستی pin نکنیم مگر نیاز اثبات شود |
 | DuckDB 2.0.1 | Python >=3.11؛ wheel cp312-abi3 | سازگار |
 | Polars 2.1.0 | Python >=3.11 | سازگار |
 | CatBoost 1.2.10 | wheelهای CPython 3.13 برای Windows/Linux/macOS | سازگار |
-| Sentence Transformers | Python >=3.10، PyTorch >=1.11 و Transformers >=4.41؛ Qwen3 model نیازمند Transformers >=4.51 | 3.13 سازگار؛ وزن مدل جداگانه benchmark شود |
+| Sentence Transformers | Python >=3.10، PyTorch >=1.11 و Transformers >=4.41؛ Qwen3 model نیازمند Transformers >=4.51 | 3.13 سازگار؛ بارگذاری وزن و تولید embedding در CI تأیید شد؛ کیفیت فارسی نیازمند benchmark انسانی است |
 
 **تصمیم:** baseline توسعه و CI برابر CPython 3.13.x است. NumPy 2.5.5، pandas 2.3.3، SciPy 1.18.1، scikit-learn 1.9.1 و Statsmodels 0.15.0 کاندیدهای pin اولیه‌اند. DoWhy 0.14 و EconML 0.17.1 نیز در Python 3.13 قرار می‌گیرند؛ DoWhy 0.14 برای Python<3.13 سقف SciPy<=1.15.3 دارد، اما برای Python>=3.13 به SciPy>=1.15 نیاز دارد. این جدول تطبیق شروط رسمی است و هنوز جایگزین اجرای resolver و تست نصب نیست. دلیل انتخاب 3.13 نیز در CI آشکار شد: DoWhy 0.14 در Python 3.12 به SciPy<=1.15.3 محدود می‌شود و با SciPy 1.18.1 تعارض دارد؛ Python 3.13 قید متفاوت و سازگار دارد.
 
@@ -166,7 +166,7 @@
 | DML | `econml.dml.LinearDML.fit` و `effect` | شکل و مقدار خروجی معتبر |
 | MMM | `pymc_marketing.mmm.MMM` با GeometricAdstock/LogisticSaturation | import و ساخت مدل؛ fit فقط با fixture و کنترل همگرایی |
 | CLV | `pymc_marketing.clv.BetaGeoModel` | import، ساخت و fit روی RFM fixture سازگار |
-| NLP | `SentenceTransformer("Qwen/Qwen3-Embedding-0.6B").encode` | embedding finite و benchmark فارسی؛ وزن‌ها از قبل cache شوند |
+| NLP | `SentenceTransformer("Qwen/Qwen3-Embedding-0.6B").encode` | embedding finite و benchmark فارسی؛ وزن‌ها cache شوند؛ کیفیت فارسی با benchmark انسانی سنجیده شود |
 | Topic model | `BERTopic.fit_transform` | موضوع‌ها، outlier و ثبات؛ فقط corpus کافی |
 | Sobol | `SALib.sample.sobol.sample` + `SALib.analyze.sobol.analyze` | indices با Ishigami test function |
 | CP-SAT | `ortools.sat.python.cp_model` | status=OPTIMAL/FEASIBLE و قیود رعایت شوند |
@@ -178,14 +178,14 @@
 |---|---|
 | تطبیق شروط نسخه و Python از PyPI metadata | انجام شده برای اجزای اصلی |
 | بررسی APIهای رسمی و نمونه‌های مستند | انجام شده برای روش‌های بالا |
-| نصب همه گروه‌ها در Python 3.13 | منتظر CI |
-| resolver و lockfile ترکیبی | منتظر DEV |
-| اجرای smoke test API | منتظر CI |
-| دانلود و آزمون وزن Qwen3/Chronos | انجام نشده؛ آزمون مدل جداگانه |
+| نصب جداگانه ۸ گروه علمی در Python 3.13 | PASS؛ ۸ از ۸ |
+| نصب ترکیبی همه وابستگی‌های منتخب + pip check | PASS؛ بدون تعارض اعلام‌شده در محیط Linux/Python 3.13 |
+| smoke test ترکیبی APIها و fixtureهای نماینده | PASS؛ شامل هسته، forecast، causal، Bayesian import، optimization، analytics، ML و NLP import |
+| دانلود وزن Qwen3-Embedding-0.6B و تولید embedding فارسی روی CPU | PASS؛ خروجی ۳ متن با ابعاد (3, 1024). کیفیت معنایی هنوز benchmark نشده؛ Chronos-2 و Meridian اجرا نشده‌اند |
 | benchmark فارسی و داده واقعی کسب‌وکار | انجام نشده |
 | ارزیابی علمی مدل‌های MMM/CLV و causal روی داده واقعی | انجام نشده |
 
-تا وقتی CI موفق نشده، هیچ ردیف را «واقعاً اجراشده و PASS» گزارش نکن. برای APIهای experimental، پیش‌انتشار، مدل‌وزن و الگوریتم‌های داده‌محور، وضعیت جداگانه نگه‌دار.
+CI موفق شده است: workflow شماره ۲۷ در commit `72682d5` روی Linux و CPython 3.13.18، تمام ۸ گروه و محیط ترکیبی را PASS کرده است. تست Qwen3 نیز وزن مدل را دانلود و embedding فارسی تولید کرده است. این نتیجه، سازگاری نصب/API و fixtureهای نماینده را ثابت می‌کند؛ نه اعتبار علمی روی داده واقعی، کیفیت معنایی فارسی، اجرای تمام ۲۹ الگوریتم در محصول یا fit/sampling مدل‌های Bayesian. برای هر کدام وضعیت جداگانه نگه‌دار.
 
 ### ۷.۵ منابع رسمی بررسی‌شده
 
@@ -219,3 +219,13 @@
 ### اصلاح تعارض Pandas و StatsForecast
 
 آزمون resolver در Python 3.13 نشان داد StatsForecast 2.1.1 شرط `pandas<3.0.0` دارد. بنابراین Pandas 3.1.1 با این نسخه قابل نصب در یک محیط واحد نیست. انتخاب baseline به Pandas 2.3.3 تغییر کرد؛ این نسخه Python 3.13 و NumPy 2.5.5 را پشتیبانی می‌کند و با حداقل pandas اعلام‌شده PyMC-Marketing و DoWhy نیز سازگار است. Pandas 3.x فقط زمانی به baseline برمی‌گردد که نسخه StatsForecast انتخابی شرط آن را بردارد و CI مشترک سبز شود.
+
+
+### ۷.۶ نتیجه CI واقعی
+
+- Workflow: [Scientific stack compatibility — run 45444696774](https://github.com/Adiuse/m-tools/actions/runs/45444696774)
+- Commit آزموده‌شده: `72682d5fd7b23e84d2d0aff7a0b80e958b649acd`؛ CPython 3.13.18 روی Ubuntu runner.
+- نتیجه: ۹ job موفق (۸ گروه جداگانه + یک محیط ترکیبی). در job ترکیبی `pip check` و اجرای همه suiteهای نماینده موفق شد.
+- Qwen3-Embedding-0.6B روی CPU بارگذاری شد و سه متن فارسی embedding با ابعاد 1024 تولید کردند. هشدار سرعت CPU ثبت شد؛ benchmark latency/GPU هنوز لازم است.
+- PyMC-Marketing فقط import و دسترسی به کلاس‌های MMM/CLV را گذراند؛ sampling و posterior diagnostics انجام نشده‌اند. BERTopic import شد، اما fit روی corpus واقعی انجام نشده است.
+- این run شامل دانلود/آزمون Chronos-2 یا Google Meridian نیست؛ این دو در نقش گزینه‌های اختیاری/مقایسه‌ای باقی می‌مانند.
