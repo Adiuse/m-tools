@@ -211,6 +211,20 @@ def nlp_model() -> None:
     print(f"Loaded Qwen3-Embedding-0.6B; Persian embedding shape={embeddings.shape}")
 
 
+
+def meridian() -> None:
+    import meridian
+    from meridian import constants
+    from meridian.analysis import analyzer, optimizer, summarizer
+    from meridian.model import model, spec
+
+    assert getattr(meridian, "__version__", None)
+    assert constants is not None
+    assert analyzer is not None and optimizer is not None and summarizer is not None
+    assert model is not None and spec is not None
+    print(f"Meridian import/API smoke test; version={meridian.__version__}")
+
+
 def combined() -> None:
     # Run all selected library suites in one shared environment to catch cross-stack conflicts.
     for suite in (core, forecast, causal, bayesian, optimization, analytics, ml, nlp):
@@ -228,6 +242,7 @@ if __name__ == "__main__":
         "ml": ml,
         "nlp": nlp,
         "nlp_model": nlp_model,
+        "meridian": meridian,
         "combined": combined,
     }
     selected = sys.argv[1] if len(sys.argv) > 1 else "core"
