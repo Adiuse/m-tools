@@ -49,7 +49,7 @@
 
 **فناوری:** NumPy برای محاسبه قابل‌ردیابی؛ pymcdm 1.4.0 برای TOPSIS، VIKOR، PROMETHEE، COPRAS و روش‌های جایگزین؛ scikit-criteria 0.9 گزینه ثانویه در اکوسیستم SciPy. کتابخانه رتبه را محاسبه می‌کند، نه وزن معتبر یا ترجیح مدیر را.
 
-**دلیل و شواهد:** روش‌های MCDA با تغییر نرمال‌سازی، وزن یا گزینه‌ها می‌توانند رتبه‌های متفاوت بدهند؛ تحلیل حساسیت و پایداری رتبه اجباری است. [PyMCDM methods](https://pymcdm.readthedocs.io/en/master/readme_link.html)؛ [PyMCDM 1.4.0](https://pypi.org/project/pymcdm/)؛ [Are MCDA methods benchmarkable?](https://doi.org/10.3390/sym12091549)؛ [Scikit-Criteria 0.9](https://scikit-criteria.quatrope.org/en/stable/).
+**دلیل و شواهد:** روش‌های MCDA با تغییر نرمال‌سازی، وزن یا گزینه‌ها می‌توانند رتبه‌های متفاوت بدهند؛ تحلیل حساسیت و پایداری رتبه اجباری است. [PyMCDM methods](https://pymcdm.readthedocs.io/en/master/readme_link.html)؛ [PyMCDM 1.4.0](https://pypi.org/project/pymcdm/)؛ [A robust framework for benchmarking MCDA methods (Applied Soft Computing, 2026)](https://doi.org/10.1016/j.asoc.2025.114335)؛ [Fifty years of MCDA: classical methods to robust ordinal regression (EJOR, 2025)](https://doi.org/10.1016/j.ejor.2024.07.038)؛ [Entropy and normalization in MCDA: ranking stability (2026)](https://doi.org/10.3390/e28010114)؛ [Are MCDA methods benchmarkable?](https://doi.org/10.3390/sym12091549)؛ [Scikit-Criteria 0.9](https://scikit-criteria.quatrope.org/en/stable/).
 
 ### S05 — سناریو و عدم‌قطعیت
 **روش:** ابتدا سناریوهای کم/پایه/زیاد با فرض‌های صریح؛ سپس Monte Carlo وقتی توزیع ورودی‌ها و وابستگی آن‌ها قابل دفاع است؛ تحلیل حساسیت برای مشخص‌کردن driverهای نتیجه. اگر توزیع نداریم، احتمال یا confidence interval ساختگی تولید نمی‌شود.
