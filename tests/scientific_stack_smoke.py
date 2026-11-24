@@ -15,7 +15,7 @@ def core() -> None:
     from sklearn.cluster import HDBSCAN, KMeans
     from statsmodels.stats.proportion import confint_proportions_2indep
 
-    assert np.__version__ == "2.5.5"
+    assert np.__version__ == "2.3.5"
     assert pd.__version__ == "2.3.3"
 
     result = milp(
