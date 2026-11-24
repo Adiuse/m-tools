@@ -72,9 +72,9 @@
 ### M01 — تحقیقات بازار
 **روش:** اول estimand و جامعه هدف؛ سپس frame نمونه‌گیری، روش جذب، پرسشنامه، پیش‌آزمون، اندازه نمونه، کنترل عدم پاسخ و طرح تحلیل. نمونه احتمالی و opt-in/non-probability جدا گزارش شوند. برای نمونه غیرتصادفی، margin of sampling error معمول بدون مدل و فرض‌های صریح گزارش نشود.
 
-**فناوری:** SurveyJS Form Library/Creator برای ساخت و اجرای پرسشنامه؛ svy 0.36.0 برای طرح نمونه‌گیری پیچیده، وزن‌دهی، raking/post-stratification و واریانس طرح‌مبنا؛ SciPy/Statsmodels برای آزمون‌های متعارف. samplics قدیمی archived شده و جانشین رسمی آن svy است.
+**فناوری:** SurveyJS Form Library/Creator برای ساخت و اجرای پرسشنامه؛ svy 0.36.0 برای طرح نمونه‌گیری پیچیده، وزن‌دهی، raking/post-stratification و واریانس طرح‌مبنا؛ SciPy/Statsmodels برای آزمون‌های متعارف. samplics در ۱۰ مارس ۲۰۲۶ archive شده و جانشین رسمی همان نگهدارنده، svy است.
 
-**دلیل و شواهد:** SurveyJS ابزار جمع‌آوری است، نه تضمین اعتبار پرسشنامه. AAPOR بر شفافیت frame، روش نمونه‌گیری، وزن‌ها، عدم پاسخ و طراحی اثرگذار بر واریانس تأکید دارد. مستندات svy می‌گویند هسته design/weighting/variance پایدار و production-ready است، درحالی‌که API همچنان در حال تکامل است. [AAPOR Disclosure Standards](https://aapor.org/standards-and-ethics/disclosure-standards/)؛ [svy docs](https://svylab.com/docs/svy/)؛ [svy 0.36.0](https://pypi.org/project/svy/)؛ [SurveyJS Form Library](https://surveyjs.io/form-library/documentation/overview)؛ [SurveyJS Creator](https://surveyjs.io/survey-creator/documentation/overview).
+**دلیل و شواهد:** SurveyJS ابزار جمع‌آوری است، نه تضمین اعتبار پرسشنامه. AAPOR بر شفافیت frame، روش نمونه‌گیری، وزن‌ها، عدم پاسخ و طراحی اثرگذار بر واریانس تأکید دارد. مستندات svy می‌گویند هسته design/weighting/variance پایدار و production-ready است، درحالی‌که API همچنان در حال تکامل است. [AAPOR Disclosure Standards](https://aapor.org/standards-and-ethics/disclosure-standards/)؛ [svy docs](https://svylab.com/docs/svy/)؛ [svy 0.36.0](https://pypi.org/project/svy/)؛ [samplics archive/migration notice](https://github.com/samplics-org/samplics)؛ [SurveyJS Form Library](https://surveyjs.io/form-library/documentation/overview)؛ [SurveyJS Creator](https://surveyjs.io/survey-creator/documentation/overview).
 
 ### M02 — اندازه بازار
 **روش:** TAM/SAM/SOM با واحد، قلمرو، بازه زمانی و تعریف مشتری روشن؛ برآورد bottom-up از تعداد مشتری واجد شرایط × نرخ خرید × قیمت، و کنترل متقابل top-down با منابع معتبر. هر ورودی منبع و تاریخ داشته باشد؛ دامنه عدم‌قطعیت جدا از عدد نقطه‌ای گزارش شود.
@@ -141,7 +141,7 @@
 
 **فناوری:** Decimal/Pandas برای شاخص‌ها؛ PyMC-Marketing 1.5.0 برای CLV احتمالاتی: BG/NBD یا Pareto/NBD برای خرید تکراری non-contractual؛ مدل‌های contractual/discrete مانند BG/BB یا Shifted BG متناسب با دوره تمدید؛ Gamma-Gamma فقط با خریدهای تکراری و استقلال تقریبی میان frequency و monetary value. lifelines برای مدل‌های بقا/ریزش جایگزین یا مکمل.
 
-**دلیل و شواهد:** مدل خرید تکراری غیرقراردادی را نباید به اشتراک قراردادی تعمیم داد. Gamma-Gamma فرض‌هایی درباره رابطه frequency و مبلغ خرید دارد؛ fit ظاهری یا RFM کوتاه به‌تنهایی LTV معتبر نمی‌سازد. [PyMC-Marketing CLV docs](https://www.pymc-marketing.io/en/stable/notebooks/clv/clv_quickstart.html)؛ [PyMC-Marketing 1.5.0](https://pypi.org/project/pymc-marketing/1.5.0/)؛ [CLV under structural breaks (2024)](https://doi.org/10.1016/j.jbusres.2024.114527)؛ [lifelines](https://lifelines.readthedocs.io/en/latest/).
+**دلیل و شواهد:** مدل خرید تکراری غیرقراردادی را نباید به اشتراک قراردادی تعمیم داد. Gamma-Gamma فرض‌هایی درباره رابطه frequency و مبلغ خرید دارد؛ fit ظاهری یا RFM کوتاه به‌تنهایی LTV معتبر نمی‌سازد. [PyMC-Marketing CLV docs](https://www.pymc-marketing.io/en/stable/notebooks/clv/clv_quickstart.html)؛ [PyMC-Marketing 1.5.0 (released 18 Nov 2026)](https://pypi.org/project/pymc-marketing/1.5.0/)؛ [CLV under structural breaks (2024)](https://doi.org/10.1016/j.jbusres.2024.114527)؛ [lifelines](https://lifelines.readthedocs.io/en/latest/).
 
 ### B02 — قیمت‌گذاری و پیش‌بینی
 **روش:** break-even و margin به‌صورت قطعی؛ price elasticity فقط با variation قابل شناسایی (ترجیحاً experiment یا quasi-experiment) و کنترل confounding؛ choice-based pricing با Biogeme در صورت طراحی انتخاب مناسب. برای forecasting، baselineهای Naive/SeasonalNaive اجباری، سپس ETS/ARIMA و مدل‌های intermittent demand در صورت نیاز؛ ارزیابی rolling-origin با افق واقعی.
@@ -208,7 +208,7 @@
 
 **محدودیت زیرساخت:** Meridian و PyMC-Marketing نباید کورکورانه در یک environment نصب شوند؛ metadata نسخه Meridian 2.2.1 بازه ArviZ کمتر از 0.20 می‌خواهد، درحالی‌که PyMC-Marketing 1.5.0 به ArviZ 1.2 یا بالاتر متکی است. اگر هر دو انتخاب شوند، worker/environment جدا لازم است. این جداسازی به‌دلیل dependency واقعی است، نه سلیقه معماری.
 
-**دلیل و شواهد:** مرور ۲۰۲۶ مقایسه مستقیم سه پروژه را ارائه می‌کند: Robyn خودکارتر، Meridian بسته‌بندی‌شده‌تر با گزینه‌های budget optimization گسترده‌تر، PyMC-Marketing انعطاف‌پذیرتر برای متخصص Bayesian. هیچ‌کدام فرض causal را حذف نمی‌کنند. [Runge & Pauwels, Open-Source Media and MMM (2026)](https://doi.org/10.1007/s40547-026-00161-4)؛ [Meridian installation](https://developers.google.com/meridian/docs/user-guide/installing)؛ [Meridian causal assumptions](https://developers.google.com/meridian/docs/causal-inference/about-mmm-causal-inference-methodology)؛ [Meridian model debugging](https://developers.google.com/meridian/docs/post-modeling/model-debugging)؛ [PyMC-Marketing](https://www.pymc-marketing.io/en/stable/)؛ [Robyn docs](https://facebookexperimental.github.io/Robyn/).
+**دلیل و شواهد:** مرور ۲۰۲۶ مقایسه مستقیم سه پروژه را ارائه می‌کند: Robyn خودکارتر، Meridian بسته‌بندی‌شده‌تر با گزینه‌های budget optimization گسترده‌تر، PyMC-Marketing انعطاف‌پذیرتر برای متخصص Bayesian. هیچ‌کدام فرض causal را حذف نمی‌کنند. [Runge & Pauwels, Open-Source Media and MMM (2026)](https://doi.org/10.1007/s40547-026-00161-4)؛ [Meridian installation](https://developers.google.com/meridian/docs/user-guide/installing)؛ [Meridian causal assumptions](https://developers.google.com/meridian/docs/causal-inference/about-mmm-causal-inference-methodology)؛ [Meridian model debugging](https://developers.google.com/meridian/docs/post-modeling/model-debugging)؛ [PyMC-Marketing](https://www.pymc-marketing.io/en/stable/)؛ [Robyn stable R 3.12.1](https://cran.r-project.org/web/packages/Robyn/index.html)؛ [Robyn Python Beta status](https://facebookexperimental.github.io/Robyn/docs/robyn-api/)؛ [Robyn docs](https://facebookexperimental.github.io/Robyn/).
 
 ### E04 — فروش و چرخه مشتری
 **روش:** تعریف lifecycle و SLA، lead qualification شفاف، تحویل MQL/SQL، follow-up و retention؛ rules-first. Lead scoring تنها وقتی ارزش دارد که برچسب outcome، زمان، هزینه مداخله و feedback loop وجود داشته باشد.
@@ -277,9 +277,9 @@
 - [DoWhy v0.14 release notes](https://github.com/py-why/dowhy/releases/tag/v0.14)
 - [EconML 0.17.1](https://pypi.org/project/econml/0.17.1/)
 - [PyMC-Marketing 1.5.0 metadata](https://pypi.org/project/pymc-marketing/1.5.0/) و [pyproject](https://github.com/pymc-labs/pymc-marketing/blob/main/pyproject.toml)
-- [Google Meridian 2.2.1 release metadata](https://pypi.org/project/google-meridian/2.2.1/)؛ [Meridian installation requirements](https://developers.google.com/meridian/docs/user-guide/installing)؛ [dependency metadata](https://github.com/google/meridian/blob/main/pyproject.toml)
+- [Google Meridian 2.2.1 (released 19 Nov 2026)](https://pypi.org/project/google-meridian/2.2.1/)؛ [Meridian installation requirements](https://developers.google.com/meridian/docs/user-guide/installing)؛ [dependency metadata](https://github.com/google/meridian/blob/main/pyproject.toml)
 - [StatsForecast 2.1.1 metadata](https://pypi.org/project/statsforecast/2.1.1/)
-- [Statsmodels 0.14.5](https://pypi.org/project/statsmodels/0.14.5/)
+- [Statsmodels 0.14.5](https://pypi.org/project/statsmodels/0.14.5/)؛ [SciPy 1.15.3](https://pypi.org/project/scipy/1.15.3/)؛ [NumPy 2.3.5](https://pypi.org/project/numpy/2.3.5/)؛ [pandas 2.3.3](https://pypi.org/project/pandas/2.3.3/)
 - [PyMCDM 1.4.0](https://pypi.org/project/pymcdm/)؛ [clustMixType 0.5-2](https://cran.r-project.org/web/packages/clustMixType/index.html)؛ [KAMILA 0.2.0](https://cran.r-project.org/web/packages/kamila/index.html)
 - [svy 0.36.0](https://pypi.org/project/svy/)
 - [Biogeme](https://pypi.org/project/biogeme/)
