@@ -213,14 +213,17 @@ def nlp_model() -> None:
 
 
 def meridian() -> None:
+    from importlib.metadata import version
     import meridian
     from meridian.analysis import analyzer, optimizer, summarizer
     from meridian.model import model, spec
 
-    assert getattr(meridian, "__version__", None)
+    installed_version = version("google-meridian")
+    assert installed_version == "2.2.1"
+    assert meridian is not None
     assert analyzer is not None and optimizer is not None and summarizer is not None
     assert model is not None and spec is not None
-    print(f"Meridian import/API smoke test; version={meridian.__version__}")
+    print(f"Meridian import/API smoke test; version={installed_version}")
 
 
 def combined() -> None:
