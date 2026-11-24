@@ -1,6 +1,6 @@
-# Scientific Engine & Technology Specification — M-Tools v1.0
+# Scientific Engine & Technology Specification — M-Tools v1.1
 
-تاریخ بازبینی منابع: ۲۴ نوامبر ۲۰۲۶. مکمل [معماری فنی](marketing-system-architecture-v1.md)، [مشخصات ابزارها](marketing-tool-specifications.md) و [UX](marketing-ux-design-v1.md). سند طراحی و برنامه آزمون است؛ هیچ‌کدام از ۲۹ ابزار پیاده‌سازی یا آزمون انتهابه‌انتها نشده‌اند. نمونه‌های زیر fixture مصنوعی و خروجی مورد انتظار هستند، نه گزارش تست اجراشده. سیاست Capability-First در AGENTS.md برقرار است.
+تاریخ بازبینی منابع رسمی: ۲۴ نوامبر ۲۰۲۶؛ نسخه 1.1 پس از تطبیق API و فراداده انتشار. مکمل [معماری فنی](marketing-system-architecture-v1.md)، [مشخصات ابزارها](marketing-tool-specifications.md) و [UX](marketing-ux-design-v1.md). سند طراحی و برنامه آزمون است؛ هیچ‌کدام از ۲۹ ابزار پیاده‌سازی یا آزمون انتهابه‌انتها نشده‌اند. نمونه‌های زیر fixture مصنوعی و خروجی مورد انتظار هستند، نه گزارش تست اجراشده. سیاست Capability-First در AGENTS.md برقرار است.
 
 ## ۱. انتخاب روش و معماری علمی
 
@@ -10,26 +10,26 @@
 
 ## ۲. انتخاب فناوری و سیاست نسخه
 
-انتخاب baseline برای شروع توسعه: Python 3.14 و Django 5.2 LTS، PostgreSQL 18، React/TypeScript و ECharts (UI در سند دیگر)، uv، Pydantic 2. این‌ها انتخاب طراحی‌اند، نه محیط نصب‌شده. Python 3.13 گزینه سازگاری اگر نسخه‌های مجاز 3.14 برای همه گروه هسته فراهم نباشند؛ Python جدیدتر تنها بعد از CI. نسخه‌های دقیق در lockfile واقعی تعیین می‌شوند؛ اعداد نسخه پاسخ‌های قبلی یا latest متغیر جایگزین lockfile نیستند.
+انتخاب baseline علمی برای شروع توسعه: CPython 3.12.x؛ Django 6.1 در صورت استفاده از نسخه جدید و سازگار، PostgreSQL 18، React/TypeScript و ECharts (UI در سند دیگر)، uv و Pydantic 2. Python 3.12 انتخاب اشتراک سازگار برای DoWhy، Meridian، PyMC-Marketing، EconML و پشته علمی است؛ نه ادعای جدیدترین بودن. نسخه‌های دقیق بعد از CI و lockfile تثبیت می‌شوند. Python 3.14/3.15 در این پروژه فعلاً baseline نیستند؛ فقط پس از عبور همه گروه‌های وابستگی از ماتریس سازگاری بررسی شوند. نسخه‌های دقیق در lockfile واقعی تعیین می‌شوند؛ اعداد نسخه پاسخ‌های قبلی یا latest متغیر جایگزین lockfile نیستند.
 
 | گروه | فناوری/خط نسخه هدف | وابستگی و شرایط | مرجع رسمی |
 |---|---|---|---|
 | هسته | Python 3.14 (fallback 3.13)، Decimal و stdlib | مالی دقیق؛ هیچ float برای پول به عنوان مرجع نهایی | https://docs.python.org/3/library/decimal.html |
-| داده | NumPy 2.x، pandas 3.x | ABI و پشتیبانی Python؛ pandas 2.x فقط fallback سازگار مستند | https://pypi.org/project/numpy/ ; https://pypi.org/project/pandas/ |
-| آمار | SciPy 1.18.x، Statsmodels 0.15.x (کاندید مطابق API مستند) | NumPy و SciPy سازگار؛ کنترل API در CI | https://docs.scipy.org/doc/scipy/reference/ ; https://www.statsmodels.org/stable/ |
-| ML | scikit-learn 1.9.x (کاندید) | NumPy/SciPy، joblib/threadpoolctl؛ preprocessing داخل pipeline | https://scikit-learn.org/stable/ |
+| داده | NumPy 2.5.5، pandas 3.1.1 | هر دو دارای پشتیبانی Python 3.12؛ pandas 3.1 به NumPy >=2.0.2 نیاز دارد | https://pypi.org/project/numpy/2.5.5/ ; https://pypi.org/project/pandas/3.1.1/ |
+| آمار | SciPy 1.18.1، Statsmodels 0.15.0 | هر دو برای Python 3.12 قابل نصب‌اند؛ APIهای آزمون نسبت در بخش آزمون مشخص شده‌اند | https://pypi.org/project/scipy/1.18.1/ ; https://pypi.org/project/statsmodels/0.15.0/ |
+| ML | scikit-learn 1.9.1 | Python >=3.11، NumPy/SciPy، Narwhals، joblib و threadpoolctl؛ با EconML 0.17.1 چون شرط sklearn <1.10 است سازگار از نظر بازه نسخه | https://pypi.org/project/scikit-learn/1.9.1/ ; https://scikit-learn.org/stable/ |
 | schema | Pydantic 2.x | strict validation، explicit null، JSON Schema | https://pypi.org/project/pydantic/ |
 | فرم | SurveyJS Form Library + Creator، نسخه هم‌خانواده | React و بسته‌های survey-core/creator؛ مجوز توسعه و انتشار طبق سیاست | https://surveyjs.io/documentation |
-| پیش‌بینی | StatsForecast 2.x؛ Chronos-2 مدل/SDK اختیاری | Numba/llvmlite و Python/NumPy؛ Chronos نیازمند PyTorch/transformers سازگار، منابع CPU/GPU و model revision | https://pypi.org/project/statsforecast/ ; https://github.com/amazon-science/chronos-forecasting |
-| NLP | Sentence Transformers؛ مدل چندزبانه با revision ثابت؛ BERTopic اختیاری | PyTorch/transformers؛ BERTopic با UMAP/HDBSCAN؛ صحت فارسی در داده هدف سنجیده شود | https://sbert.net/docs/ ; https://github.com/MaartenGr/BERTopic |
-| علّی | DoWhy، EconML (اختیاری) | سازگاری scikit-learn و SciPy؛ فرض شناسایی مستقل از کتابخانه | https://pypi.org/project/dowhy/ ; https://pypi.org/project/econml/ |
-| بازاریابی بیزی | PyMC-Marketing؛ Meridian گزینه رقیب برای MMM، نه دو موتور هم‌زمان | PyMC/PyTensor/ArviZ یا stack Meridian؛ بررسی همگرایی و هزینه پردازش | https://pypi.org/project/pymc-marketing/ ; https://github.com/google/meridian |
-| مدل ریزش | CatBoost، SHAP، Optuna (اختیاری) | نسخه‌های سازگار؛ SHAP توضیح پیش‌بینی، نه علیت؛ Optuna فقط در nested validation | https://catboost.ai/docs/ ; https://shap.readthedocs.io/ ; https://optuna.readthedocs.io/ |
-| حساسیت/تخصیص | SALib؛ SciPy HiGHS؛ OR-Tools اختیاری | حدود معتبر، قیود، نسخه solver، status؛ integer CP-SAT فقط با مقیاس صحیح | https://salib.readthedocs.io/ ; https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html ; https://developers.google.com/optimization |
-| حجم بالا | Polars و DuckDB، اختیاری و انتخاب بر اساس benchmark | سازگاری نوع، null، decimal و timezone با پایه | https://docs.pola.rs/ ; https://duckdb.org/docs/ |
+| پیش‌بینی | StatsForecast 2.1.1 برای سری‌های متعدد؛ Statsmodels برای مدل‌های کلاسیک؛ Chronos-2.3.2 فقط challenger؛ بدون مدل‌وزن در runtime اصلی | StatsForecast به coreforecast و utilsforecast وابسته است؛ Numba وابستگی اجباری مستقیم نسخه 2.1.1 نیست. Chronos-forecasting 2.3.2 به torch>=2.2,<3، transformers>=4.41,<6 و accelerate>=1.1,<2 نیاز دارد | https://pypi.org/project/statsforecast/2.1.1/ ; https://pypi.org/project/chronos-forecasting/2.3.2/ ; https://github.com/amazon-science/chronos-forecasting |
+| NLP | Sentence Transformers + مدل Qwen3-Embedding-0.6B به‌عنوان نامزد اول؛ BGE-M3 نامزد مقایسه؛ BERTopic 0.17.4 اختیاری | Qwen3-Embedding نیازمند transformers>=4.51 و sentence-transformers>=2.7 است؛ 100+ زبان ادعا شده اما دقت فارسی باید روی داده واقعی سنجیده شود. BERTopic 1.0.0b1 پیش‌انتشار است و baseline نیست | https://huggingface.co/Qwen/Qwen3-Embedding-0.6B ; https://huggingface.co/BAAI/bge-m3 ; https://pypi.org/project/bertopic/0.17.4/ |
+| علّی | DoWhy 0.14 برای model/identify/estimate/refute؛ EconML 0.17.1 برای DML و CATE | DoWhy 0.14 به Python <3.14 محدود است؛ EconML 0.17.1 به sklearn>=1.6,<1.10 و NumPy>=2.0.2 نیاز دارد؛ sklearn 1.9.1 در این بازه است | https://pypi.org/project/dowhy/0.14/ ; https://pypi.org/project/econml/0.17.1/ ; https://www.pywhy.org/dowhy/main/ |
+| بازاریابی بیزی | PyMC-Marketing 1.5.0 انتخاب اصلی MMM/CLV؛ Google Meridian فقط گزینه مقایسه‌ای جدا | PyMC-Marketing به Python>=3.12، PyMC>=6.0، ArviZ>=1.2 و در metadata فعلی NumPy<2.6 نیاز دارد. Meridian فقط Python 3.11/3.12 را می‌پذیرد، backend پیش‌فرض JAX دارد و GPU را توصیه می‌کند؛ هم‌زمان هر دو stack را بی‌دلیل نصب نکن | https://pypi.org/project/pymc-marketing/ ; https://developers.google.com/meridian/docs/user-guide/installing |
+| مدل ریزش | LogisticRegression به‌عنوان baseline؛ CatBoost 1.2.10 challenger؛ SHAP و Optuna اختیاری | CatBoost wheel برای CPython 3.12 موجود است؛ SHAP سهم ویژگی در پیش‌بینی را توضیح می‌دهد نه علیت؛ Optuna فقط با validation بدون نشت داده | https://pypi.org/project/catboost/1.2.10/ ; https://shap.readthedocs.io/ ; https://optuna.readthedocs.io/ |
+| حساسیت/تخصیص | NumPy/SciPy برای سناریو و Monte Carlo؛ SALib 1.6.0 فقط تحلیل حساسیت سراسری Sobol/Morris؛ SciPy HiGHS برای LP/MILP؛ OR-Tools CP-SAT برای زمان‌بندی/قیود صحیح | CP-SAT فقط ضرایب صحیح می‌پذیرد؛ SciPy milp یک wrapper بر HiGHS است؛ SALib جایگزین شبیه‌سازی عمومی Monte Carlo نیست | https://pypi.org/project/SALib/1.6.0/ ; https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html ; https://developers.google.com/optimization/cp/cp_solver/ |
+| حجم بالا | Pandas ابزار پیش‌فرض؛ Polars 2.1.0 و DuckDB 2.0.1 فقط در صورت benchmark مثبت | Polars برای پردازش DataFrame؛ DuckDB برای SQL تحلیلی روی فایل/Parquet؛ هیچ‌کدام جای PostgreSQL منبع حقیقت نیستند | https://pypi.org/project/polars/2.1.0/ ; https://pypi.org/project/duckdb/2.0.1/ |
 | AI | adapter اختصاصی JSON Schema؛ مدل منتخب با نسخه ثابت | ارائه‌دهنده/مدل بعد از benchmark فارسی، هزینه، latency، privacy؛ بدون عامل مستقل | سیاست AI معماری و NIST AI RMF |
 
-منابع PyPI و مستندات SciPy، sklearn HDBSCAN، Statsmodels proportions، SurveyJS و Sentence Transformers در این بازبینی باز شده‌اند؛ مراجع سایر گزینه‌ها فهرست رسمی برای بررسی اختصاصی پیش از فعال‌سازی هستند. صفحات PyPI در زمان بازبینی snapshotهای متفاوت داشتند؛ نسخه دقیق تمام اجزا و latest بودن آنها تأیید نشده است. خطوط نسخه بالا اهداف resolver هستند، نه تأیید نصب مشترک یا تضمین جدیدترین نسخه. به‌روزرسانی امنیتی و سازگاری مقدم بر انتخاب شماره نسخه بزرگ‌تر است.
+نسخه‌ها و بازه‌های کلیدی با مستندات رسمی و metadata انتشار تطبیق داده شده‌اند. این تطبیق استاتیک است، نه نتیجه نصب و اجرای یک محیط واقعی. نسخه‌های فوق کاندیدهای تثبیت در CI هستند؛ فقط پس از حل وابستگی و smoke test در Python 3.12 به‌عنوان stack تأییدشده شناخته می‌شوند. به‌روزرسانی امنیتی و سازگاری مقدم بر انتخاب شماره نسخه بزرگ‌تر است.
 
 ### قرارداد تثبیت وابستگی
 
@@ -44,27 +44,27 @@
 | S01 | هدف، مشاهده هم‌تعریف، شواهد؛ حداقل یک جفت هدف/واقعی برای شکاف | Decimal؛ درخت مسئله اختصاصی، فرضیه‌های رقیب و شواهد مخالف | DoWhy فقط در B04 برای آزمون علّی قابل شناسایی؛ AI برای استخراج فرضیه | هدف 100، واقعی 70 → gap=-30؛ علت بدون شاهد hypothesis | نبود جفت معتبر: تعریف مسئله/جمع‌آوری داده |
 | S02 | محصول، مشتری، مدل درآمد و هزینه؛ شواهد رقبا برای مزیت | بوم اختصاصی ۹ بخش؛ VRIO به‌صورت rubric مستند؛ ارزیابی انسان | AI ساختاردهی شواهد؛ بدون مدل ML مستقل | فروش اشتراکی ثبت شده، رقبا نامعلوم → revenue_model=subscription، advantage=unknown | بوم ناقص و فرضیه آزمون |
 | S03 | هدف، مسئله، دست‌کم دو گزینه یا توضیح تک‌گزینه، قیود | فیلتر قیود سخت، مقایسه گزینه و trade-off؛ انتخاب انسانی | S04 برای امتیازدهی؛ AI فقط پیشنهاد مستند | بودجه 100، گزینه A هزینه 120، B هزینه 80 → A نامجاز؛ B نیازمند تأیید | کمبود گزینه: طرح تولید و آزمون گزینه |
-| S04 | حداقل دو گزینه و یک معیار قابل مقایسه، کران و وزن صریح | NumPy: نرمال‌سازی و جمع وزنی؛ تغییر وزن و بررسی ثبات رتبه | SALib فقط برای مدل عددی با دامنه/توزیع معتبر؛ نه جایگزین rubric | A=(.8,.2)، B=(.4,.9)، w=(.6,.4) → .56 و .60؛ با w=(.8,.2) → .68 و .50 | معیار مفقود مؤثر: بدون رتبه قطعی |
-| S05 | پایه و پارامترها/دامنه سناریو؛ توزیع و وابستگی برای شبیه‌سازی | Decimal/NumPy: سناریوی کم/پایه/زیاد و تغییر یک پارامتر | SciPy random variates + SALib؛ Monte Carlo seed و بررسی همگرایی؛ توزیع مستند | قیمت 5 و حجم 8/10/12 → درآمد 40/50/60؛ توزیع نامعلوم → بدون احتمال | سناریوی قطعی یا کیفی |
+| S04 | حداقل دو گزینه و یک معیار قابل مقایسه، کران و وزن صریح | NumPy: نرمال‌سازی و جمع وزنی؛ تحلیل سناریوی وزن با grid ساده و بررسی ثبات رتبه؛ SALib فقط اگر مدل عددی پیوسته و ورودی‌های دارای دامنه معتبر باشد | SALib فقط برای مدل عددی با دامنه/توزیع معتبر؛ نه جایگزین rubric | A=(.8,.2)، B=(.4,.9)، w=(.6,.4) → .56 و .60؛ با w=(.8,.2) → .68 و .50 | معیار مفقود مؤثر: بدون رتبه قطعی |
+| S05 | پایه و پارامترها/دامنه سناریو؛ توزیع و وابستگی برای شبیه‌سازی | Decimal/NumPy: سناریوی کم/پایه/زیاد و تغییر یک پارامتر | NumPy Generator یا scipy.stats.qmc/distributions برای Monte Carlo با seed؛ SALib Sobol فقط برای تحلیل حساسیت مدل روی دامنه‌های معتبر | قیمت 5 و حجم 8/10/12 → درآمد 40/50/60؛ توزیع نامعلوم → بدون احتمال | سناریوی قطعی یا کیفی |
 | S06 | محصول، بخش، هدف، کانال و ظرفیت؛ اقتصاد واحد برای تصمیم مالی | قالب GTM/Ansoff؛ مقایسه ظرفیت و هزینه با B01 | AI پیشنهاد و B06/E03 برای بهینه‌سازی دارای داده | کانال هزینه 150 در سقف 100 → خارج طرح؛ CAC نامعلوم → مشروط | طرح آزمون کوچک بدون ادعای ROI |
 | M01 | سؤال، جامعه، روش، بودجه؛ داده پاسخ اختیاری؛ برای استنباط n از دقت/توان | SurveyJS Creator + Form Library؛ SciPy/Statsmodels؛ پرسشنامه نسخه‌دار، آمار توصیفی، SRS و Wilson | طرح پیچیده با وزن/خوشه فقط پس از بررسی متخصص؛ تحلیل کیفی M04 | SRS با p=.5,z=1.96,e=.05 → n=385 پیش از تصحیح؛ بدون پاسخ فقط طرح؛ 30/100 غیرتصادفی → 30% نمونه، نه جامعه | طرح تحقیق، مصاحبه و جمع‌آوری واقعی |
 | M02 | جمعیت واجد شرایط، نرخ خرید، قیمت و قلمرو؛ هم‌واحد و هم‌افق | Decimal/Pandas: bottom-up؛ برآورد top-down مستند برای کنترل متقابل | SciPy/NumPy سناریو و عدم قطعیت دارای فرض مستند | 100×2×5=1000؛ 60 خریدار قابل خدمت → SAM=600؛ 10 قابل دستیابی → SOM=100 | مخرج نامعلوم: بدون عدد؛ دامنه مستند اگر ممکن |
 | M03 | بازار، رقیب و شواهد تاریخ‌دار؛ حداقل یک رقیب برای مقایسه | ماتریس ویژگی/قیمت، PESTEL/Porter به‌صورت rubric؛ Pandas + AI مستند | استخراج متنی/جست‌وجوی مجاز؛ هر ادعا به منبع | قیمت A=10 و B=null → B مجهول، نسبت قیمت null | طرح تحقیق رقبا؛ بدون سهم بازار جعلی |
-| M04 | متن واقعی و شناسه شاهد؛ مصاحبه/بازخورد و زمینه؛ حداقل یک شاهد برای یک مشاهده | کدگذاری با codebook و مرور انسان؛ Sentence Transformers چندزبانه برای گروه‌بندی پیشنهادی | BERTopic فقط corpus کافی و آزمون ثبات؛ ارزیابی فارسی با نمونه انسانی | دو متن درباره تأخیر، یک متن کیفیت؛ هر theme دارای ref واقعی؛ متن جعلی رد | کدگذاری دستی؛ بدون شاهد فقط طرح مصاحبه |
-| M05 | داده مشتری/بخش، معیار و تعریف؛ برای RFM تراکنش تاریخ‌دار و شناسه؛ ML مشروط به حجم/ثبات | Pandas RFM/قواعد؛ sklearn Pipeline+StandardScaler+KMeans/HDBSCAN (اختیاری) | ارزیابی silhouette در صورت معتبر بودن، ثبات bootstrap، تمایز عملی و اعتبار روی نمونه مستقل؛ هیچ k اجباری | RFM تاریخ مرجع و تراکنش یکتا؛ چهار نقطه (0,0),(0,1),(10,10),(10,11)، k=2 → دو جفت مستقل از شماره label؛ fixture فقط فنی | قواعد بخش‌بندی و فرضیه بازار هدف |
+| M04 | متن واقعی و شناسه شاهد؛ مصاحبه/بازخورد و زمینه؛ حداقل یک شاهد برای یک مشاهده | کدگذاری با codebook و مرور انسان؛ Sentence Transformers با Qwen3-Embedding-0.6B candidate و BGE-M3 challenger؛ گروه‌بندی پیشنهادی، نه برچسب حقیقت | BERTopic 0.17.4 فقط corpus کافی و آزمون ثبات؛ embedding مدل ثابت؛ ارزیابی فارسی با نمونه انسانی | دو متن درباره تأخیر، یک متن کیفیت؛ هر theme دارای ref واقعی؛ متن جعلی رد | کدگذاری دستی؛ بدون شاهد فقط طرح مصاحبه |
+| M05 | داده مشتری/بخش، معیار و تعریف؛ برای RFM تراکنش تاریخ‌دار و شناسه؛ ML مشروط به حجم/ثبات | Pandas RFM/قواعد؛ sklearn Pipeline+StandardScaler+KMeans و sklearn.cluster.HDBSCAN (اختیاری؛ بدون نیاز به بسته جداگانه hdbscan) | ارزیابی silhouette در صورت معتبر بودن، ثبات bootstrap، تمایز عملی و اعتبار روی نمونه مستقل؛ هیچ k اجباری | RFM تاریخ مرجع و تراکنش یکتا؛ چهار نقطه (0,0),(0,1),(10,10),(10,11)، k=2 → دو جفت مستقل از شماره label؛ fixture فقط فنی | قواعد بخش‌بندی و فرضیه بازار هدف |
 | M06 | بخش هدف، گزینه‌های جایگزین، منافع و شاهد؛ نقشه ادراکی نیازمند رتبه‌بندی واقعی | STP و بیانیه ارزش؛ AI مستند؛ sklearn MDS روی ماتریس فاصله معتبر | آزمون مفهوم/پیام B04؛ انتخاب ویژگی با تحقیق | ادعای «سریع‌ترین» بدون شاهد → hypothesis؛ ماتریس فاصله نامتقارن → رد | بیانیه مشروط و طرح آزمون |
 | M07 | تعریف فعال‌سازی/نگهداشت، cohort و پنجره؛ بازخورد مستقل | Pandas cohort، تکرار خرید، قیف؛ triangulation و مرور انسان | مدل بقا با داده censoring معتبر؛ اختیاری و پس از بررسی روش | 10 واجد شرایط، 4 بازگشته در پنجره → 40%؛ cohort ناتمام حذف/علامت؛ PMF قطعی ممنوع | طرح گردآوری شواهد و آزمون |
 | M08 | هویت و پیام؛ تحقیق واقعی برای ادراک، آگاهی و تداعی | ممیزی برند؛ Pandas نسبت‌های پیمایش، کدگذاری انسانی + Sentence Transformers | BERTopic/مدل طبقه‌بندی فارسی فقط با ارزیابی برچسب انسانی | بدون پاسخ ادراک → perception_gap=null؛ آگاهی 20 از 50 → 40% نمونه | ممیزی هویت بدون ادعای ادراک |
 | M09 | مراحل، تماس‌ها و شواهد دارای زمان؛ شناسه برای مسیر فردی | Pandas ترتیب رویدادها، دسته‌بندی شکایت و فراوانی با مخرج؛ نقشه سفر | AI گروه‌بندی متن؛ خوشه‌بندی فقط در صورت ارزیابی | A→B→B duplicate event_id → A→B؛ شکایت بی‌زمان مسیر قطعی نیست | نقشه فرضی و تحقیق کیفی |
-| B01 | ارز و دوره مشترک؛ درآمد، هزینه، مشتری جدید؛ cohort برای LTV و اثر افزایشی برای ROMI | Decimal/Pandas: margin، CAC، LTV افق ثابت، ROMI طبق قرارداد | PyMC-Marketing CLV با تاریخچه تکرار خرید و holdout زمانی، posterior checks | 10000−6000=4000؛ 2000/20=100؛ (1500−500)/500=2؛ مخرج صفر null | فقط شاخص‌های دارای داده؛ LTV مشاهده‌ای/سناریو |
-| B02 | قیمت/هزینه و افق؛ سری منظم زمانی برای پیش‌بینی؛ پنجره آزمون؛ کشش نیازمند شناسایی | Decimal سربه‌سر؛ StatsForecast Naive/SeasonalNaive، AutoETS/AutoARIMA با rolling origin | Chronos-2 فقط challenger؛ Statsmodels رگرسیون قیمت، DoWhy/B04 برای استنتاج علّی | 100−60=40، هزینه ثابت 4000 → 100 واحد؛ سری ثابت 10 → naive=10 و MAE=0؛ حاشیه ≤0 → بدون سربه‌سر | سناریوی قیمت و حجم؛ بدون ادعای کشش علّی |
+| B01 | ارز و دوره مشترک؛ درآمد، هزینه، مشتری جدید؛ cohort برای LTV و اثر افزایشی برای ROMI | Decimal/Pandas: margin، CAC، LTV افق ثابت، ROMI طبق قرارداد | PyMC-Marketing 1.5.0 BG/NBD و Gamma-Gamma برای مشتریان غیرقراردادی با داده تکرار خرید؛ مدل قراردادی برای اشتراک؛ holdout زمانی و posterior checks | 10000−6000=4000؛ 2000/20=100؛ (1500−500)/500=2؛ مخرج صفر null | فقط شاخص‌های دارای داده؛ LTV مشاهده‌ای/سناریو |
+| B02 | قیمت/هزینه و افق؛ سری منظم زمانی برای پیش‌بینی؛ پنجره آزمون؛ کشش نیازمند شناسایی | Decimal سربه‌سر؛ StatsForecast 2.1.1 Naive/SeasonalNaive به‌عنوان benchmark، AutoETS/AutoARIMA و Croston برای تقاضای متناوب؛ Statsmodels SARIMAX/ETS جایگزین کلاسیک؛ rolling origin | Chronos-2 فقط challenger؛ Statsmodels رگرسیون قیمت، DoWhy/B04 برای استنتاج علّی | 100−60=40، هزینه ثابت 4000 → 100 واحد؛ سری ثابت 10 → naive=10 و MAE=0؛ حاشیه ≤0 → بدون سربه‌سر | سناریوی قیمت و حجم؛ بدون ادعای کشش علّی |
 | B03 | رویداد با شناسه مشتری/مرحله/زمان، پنجره و تعریف churn؛ مدل به رخداد کافی در هر دو کلاس نیاز دارد | Pandas cohort funnel/retention؛ sklearn LogisticRegression به‌عنوان مدل پایه با جداسازی زمانی | CatBoost challenger؛ SHAP فقط توضیح مدل نه علت؛ calibration و PR-AUC/هزینه خطا | 100 واجد شرایط، 40 رسیده، رویداد تکراری → 40%؛ 10 ریزش از 100 فعال → 10% | قیف تجمیعی فقط با مخرج معتبر؛ بدون مدل پیش‌بینی |
-| B04 | فرضیه، واحد تخصیص، متریک، MDE، alpha، power، نرخ پایه/واریانس؛ داده واقعی برای اثر | Statsmodels power/CI، SciPy Welch یا آزمون نسبت متناسب؛ RCT دوگروهی | DoWhy شناسایی/refutation؛ EconML اثر ناهمگن فقط با overlap، confounding assumptions و review؛ MMM در E03 | کنترل 20/100 و درمان 30/100 → RD=.10؛ بدون طرح تصادفی معتبر، causal_claim=false؛ بدون داده فقط protocol | تحلیل توصیفی/طرح آزمایش؛ عدم ادعای علت |
+| B04 | فرضیه، واحد تخصیص، متریک، MDE، alpha، power، نرخ پایه/واریانس؛ داده واقعی برای اثر | Statsmodels 0.15.0 power و CI؛ SciPy Welch برای متریک پیوسته؛ statsmodels proportion APIs برای نرخ‌ها؛ RCT دوگروهی | DoWhy 0.14 برای DAG/identification/refutation؛ EconML 0.17.1 برای DML/CATE فقط با overlap و فرض‌های مخدوش‌گر مستند؛ MMM در E03 | کنترل 20/100 و درمان 30/100 → RD=.10؛ بدون طرح تصادفی معتبر، causal_claim=false؛ بدون داده فقط protocol | تحلیل توصیفی/طرح آزمایش؛ عدم ادعای علت |
 | B05 | تعریف KPI، داده، دانه‌بندی و دوره؛ هدف اختیاری | Pandas groupby و Decimal برای پول؛ روند و انحراف؛ ECharts فقط نمایش | Polars یا DuckDB بعد از benchmark بر داده حجیم؛ کنترل ناهنجاری با خط پایه معتبر | actual=70,target=100 → -30؛ target=null → deviation=null؛ صفر معتبر حفظ | گزارش مشاهده‌ای و نقص داده |
 | B06 | گزینه، هزینه، بازده/حاشیه مستند، ظرفیت؛ قیود و تابع هدف | NumPy امتیازدهی؛ SciPy linprog/milp HiGHS در حالت مدل خطی معتبر | تحلیل حساسیت؛ OR-Tools برای قیود گسسته پیچیده فقط در نیاز | max 3x+2y، x+y≤4، x≤2، x,y≥0 → x=2,y=2,obj=10؛ ناممکن → infeasible | مقایسه گزینه یا طرح جمع‌آوری بازده؛ بدون بهینه ساختگی |
 | E01 | تصمیم تأییدشده، کارها، بودجه، ظرفیت، موعد | WBS، جمع Decimal، کنترل قیود، زمان‌بندی ساده | SciPy milp یا OR-Tools CP-SAT برای زمان‌بندی گسسته در صورت نیاز | دو کار 60 و 50، بودجه 100 → violation=10؛ تصمیم draft → برنامه غیرقابل اجرا | پیش‌نویس یا درخواست اصلاح قیود |
 | E02 | هدف، مخاطب، جایگاه، کانال، شواهد ادعا | قالب IMC/brief اختصاصی + AI با schema و مرور انسان | آزمون محتوا B04؛ بدون ابزار انتشار خودکار | ادعای فاقد ref در بریف → پرچم unverified، publication_ready=false | قالب بدون AI و فهرست ادعاهای نیازمند بررسی |
-| E03 | بودجه، کانال، قید و شواهد عملکرد؛ مدل پاسخ معتبر برای بهینه‌سازی | Decimal بودجه؛ SciPy linprog در بازده خطی؛ طرح آزمایشی در نبود داده | PyMC-Marketing یا Meridian (یکی) برای MMM با داده زمانی/جغرافیایی، کنترل confounding، اعتبارسنجی و کالیبراسیون آزمایش | بودجه 100 و تخصیص 60+50 → رد؛ داده عملکرد غایب → test_plan، نه ROI پیش‌بینی‌شده | تخصیص آزمایشی و قواعد توقف |
+| E03 | بودجه، کانال، قید و شواهد عملکرد؛ مدل پاسخ معتبر برای بهینه‌سازی | Decimal بودجه؛ SciPy linprog در بازده خطی؛ طرح آزمایشی در نبود داده | PyMC-Marketing 1.5.0 به‌عنوان انتخاب اصلی؛ Meridian فقط مقایسه جدا (یکی) برای MMM با داده زمانی/جغرافیایی، کنترل confounding، اعتبارسنجی و کالیبراسیون آزمایش | بودجه 100 و تخصیص 60+50 → رد؛ داده عملکرد غایب → test_plan، نه ROI پیش‌بینی‌شده | تخصیص آزمایشی و قواعد توقف |
 | E04 | مراحل، محصول، ظرفیت؛ داده مشتری مجاز و برچسب تبدیل برای مدل | قواعد SLA، RFM/Pandas، lead scoring شفاف؛ طرح چرخه عمر | sklearn LogisticRegression/CatBoost با validation زمانی، calibration و fairness؛ بدون تصمیم خودکار درباره افراد | lead بدون داده → unknown؛ opt-out → outreach_allowed=false؛ 20 ظرفیت در برابر 25 → backlog=5 | امتیاز قواعدی یا صف دستی |
 | E05 | فرایند، سیستم‌ها، نیاز و محدودیت داده | نقشه فرایند اختصاصی، ماتریس requirements و کنترل مجوز | AI خلاصه مستندات؛ بدون اتوماسیون یا اتصال مستقل | سیستم A فاقد اجازه انتقال → blocked؛ نیاز فاقد شاهد → pending | چک‌لیست و ارزیابی دستی |
 | E06 | کار، نقش، ظرفیت و مهارت مستند؛ مالک و قیود | RACI اختصاصی؛ تخصیص ظرفیت با قواعد؛ OPM ساختار ارزیابی | OR-Tools CP-SAT برای تخصیص گسسته، نه انتخاب/رد خودکار افراد | دو مالک accountable برای یک کار → رد؛ ظرفیت 8 و کار 10 → overload=2 | تقسیم کار دستی/اصلاح ظرفیت |
@@ -113,3 +113,104 @@
 - https://pypi.org/project/statsforecast/ ، https://pypi.org/project/dowhy/ ، https://pypi.org/project/econml/ ، https://pypi.org/project/pymc-marketing/ — قابلیت خانواده مدل‌ها؛ نه اثبات صحت روی داده M-Tools.
 
 **محدودیت نهایی:** این سند مرجع انتخاب و معیار اثبات است؛ اعتبار تجربی محصول، سازگاری دقیق نسخه‌ها و اجرای تست‌ها همچنان NOT_RUN هستند. معیارهای پذیرش پیشرفته وابسته به داده و سؤال، قبل از هر آزمایش تعیین و مستند می‌شوند. هیچ فناوری صرفاً به علت جدید بودن یا رایگان بودن اجباری نیست.
+
+
+## ۷. تطبیق دقیق با مستندات رسمی و تصمیم‌های اصلاحی — ۲۴ نوامبر ۲۰۲۶
+
+این بخش مرجع نهایی انتخاب نسخه و API است. ترتیب اعتبار: metadata نسخه منتشرشده در PyPI و فایل pyproject همان release، سپس مستندات stable/API همان نسخه، و در آخر README یا branch اصلی. مستندات قدیمی/توسعه‌ای ممکن است با metadata release اختلاف داشته باشند.
+
+### ۷.۱ چرا Python 3.12.x انتخاب می‌شود؟
+
+| مؤلفه | شرط رسمی/نسخه منتشرشده | نتیجه برای M-Tools |
+|---|---|---|
+| NumPy 2.5.5 | Python 3.12 تا 3.15 | سازگار |
+| SciPy 1.18.1 | Python >=3.12؛ wheelهای 3.12 موجود | سازگار |
+| pandas 3.1.1 | Python 3.12 در classifier؛ NumPy >=2.0.2 | سازگار با NumPy 2.5.5 |
+| scikit-learn 1.9.1 | Python >=3.11؛ NumPy >=1.24.1 و SciPy >=1.10 | سازگار |
+| Statsmodels 0.15.0 | wheel برای CPython 3.12؛ API stable docs | سازگار |
+| DoWhy 0.14 | Python >=3.9 و <3.14 | 3.12 لازم |
+| EconML 0.17.1 | wheel CPython 3.12؛ scikit-learn >=1.6 و <1.10 | sklearn 1.9.1 در بازه |
+| PyMC-Marketing 1.5.0 | Python >=3.12؛ PyMC >=6.0 و ArviZ >=1.2؛ NumPy <2.6 در pyproject فعلی | NumPy 2.5.5 در بازه |
+| Google Meridian | فقط Python 3.11 یا 3.12؛ JAX backend پیش‌فرض | 3.12 نقطه اشتراک؛ جایگزین جداگانه |
+| StatsForecast 2.1.1 | Python >=3.11؛ statsmodels >=0.14.5 و SciPy >=1.7.3 | 3.12 و stack انتخابی سازگار از نظر شروط اعلام‌شده |
+| Numba 0.68.1 | Python 3.10 تا قبل از 3.16؛ NumPy 2.0 تا قبل از 2.6 | با NumPy 2.5.5 سازگار |
+| DuckDB 2.0.1 | Python >=3.11؛ wheel cp312-abi3 | سازگار |
+| Polars 2.1.0 | Python >=3.11 | سازگار |
+| CatBoost 1.2.10 | wheelهای CPython 3.12 برای Windows/Linux/macOS | سازگار |
+| Sentence Transformers | Python >=3.10، PyTorch >=1.11 و Transformers >=4.41؛ Qwen3 model نیازمند Transformers >=4.51 | 3.12 سازگار؛ وزن مدل جداگانه benchmark شود |
+
+**تصمیم:** baseline توسعه و CI برابر CPython 3.12.x است. NumPy 2.5.5، pandas 3.1.1، SciPy 1.18.1، scikit-learn 1.9.1 و Statsmodels 0.15.0 کاندیدهای pin اولیه‌اند. DoWhy 0.14 و EconML 0.17.1 نیز در همین محیط قرار می‌گیرند. این جدول تطبیق شروط رسمی است و هنوز جایگزین اجرای resolver و تست نصب نیست.
+
+### ۷.۲ اصلاحات مهم در انتخاب الگوریتم و API
+
+1. **S04/S05 — امتیازدهی، سناریو و حساسیت:** امتیاز وزنی با فرمول شفاف NumPy و grid sensitivity انجام می‌شود. شبیه‌سازی تصادفی با `numpy.random.default_rng(seed)` یا `scipy.stats.qmc` انجام می‌شود. SALib برای شاخص‌های حساسیت جهانی Sobol/Morris روی یک مدل قابل اجراست؛ SALib ابزار عمومی تولید سناریو یا جایگزین Monte Carlo نیست.
+2. **M04/M08 — متن فارسی:** Sentence Transformers فقط runtime embedding است، نه تضمین کیفیت. مدل اولیه آزمایش Qwen3-Embedding-0.6B با پشتیبانی اعلام‌شده 100+ زبان و context تا 32k است؛ BGE-M3 challenger. مدل منتخب فقط پس از آزمون روی مجموعه برچسب‌خورده فارسی تثبیت می‌شود. BERTopic 0.17.4 نسخه stable موجود در PyPI است؛ 1.0.0b1 پیش‌انتشار است و در baseline استفاده نمی‌شود. خوشه/موضوع بدون مرور انسانی، یافته قطعی نیست.
+3. **M05 — خوشه‌بندی:** `sklearn.cluster.HDBSCAN` از scikit-learn 1.3 به بعد داخل خود sklearn است؛ بسته مجزای `hdbscan` لازم نیست. در sklearn، `min_samples` خود نقطه را می‌شمارد و با بسته contrib از نظر مقدار یکسان نیست. KMeans با `random_state` و `n_init` صریح اجرا شود. هیچ الگوریتمی بدون داده کافی یا تفسیرپذیری تجاری به‌زور انتخاب نشود.
+4. **B02 — پیش‌بینی:** StatsForecast API واقعی `StatsForecast(models=[...], freq=...)`, `fit(df)`, `predict(h=...)` یا `forecast(df=..., h=...)` و `cross_validation(...)` دارد. Naive/SeasonalNaive baseline، AutoETS/AutoARIMA گزینه‌های کلاسیک و Croston/ADIDA/TSB برای تقاضای متناوب‌اند. نسخه 2.1.1 در metadata PyPI با وضعیت Beta برچسب خورده؛ تا عبور از CI و backtest، فعال‌سازی production آن مشروط است. metadata نسخه 2.1.1 وابستگی اجباری مستقیم Numba را فهرست نمی‌کند؛ به همین دلیل Numba به‌زور به گروه forecast اضافه نمی‌شود. Chronos-2.3.2 مدل foundation challenger است؛ `Chronos2Pipeline.from_pretrained(...)` و `predict_df(...)` API رسمی دارد، اما وزن مدل، latency، CPU/GPU و دقت در داده کسب‌وکار باید جداگانه آزموده شود.
+5. **B04 — آزمایش و علیت:** برای RCT نرخ‌ها از روش‌های نسبت Statsmodels و برای میانگین پیوسته Welch استفاده شود. API `confint_proportions_2indep` در مستندات 0.15.0 experimental علامت‌گذاری شده؛ نسخه روش `newcomb` صریح و regression-test شود. DoWhy جریان model → identify → estimate → refute را فراهم می‌کند؛ refutation آزمون استحکام فرض‌هاست، نه اثبات علیت. EconML برای DML/CATE فقط با overlap، تعریف treatment/outcome و فرض‌های شناسایی مناسب.
+6. **B01/E03 — CLV و MMM:** PyMC-Marketing 1.5.0 یک مجموعه تخصصی بازاریابی است؛ برای CLV غیرقراردادی BG/NBD و Gamma-Gamma فقط با فرض‌های سازگار و داده RFM معتبر، برای اشتراک قراردادی مدل متناسب با قرارداد/ریزش. برای MMM، PyMC-Marketing انتخاب اول است چون MMM، CLV و budget optimization را در یک کتابخانه عرضه می‌کند. Google Meridian گزینه مقایسه‌ای است؛ به Python 3.11/3.12 و JAX backend متکی است و GPU را توصیه می‌کند. هر دو را از ابتدا هم‌زمان نصب نکنیم.
+7. **B06/E01/E06 — بهینه‌سازی:** `scipy.optimize.linprog` برای LP و `scipy.optimize.milp` برای MILP خطی؛ هر دو بر HiGHS. OR-Tools CP-SAT برای تخصیص/زمان‌بندی با متغیرهای صحیح/Boolean مناسب است و همه ضرایب/قیود باید integer شوند. اگر مسئله continuous است CP-SAT انتخاب اول نیست.
+8. **B03/E04 — پیش‌بینی مشتری:** LogisticRegression baseline، CatBoost challenger برای داده جدولی و دسته‌ای. split زمانی/group-aware و calibration الزامی. SHAP feature attribution است، نه causal explanation؛ Optuna فقط با validation داخلی و بدون دست‌زدن به test set.
+9. **B05 — داده حجیم:** Pandas مبنا می‌ماند. Polars و DuckDB فقط پس از benchmark روی داده نماینده و بررسی null، decimal، timezone و سازگاری خروجی افزوده می‌شوند؛ پایگاه اصلی داده همچنان PostgreSQL است.
+
+### ۷.۳ APIهای مشخصی که باید در smoke test اجرا شوند
+
+| بخش | API واقعی | انتظار تست |
+|---|---|---|
+| محاسبه و قیود | `scipy.optimize.milp` | جواب optimal و infeasible را درست تشخیص دهد |
+| HDBSCAN | `sklearn.cluster.HDBSCAN.fit_predict` | labels و noise را بر fixture جداشده تولید کند |
+| KMeans | `sklearn.cluster.KMeans(..., random_state=..., n_init=...)` | clustering تکرارپذیر |
+| A/B proportion | `statsmodels.stats.proportion.confint_proportions_2indep(..., method="newcomb")` | CI finite و شامل/حول اختلاف مشاهده‌شده |
+| Forecast | `StatsForecast.fit` و `predict(h)` | تعداد سطرهای افق درست و خروجی finite |
+| Causal | `CausalModel.identify_effect`, `estimate_effect`, `refute_estimate` | estimand/estimate/refutation ثبت شود |
+| DML | `econml.dml.LinearDML.fit` و `effect` | شکل و مقدار خروجی معتبر |
+| MMM | `pymc_marketing.mmm.MMM` با GeometricAdstock/LogisticSaturation | import و ساخت مدل؛ fit فقط با fixture و کنترل همگرایی |
+| CLV | `pymc_marketing.clv.BetaGeoModel` | import، ساخت و fit روی RFM fixture سازگار |
+| NLP | `SentenceTransformer("Qwen/Qwen3-Embedding-0.6B").encode` | embedding finite و benchmark فارسی؛ وزن‌ها از قبل cache شوند |
+| Topic model | `BERTopic.fit_transform` | موضوع‌ها، outlier و ثبات؛ فقط corpus کافی |
+| Sobol | `SALib.sample.sobol.sample` + `SALib.analyze.sobol.analyze` | indices با Ishigami test function |
+| CP-SAT | `ortools.sat.python.cp_model` | status=OPTIMAL/FEASIBLE و قیود رعایت شوند |
+| Analytical data | `duckdb.sql`, `polars.DataFrame` | query و aggregation نتیجه دقیق |
+
+### ۷.۴ وضعیت اعتبارسنجی
+
+| نوع بررسی | وضعیت |
+|---|---|
+| تطبیق شروط نسخه و Python از PyPI metadata | انجام شده برای اجزای اصلی |
+| بررسی APIهای رسمی و نمونه‌های مستند | انجام شده برای روش‌های بالا |
+| نصب همه گروه‌ها در Python 3.12 | منتظر CI |
+| resolver و lockfile ترکیبی | منتظر DEV |
+| اجرای smoke test API | منتظر CI |
+| دانلود و آزمون وزن Qwen3/Chronos | انجام نشده؛ آزمون مدل جداگانه |
+| benchmark فارسی و داده واقعی کسب‌وکار | انجام نشده |
+| ارزیابی علمی مدل‌های MMM/CLV و causal روی داده واقعی | انجام نشده |
+
+تا وقتی CI موفق نشده، هیچ ردیف را «واقعاً اجراشده و PASS» گزارش نکن. برای APIهای experimental، پیش‌انتشار، مدل‌وزن و الگوریتم‌های داده‌محور، وضعیت جداگانه نگه‌دار.
+
+### ۷.۵ منابع رسمی بررسی‌شده
+
+- Python 3.15 release: https://docs.python.org/3.15/whatsnew/3.15.html
+- Django 6.1 Python compatibility: https://docs.djangoproject.com/en/6.1/releases/6.1/
+- NumPy 2.5.5: https://numpy.org/news/ و https://pypi.org/project/numpy/2.5.5/
+- pandas 3.1.1: https://pandas.pydata.org/docs/whatsnew/ و https://pandas.pydata.org/docs/getting_started/install
+- SciPy 1.18.1: https://scipy.org/news/ و https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html
+- scikit-learn 1.9.1: https://scikit-learn.org/stable/ و https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html
+- Statsmodels 0.15.0: https://www.statsmodels.org/stable/ و https://www.statsmodels.org/stable/generated/statsmodels.stats.proportion.confint_proportions_2indep.html
+- StatsForecast 2.1.1: https://pypi.org/project/statsforecast/2.1.1/ و https://github.com/Nixtla/statsforecast
+- DoWhy: https://pypi.org/project/dowhy/0.14/ و https://www.pywhy.org/dowhy/main/
+- EconML 0.17.1: https://pypi.org/project/econml/0.17.1/ و https://github.com/py-why/EconML
+- PyMC-Marketing 1.5.0: https://pypi.org/project/pymc-marketing/ و https://www.pymc-marketing.io/en/stable/
+- Meridian: https://developers.google.com/meridian/docs/user-guide/installing
+- Chronos-2: https://huggingface.co/amazon/chronos-2 و https://github.com/amazon-science/chronos-forecasting
+- Sentence Transformers: https://sbert.net/docs/ و https://pypi.org/project/sentence-transformers/
+- Qwen3 Embedding: https://huggingface.co/Qwen/Qwen3-Embedding-0.6B
+- BERTopic: https://bertopic.readthedocs.io/en/latest/ و https://pypi.org/project/bertopic/
+- CatBoost: https://catboost.ai/docs/en/concepts/python-installation
+- Numba compatibility: https://numba.readthedocs.io/en/stable/user/installing.html
+- SALib: https://salib.readthedocs.io/en/stable/api.html
+- OR-Tools CP-SAT: https://developers.google.com/optimization/cp/cp_solver/
+- Polars: https://pypi.org/project/polars/2.1.0/
+- DuckDB: https://duckdb.org/docs/current/clients/python/overview
+- SurveyJS: https://surveyjs.io/form-library/documentation/overview
+
+**جمع‌بندی:** انتخاب اصلی M-Tools اکنون بر یک پشته سازگار Python 3.12 و کتابخانه‌های تخصصی با نقش مشخص استوار است. این تطبیق، خطاهای شناخته‌شده طراحی را رفع می‌کند؛ تأیید عملی نهایی منوط به اجرای workflow سازگاری و آزمون مدل‌هاست.
