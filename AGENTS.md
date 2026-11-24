@@ -16,3 +16,11 @@ This file records project policy, not a legal grant of permissions.
 ## Scientific engine implementation reference
 
 Use [Scientific Engine & Technology Specification](docs/marketing-scientific-engine-specification.md) for all 29 tools: baseline, conditional advanced methods, dependency selection, evidence gates, fixtures and validation. Do not report PASS before actual tests; freeze compatible dependency versions in DEV.
+
+## Scientific technology baseline and verification
+
+- Read `docs/marketing-scientific-engine-specification.md` before selecting or changing a scientific method, library, model or API for any of the 29 tools.
+- Scientific runtime baseline is CPython 3.12.x. Candidate pins are not considered validated until the `Scientific stack compatibility` GitHub Actions workflow passes.
+- The smoke tests verify package installation/API compatibility only; they do not establish scientific validity on real business data. Persian model-weight benchmarks and MMM/CLV/causal empirical validation remain separate gates.
+- Do not add Numba as a direct StatsForecast dependency without evidence; StatsForecast 2.1.1's published dependency metadata uses coreforecast/utilsforecast. Numba is required by other optional stacks where their metadata specifies it.
+- Keep Chronos-2, Meridian, BERTopic, SHAP and other heavy/optional stacks as conditional challengers; do not load model weights or execute expensive inference in the core path without a benchmark and user data/privacy review.
