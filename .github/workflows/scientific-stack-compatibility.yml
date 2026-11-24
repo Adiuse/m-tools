@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
       - run: python -m pip install --upgrade pip
       - run: python -m pip install numpy==2.5.5 pandas==3.1.1 scipy==1.18.1 scikit-learn==1.9.1 statsmodels==0.15.0
       - run: python tests/scientific_stack_smoke.py core
@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
       - run: python -m pip install --upgrade pip
       - run: python -m pip install numpy==2.5.5 pandas==3.1.1 scipy==1.18.1 statsmodels==0.15.0 statsforecast==2.1.1
       - run: python tests/scientific_stack_smoke.py forecast
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
       - run: python -m pip install --upgrade pip
       - run: python -m pip install numpy==2.5.5 pandas==3.1.1 scipy==1.18.1 scikit-learn==1.9.1 statsmodels==0.15.0 dowhy==0.14 econml==0.17.1
       - run: python tests/scientific_stack_smoke.py causal
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
       - run: python -m pip install --upgrade pip
       - run: python -m pip install numpy==2.5.5 pandas==3.1.1 scipy==1.18.1 pymc-marketing==1.5.0
       - run: python tests/scientific_stack_smoke.py bayesian
@@ -74,7 +74,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
       - run: python -m pip install --upgrade pip
       - run: python -m pip install numpy==2.5.5 scipy==1.18.1 SALib==1.6.0 ortools
       - run: python tests/scientific_stack_smoke.py optimization
@@ -86,7 +86,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
       - run: python -m pip install --upgrade pip
       - run: python -m pip install pandas==3.1.1 polars==2.1.0 duckdb==2.0.1
       - run: python tests/scientific_stack_smoke.py analytics
@@ -98,7 +98,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
       - run: python -m pip install --upgrade pip
       - run: python -m pip install numpy==2.5.5 pandas==3.1.1 scipy==1.18.1 catboost==1.2.10 shap optuna
       - run: python tests/scientific_stack_smoke.py ml
@@ -110,7 +110,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
       - run: python -m pip install --upgrade pip
       - run: python -m pip install sentence-transformers bertopic==0.17.4
       - run: python tests/scientific_stack_smoke.py nlp
