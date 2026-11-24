@@ -1,4 +1,4 @@
-# Scientific Engine & Technology Specification — M-Tools v1.4
+# Scientific Engine & Technology Specification — M-Tools v1.5
 
 تاریخ بازبینی روش‌شناختی و منابع رسمی: ۲۴ نوامبر ۲۰۲۶؛ نسخه 1.4. این بازبینی مستقل از CI است؛ CI فقط نصب و smoke test نرم‌افزار را می‌سنجد. مکمل [معماری فنی](marketing-system-architecture-v1.md)، [مشخصات ابزارها](marketing-tool-specifications.md) و [UX](marketing-ux-design-v1.md). سند طراحی و برنامه آزمون است؛ هیچ‌کدام از ۲۹ ابزار پیاده‌سازی یا آزمون انتهابه‌انتها نشده‌اند. نمونه‌های زیر fixture مصنوعی و خروجی مورد انتظار هستند، نه گزارش تست اجراشده. سیاست Capability-First در AGENTS.md برقرار است.
 
@@ -10,26 +10,26 @@
 
 ## ۲. انتخاب فناوری و سیاست نسخه
 
-انتخاب baseline علمی برای شروع توسعه: CPython 3.13.x؛ Django 6.1 در صورت استفاده از نسخه جدید و سازگار، PostgreSQL 18، React/TypeScript و ECharts (UI در سند دیگر)، uv و Pydantic 2. Python 3.13 انتخاب اشتراک سازگار برای DoWhy، PyMC-Marketing، EconML و پشته علمی اصلی است؛ Meridian به دلیل محدودیت Python 3.11/3.12 فقط در محیط مقایسه‌ای جدا اجرا می‌شود. نسخه‌های دقیق بعد از CI و lockfile تثبیت می‌شوند. Python 3.14/3.15 در این پروژه فعلاً baseline نیستند؛ فقط پس از عبور همه گروه‌های وابستگی از ماتریس سازگاری بررسی شوند. نسخه‌های دقیق در lockfile واقعی تعیین می‌شوند؛ اعداد نسخه پاسخ‌های قبلی یا latest متغیر جایگزین lockfile نیستند.
+انتخاب baseline علمی برای شروع توسعه: CPython 3.12.x؛ NumPy 2.3.5، pandas 2.3.3، SciPy 1.15.3، scikit-learn 1.9.1 و Statsmodels 0.14.5 به‌عنوان candidateهای سازگار با اشتراک DoWhy 0.14، PyMC-Marketing 1.5.0 و StatsForecast 2.1.1. Google Meridian به‌دلیل تعارض ArviZ با PyMC-Marketing در محیط/worker جدا اجرا می‌شود. این baseline از روی metadata و شروط رسمی انتخاب شده و تا lockfile و اجرای مجدد resolver تأیید اجرایی نشده است. مرور پژوهش‌ها و انتخاب روش برای هر ۲۹ ابزار در [سند Evidence Review](marketing-29-tools-evidence-review.md) ثبت شده است.
 
 | گروه | فناوری/خط نسخه هدف | وابستگی و شرایط | مرجع رسمی |
 |---|---|---|---|
-| هسته | Python 3.13، Decimal و stdlib | مالی دقیق؛ هیچ float برای پول به عنوان مرجع نهایی | https://docs.python.org/3/library/decimal.html |
-| داده | NumPy 2.5.5، pandas 2.3.3 | هر دو دارای پشتیبانی Python 3.13؛ pandas 2.3 با NumPy 2.x سازگار است و شرط pandas<3.0 موردنیاز StatsForecast را برآورده می‌کند | https://pypi.org/project/numpy/2.5.5/ ; https://pypi.org/project/pandas/2.3.3/ |
-| آمار | SciPy 1.18.1، Statsmodels 0.15.0 | هر دو برای Python 3.13 قابل نصب‌اند؛ APIهای آزمون نسبت در بخش آزمون مشخص شده‌اند | https://pypi.org/project/scipy/1.18.1/ ; https://pypi.org/project/statsmodels/0.15.0/ |
-| ML | scikit-learn 1.9.1 | Python >=3.11، NumPy/SciPy، Narwhals، joblib و threadpoolctl؛ با EconML 0.17.1 چون شرط sklearn <1.10 است سازگار از نظر بازه نسخه | https://pypi.org/project/scikit-learn/1.9.1/ ; https://scikit-learn.org/stable/ |
+| هسته | Python 3.12، Decimal و stdlib | مالی دقیق؛ هیچ float برای پول به عنوان مرجع نهایی | https://docs.python.org/3/library/decimal.html |
+| داده | NumPy 2.3.5، pandas 2.3.3 | در بازه NumPy<2.4 Meridian و NumPy<2.6 PyMC-Marketing؛ pandas<3 برای StatsForecast و Meridian | https://pypi.org/project/numpy/2.5.5/ ; https://pypi.org/project/pandas/2.3.3/ |
+| آمار | SciPy 1.15.3، Statsmodels 0.14.5 | SciPy سقف DoWhy 0.14 در Python 3.12 را رعایت می‌کند؛ Statsmodels حداقل موردنیاز StatsForecast و Meridian را برآورده می‌کند | https://pypi.org/project/scipy/1.18.1/ ; https://pypi.org/project/statsmodels/0.15.0/ |
+| ML | scikit-learn 1.9.1 | با Python 3.12، NumPy 2.3.5 و SciPy 1.15.3 و بازه EconML 0.17.1 سازگار از نظر شروط metadata | https://pypi.org/project/scikit-learn/1.9.1/ ; https://scikit-learn.org/stable/ |
 | schema | Pydantic 2.x | strict validation، explicit null، JSON Schema | https://pypi.org/project/pydantic/ |
 | فرم | SurveyJS Form Library + Creator، نسخه هم‌خانواده | React و بسته‌های survey-core/creator؛ مجوز توسعه و انتشار طبق سیاست | https://surveyjs.io/documentation |
 | پیش‌بینی | StatsForecast 2.1.1 برای سری‌های متعدد؛ Statsmodels برای مدل‌های کلاسیک؛ Chronos-2.3.2 فقط challenger؛ بدون مدل‌وزن در runtime اصلی | StatsForecast به coreforecast و utilsforecast وابسته است؛ Numba وابستگی اجباری مستقیم نسخه 2.1.1 نیست. Chronos-forecasting 2.3.2 به torch>=2.2,<3، transformers>=4.41,<6 و accelerate>=1.1,<2 نیاز دارد | https://pypi.org/project/statsforecast/2.1.1/ ; https://pypi.org/project/chronos-forecasting/2.3.2/ ; https://github.com/amazon-science/chronos-forecasting |
 | NLP | Sentence Transformers + مدل Qwen3-Embedding-0.6B به‌عنوان نامزد اول؛ BGE-M3 نامزد مقایسه؛ BERTopic 0.17.4 اختیاری | Qwen3-Embedding نیازمند transformers>=4.51 و sentence-transformers>=2.7 است؛ 100+ زبان ادعا شده اما دقت فارسی باید روی داده واقعی سنجیده شود. BERTopic 1.0.0b1 پیش‌انتشار است و baseline نیست | https://huggingface.co/Qwen/Qwen3-Embedding-0.6B ; https://huggingface.co/BAAI/bge-m3 ; https://pypi.org/project/bertopic/0.17.4/ |
-| علّی | DoWhy 0.14 برای model/identify/estimate/refute؛ EconML 0.17.1 برای DML و CATE | DoWhy 0.14 به Python <3.14 محدود است؛ EconML 0.17.1 به sklearn>=1.6,<1.10 و NumPy>=2.0.2 نیاز دارد؛ sklearn 1.9.1 در این بازه است | https://pypi.org/project/dowhy/0.14/ ; https://pypi.org/project/econml/0.17.1/ ; https://www.pywhy.org/dowhy/main/ |
-| بازاریابی بیزی | PyMC-Marketing 1.5.0 انتخاب اصلی MMM/CLV؛ Google Meridian فقط گزینه مقایسه‌ای جدا | PyMC-Marketing به Python>=3.12، PyMC>=6.0، ArviZ>=1.2 و در metadata فعلی NumPy<2.6 نیاز دارد. Meridian فقط Python 3.11/3.12 را می‌پذیرد، backend پیش‌فرض JAX دارد و GPU را توصیه می‌کند؛ هم‌زمان هر دو stack را بی‌دلیل نصب نکن | https://pypi.org/project/pymc-marketing/ ; https://developers.google.com/meridian/docs/user-guide/installing |
-| مدل ریزش | LogisticRegression به‌عنوان baseline؛ CatBoost 1.2.10 challenger؛ SHAP و Optuna اختیاری | CatBoost wheel برای CPython 3.13 موجود است؛ SHAP سهم ویژگی در پیش‌بینی را توضیح می‌دهد نه علیت؛ Optuna فقط با validation بدون نشت داده | https://pypi.org/project/catboost/1.2.10/ ; https://shap.readthedocs.io/ ; https://optuna.readthedocs.io/ |
+| علّی | DoWhy 0.14 برای model/identify/estimate/refute؛ EconML 0.17.1 برای DML و CATE | DoWhy 0.14 در Python 3.12 به SciPy<=1.15.3 نیاز دارد؛ EconML 0.17.1 با scikit-learn 1.9.1 در بازه نسخه قرار می‌گیرد | https://pypi.org/project/dowhy/0.14/ ; https://pypi.org/project/econml/0.17.1/ ; https://www.pywhy.org/dowhy/main/ |
+| بازاریابی بیزی | PyMC-Marketing 1.5.0 برای CLV و MMM سفارشی؛ Google Meridian برای MMM بسته‌بندی‌شده در worker جدا | هر دو Python 3.12 را پشتیبانی می‌کنند، اما PyMC-Marketing به ArviZ>=1.2 و Meridian به ArviZ<0.20 نیاز دارد؛ نصب در یک محیط ممکن نیست. Meridian همچنین NumPy<2.4 و pandas<3 می‌خواهد و GPU را توصیه می‌کند | https://pypi.org/project/pymc-marketing/ ; https://developers.google.com/meridian/docs/user-guide/installing |
+| مدل ریزش | LogisticRegression به‌عنوان baseline؛ CatBoost 1.2.10 challenger؛ SHAP و Optuna اختیاری | CatBoost برای CPython 3.12 wheel دارد؛ SHAP سهم ویژگی در پیش‌بینی را توضیح می‌دهد نه علیت؛ Optuna فقط با validation بدون نشت داده | https://pypi.org/project/catboost/1.2.10/ ; https://shap.readthedocs.io/ ; https://optuna.readthedocs.io/ |
 | حساسیت/تخصیص | NumPy/SciPy برای سناریو و Monte Carlo؛ SALib 1.6.0 فقط تحلیل حساسیت سراسری Sobol/Morris؛ SciPy HiGHS برای LP/MILP؛ OR-Tools CP-SAT برای زمان‌بندی/قیود صحیح | CP-SAT فقط ضرایب صحیح می‌پذیرد؛ SciPy milp یک wrapper بر HiGHS است؛ SALib جایگزین شبیه‌سازی عمومی Monte Carlo نیست | https://pypi.org/project/SALib/1.6.0/ ; https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html ; https://developers.google.com/optimization/cp/cp_solver/ |
 | حجم بالا | Pandas ابزار پیش‌فرض؛ Polars 2.1.0 و DuckDB 2.0.1 فقط در صورت benchmark مثبت | Polars برای پردازش DataFrame؛ DuckDB برای SQL تحلیلی روی فایل/Parquet؛ هیچ‌کدام جای PostgreSQL منبع حقیقت نیستند | https://pypi.org/project/polars/2.1.0/ ; https://pypi.org/project/duckdb/2.0.1/ |
 | AI | adapter اختصاصی JSON Schema؛ مدل منتخب با نسخه ثابت | ارائه‌دهنده/مدل بعد از benchmark فارسی، هزینه، latency، privacy؛ بدون عامل مستقل | سیاست AI معماری و NIST AI RMF |
 
-نسخه‌ها و بازه‌های کلیدی با مستندات رسمی و metadata انتشار تطبیق داده شده‌اند. این تطبیق استاتیک است، نه نتیجه نصب و اجرای یک محیط واقعی. نسخه‌های فوق کاندیدهای تثبیت در CI هستند؛ فقط پس از حل وابستگی و smoke test در Python 3.13 به‌عنوان stack تأییدشده شناخته می‌شوند. به‌روزرسانی امنیتی و سازگاری مقدم بر انتخاب شماره نسخه بزرگ‌تر است.
+نسخه‌ها و بازه‌های کلیدی با مستندات رسمی و metadata انتشار تطبیق داده شده‌اند. این تطبیق استاتیک است، نه نتیجه نصب و اجرای یک محیط واقعی. نسخه‌های فوق candidateهای تثبیت در lockfile هستند؛ فقط پس از resolver و smoke test در Python 3.12 به‌عنوان stack تأییدشده شناخته می‌شوند. به‌روزرسانی امنیتی و سازگاری مقدم بر انتخاب شماره نسخه بزرگ‌تر است.
 
 ### قرارداد تثبیت وابستگی
 
@@ -59,7 +59,7 @@
 | B01 | ارز و دوره مشترک؛ درآمد/حاشیه، هزینه جذب و مشتری جدید؛ cohort و تاریخچه خرید برای LTV؛ اثر افزایشی برای ROMI | Decimal/Pandas: contribution margin، CAC با تفکیک paid/blended و هزینه‌های منظورشده، LTV در افق مشخص با تنزیل/نگهداشت مستند، ROMI افزایشی | PyMC-Marketing: BG/NBD یا Pareto/NBD برای خرید تکراری continuous/non-contractual؛ Shifted BG یا BG/BB برای contractual/discrete متناسب با داده؛ Gamma-Gamma فقط برای مشتری دارای خرید تکراری و پس از بررسی استقلال تقریبی مبلغ متوسط خرید از frequency؛ در صورت نقض فرض، مدل جایگزین؛ holdout زمانی و posterior predictive checks | 10000−6000=4000؛ 2000/20=100؛ (1500−500)/500=2؛ مخرج صفر null | فقط شاخص‌های دارای داده؛ LTV مشاهده‌ای/سناریو |
 | B02 | قیمت/هزینه و افق؛ سری زمانی منظم با تناوب/فصل‌پذیری معلوم؛ پنجره آزمون؛ کشش نیازمند تغییر قیمت قابل شناسایی | Decimal سربه‌سر؛ Naive/SeasonalNaive baseline؛ StatsForecast AutoETS/AutoARIMA و خانواده Croston/ADIDA/IMAPA/TSB برای تقاضای متناوب؛ Statsmodels ETS/SARIMAX جایگزین کلاسیک؛ rolling-origin با افق واقعی | Chronos-2 فقط challenger؛ Statsmodels رگرسیون قیمت، DoWhy/B04 برای استنتاج علّی | 100−60=40، هزینه ثابت 4000 → 100 واحد؛ سری ثابت 10 → naive=10 و MAE=0؛ حاشیه ≤0 → بدون سربه‌سر | سناریوی قیمت و حجم؛ بدون ادعای کشش علّی |
 | B03 | رویداد با شناسه مشتری/مرحله/زمان، پنجره و تعریف churn؛ مدل به رخداد کافی در هر دو کلاس نیاز دارد | Pandas cohort funnel/retention؛ sklearn LogisticRegression به‌عنوان مدل پایه با جداسازی زمانی | CatBoost challenger؛ SHAP فقط توضیح مدل نه علت؛ calibration و PR-AUC/هزینه خطا | 100 واجد شرایط، 40 رسیده، رویداد تکراری → 40%؛ 10 ریزش از 100 فعال → 10% | قیف تجمیعی فقط با مخرج معتبر؛ بدون مدل پیش‌بینی |
-| B04 | فرضیه، واحد تخصیص، متریک، MDE، alpha، power، نرخ پایه/واریانس؛ داده واقعی برای اثر | Statsmodels 0.15.0 power و CI؛ SciPy Welch برای متریک پیوسته؛ statsmodels proportion APIs برای نرخ‌ها؛ RCT دوگروهی | DoWhy 0.14 برای DAG/identification/refutation؛ EconML 0.17.1 برای DML/CATE فقط با overlap و فرض‌های مخدوش‌گر مستند؛ MMM در E03 | کنترل 20/100 و درمان 30/100 → RD=.10؛ بدون طرح تصادفی معتبر، causal_claim=false؛ بدون داده فقط protocol | تحلیل توصیفی/طرح آزمایش؛ عدم ادعای علت |
+| B04 | فرضیه، واحد تخصیص، متریک، MDE، alpha، power، نرخ پایه/واریانس؛ داده واقعی برای اثر | Statsmodels 0.14.5 power و CI؛ SciPy Welch برای متریک پیوسته؛ statsmodels proportion APIs برای نرخ‌ها؛ RCT دوگروهی | DoWhy 0.14 برای DAG/identification/refutation؛ EconML 0.17.1 برای DML/CATE فقط با overlap و فرض‌های مخدوش‌گر مستند؛ MMM در E03 | کنترل 20/100 و درمان 30/100 → RD=.10؛ بدون طرح تصادفی معتبر، causal_claim=false؛ بدون داده فقط protocol | تحلیل توصیفی/طرح آزمایش؛ عدم ادعای علت |
 | B05 | تعریف KPI، داده، دانه‌بندی و دوره؛ هدف اختیاری | Pandas groupby و Decimal برای پول؛ روند و انحراف؛ ECharts فقط نمایش | Polars یا DuckDB بعد از benchmark بر داده حجیم؛ کنترل ناهنجاری با خط پایه معتبر | actual=70,target=100 → -30؛ target=null → deviation=null؛ صفر معتبر حفظ | گزارش مشاهده‌ای و نقص داده |
 | B06 | گزینه، هزینه، بازده/حاشیه مستند، ظرفیت؛ قیود و تابع هدف | NumPy امتیازدهی؛ SciPy linprog/milp (HiGHS) فقط وقتی تابع هدف و قیود واقعاً خطی‌اند | برای بازده نزولی/تعامل گزینه‌ها، response curve یا تقریب قطعه‌ای و MILP/روش غیرخطی؛ OR-Tools برای قیود گسسته پیچیده؛ تحلیل حساسیت و feasibility مستقل | max 3x+2y، x+y≤4، x≤2، x,y≥0 → x=2,y=2,obj=10؛ ناممکن → infeasible | مقایسه گزینه یا طرح جمع‌آوری بازده؛ بدون بهینه ساختگی |
 | E01 | تصمیم تأییدشده، کارها، بودجه، ظرفیت، موعد | WBS، جمع Decimal، کنترل قیود، زمان‌بندی ساده | SciPy milp یا OR-Tools CP-SAT برای زمان‌بندی گسسته در صورت نیاز | دو کار 60 و 50، بودجه 100 → violation=10؛ تصمیم draft → برنامه غیرقابل اجرا | پیش‌نویس یا درخواست اصلاح قیود |
@@ -89,7 +89,7 @@
 | مرحله | معیار عبور | وضعیت فعلی |
 |---|---|---|
 | V0 مستندات | ۲۹ شناسه منطبق، روش/فناوری/شرایط/fixture/fallback برای هر ابزار | پوشش سند بررسی‌شده؛ انتخاب علمی نیازمند بازبینی تخصصی |
-| V1 قابلیت نصب | resolve و نصب گروه‌ها، import/API smoke، ثبت lock و نسخه، مجوز توسعه | PASS برای ۸ گروه و محیط ترکیبی روی Linux/Python 3.13؛ lockfile نهایی و ماتریس پلتفرم‌ها باقی است |
+| V1 قابلیت نصب | resolve و نصب گروه‌ها، import/API smoke، ثبت lock و نسخه، مجوز توسعه | PASS برای ۸ گروه و محیط ترکیبی روی Linux/Python 3.12؛ lockfile نهایی و ماتریس پلتفرم‌ها باقی است |
 | V2 صحت و یکپارچگی | golden fixture هر ابزار، ورودی ناقص، ورودی ناسازگار، reproducibility، آزمون عدم نشت و خروجی بی‌شاهد؛ CI سبز | smoke/API و fixtureهای نماینده PASS؛ golden test کامل ۲۹ ابزار و آزمون‌های نشت/داده ناقص باقی است |
 | V3 اعتبار علمی و کاربردی | مقایسه با روش پایه/محاسبه مستقل، مرور خبره، پایلوت داده واقعی مجاز با معیار پیشینی، امنیت و release gate | انجام نشده |
 
@@ -119,27 +119,23 @@
 
 این بخش مرجع نهایی انتخاب نسخه و API است. ترتیب اعتبار: metadata نسخه منتشرشده در PyPI و فایل pyproject همان release، سپس مستندات stable/API همان نسخه، و در آخر README یا branch اصلی. مستندات قدیمی/توسعه‌ای ممکن است با metadata release اختلاف داشته باشند.
 
-### ۷.۱ چرا Python 3.13.x انتخاب می‌شود؟
+### ۷.۱ چرا Python 3.12.x انتخاب می‌شود؟
 
 | مؤلفه | شرط رسمی/نسخه منتشرشده | نتیجه برای M-Tools |
 |---|---|---|
-| NumPy 2.5.5 | Python 3.12 تا 3.15 | سازگار |
-| SciPy 1.18.1 | Python >=3.12؛ wheelهای 3.12 موجود | سازگار |
-| pandas 2.3.3 | Python 3.13؛ NumPy >=1.23.2 | سازگار با NumPy 2.5.5 و شرط pandas<3.0 در StatsForecast |
-| scikit-learn 1.9.1 | Python >=3.11؛ NumPy >=1.24.1 و SciPy >=1.10 | سازگار |
-| Statsmodels 0.15.0 | wheel برای CPython 3.13؛ API stable docs | سازگار |
-| DoWhy 0.14 | Python >=3.9 و <3.14؛ برای Python<3.13، SciPy<=1.15.3؛ برای Python>=3.13، SciPy>=1.15 | 3.13 با SciPy 1.18.1 سازگار؛ 3.12 با آن ناسازگار |
-| EconML 0.17.1 | wheel CPython 3.13؛ scikit-learn >=1.6 و <1.10 | sklearn 1.9.1 در بازه |
-| PyMC-Marketing 1.5.0 | Python >=3.12؛ PyMC >=6.0 و ArviZ >=1.2؛ NumPy <2.6 در pyproject فعلی | NumPy 2.5.5 در بازه |
-| Google Meridian | فقط Python 3.11 یا 3.12؛ JAX backend پیش‌فرض | خارج از محیط اصلی 3.13؛ در صورت نیاز، worker/محیط مقایسه‌ای Python 3.12 جدا |
-| StatsForecast 2.1.1 | Python >=3.11؛ pandas<3.0؛ statsmodels >=0.14.5 و SciPy >=1.7.3 | Python 3.13 + pandas 2.3.3 سازگار از نظر شروط اعلام‌شده |
-| Numba (resolver-managed؛ در CI لینوکس 0.68.0) | وابستگی انتقالی DoWhy/EconML/PyTensor؛ NumPy 2.5.5 در بازه مجاز | نصب و import در محیط ترکیبی موفق؛ نسخه را دستی pin نکنیم مگر نیاز اثبات شود |
-| DuckDB 2.0.1 | Python >=3.11؛ wheel cp312-abi3 | سازگار |
-| Polars 2.1.0 | Python >=3.11 | سازگار |
-| CatBoost 1.2.10 | wheelهای CPython 3.13 برای Windows/Linux/macOS | سازگار |
-| Sentence Transformers | Python >=3.10، PyTorch >=1.11 و Transformers >=4.41؛ Qwen3 model نیازمند Transformers >=4.51 | 3.13 سازگار؛ بارگذاری وزن و تولید embedding در CI تأیید شد؛ کیفیت فارسی نیازمند benchmark انسانی است |
+| CPython | Meridian installation guide، Python 3.11 یا 3.12؛ PyMC-Marketing >=3.12 | 3.12 نقطه اشتراک مستندشده |
+| NumPy 2.3.5 | Meridian: >=2.0.2,<2.4؛ PyMC-Marketing 1.5.0 release: >=2.0,<2.6 | داخل هر دو بازه |
+| pandas 2.3.3 | Meridian و StatsForecast: pandas<3؛ PyMC-Marketing >=2.2 | سازگار از نظر شروط اعلام‌شده |
+| SciPy 1.15.3 | DoWhy 0.14 در Python<3.13: <=1.15.3؛ Meridian >=1.13.1,<2 | دقیقاً در تقاطع |
+| scikit-learn 1.9.1 | EconML 0.17.1: >=1.6,<1.10 | در بازه |
+| Statsmodels 0.14.5 | StatsForecast >=0.14.5؛ Meridian >=0.14.5 | حداقل رسمی مشترک |
+| PyMC-Marketing 1.5.0 | Python>=3.12؛ ArviZ>=1.2؛ NumPy<2.6 | در محیط اصلی CLV/مدل سفارشی |
+| Google Meridian | راهنمای نصب: Python 3.11/3.12؛ ArviZ<0.20؛ NumPy<2.4؛ pandas<3 | worker جدا به‌دلیل تعارض ArviZ با PyMC-Marketing |
+| StatsForecast 2.1.1 | Python>=3.11؛ pandas<3؛ statsmodels>=0.14.5 و SciPy>=1.7.3 | در baseline پیشنهادی قرار می‌گیرد |
+| EconML 0.17.1 | Python 3.12 و scikit-learn 1.9.1 در بازه metadata | سازگار از نظر شروط اعلام‌شده |
+| CatBoost 1.2.10 | wheel CPython 3.12 | سازگار از نظر انتشار wheel |
 
-**تصمیم:** baseline توسعه و CI برابر CPython 3.13.x است. NumPy 2.5.5، pandas 2.3.3، SciPy 1.18.1، scikit-learn 1.9.1 و Statsmodels 0.15.0 کاندیدهای pin اولیه‌اند. DoWhy 0.14 و EconML 0.17.1 نیز در Python 3.13 قرار می‌گیرند؛ DoWhy 0.14 برای Python<3.13 سقف SciPy<=1.15.3 دارد، اما برای Python>=3.13 به SciPy>=1.15 نیاز دارد. resolver و نصب stack انتخابی در CI ترکیبی موفق شده است؛ lockfile تولیدی، ماتریس Windows/macOS و آزمون‌های تمام الگوریتم‌های ۲۹ ابزار هنوز انجام نشده‌اند. دلیل انتخاب 3.13 نیز در CI آشکار شد: DoWhy 0.14 در Python 3.12 به SciPy<=1.15.3 محدود می‌شود و با SciPy 1.18.1 تعارض دارد؛ Python 3.13 قید متفاوت و سازگار دارد.
+**تصمیم:** baseline candidate برای DEV برابر CPython 3.12، NumPy 2.3.5، pandas 2.3.3، SciPy 1.15.3، scikit-learn 1.9.1 و Statsmodels 0.14.5 است. دلیل انتخاب SciPy 1.15.3 این است که DoWhy 0.14 در Python 3.12 سقف همین نسخه را دارد؛ دلیل انتخاب NumPy 2.3.5 نیز قرار گرفتن هم‌زمان در بازه Meridian و PyMC-Marketing است. این انتخاب static metadata resolution است و تا زمانی که CI/uv resolver در دسترس نباشد، نباید PASS اجرایی اعلام شود.
 
 ### ۷.۲ اصلاحات مهم در انتخاب الگوریتم و API
 
@@ -148,7 +144,7 @@
 3. **M05 — خوشه‌بندی:** `sklearn.cluster.HDBSCAN` از scikit-learn 1.3 به بعد داخل خود sklearn است؛ بسته مجزای `hdbscan` لازم نیست. در sklearn، `min_samples` خود نقطه را می‌شمارد و با بسته contrib از نظر مقدار یکسان نیست. KMeans با `random_state` و `n_init` صریح اجرا شود. هیچ الگوریتمی بدون داده کافی یا تفسیرپذیری تجاری به‌زور انتخاب نشود.
 4. **B02 — پیش‌بینی:** StatsForecast API واقعی `StatsForecast(models=[...], freq=...)`, `fit(df)`, `predict(h=...)` یا `forecast(df=..., h=...)` و `cross_validation(...)` دارد. Naive/SeasonalNaive baseline، AutoETS/AutoARIMA گزینه‌های کلاسیک و Croston/ADIDA/TSB برای تقاضای متناوب‌اند. نسخه 2.1.1 در metadata PyPI با وضعیت Beta برچسب خورده؛ CI نصب و API smoke را PASS کرده؛ فعال‌سازی production همچنان مشروط به backtest خارج از نمونه و مقایسه با baseline است. metadata نسخه 2.1.1 وابستگی اجباری مستقیم Numba را فهرست نمی‌کند؛ به همین دلیل Numba به‌زور به گروه forecast اضافه نمی‌شود. Chronos-2.3.2 مدل foundation challenger است؛ `Chronos2Pipeline.from_pretrained(...)` و `predict_df(...)` API رسمی دارد، اما وزن مدل، latency، CPU/GPU و دقت در داده کسب‌وکار باید جداگانه آزموده شود.
 5. **B04 — آزمایش و علیت:** برای RCT نرخ‌ها از روش‌های نسبت Statsmodels و برای میانگین پیوسته Welch استفاده شود. API `confint_proportions_2indep` در مستندات 0.15.0 experimental علامت‌گذاری شده؛ نسخه روش `newcomb` صریح و regression-test شود. DoWhy جریان model → identify → estimate → refute را فراهم می‌کند؛ refutation آزمون استحکام فرض‌هاست، نه اثبات علیت. EconML برای DML/CATE فقط با overlap، تعریف treatment/outcome و فرض‌های شناسایی مناسب.
-6. **B01/E03 — CLV و MMM:** PyMC-Marketing 1.5.0 یک مجموعه تخصصی بازاریابی است؛ برای CLV غیرقراردادی BG/NBD/Pareto-NBD و Gamma-Gamma فقط با فرض‌های سازگار؛ Gamma-Gamma نیازمند خرید تکراری و نبود رابطه مهم میان frequency و متوسط monetary value است. برای اشتراک قراردادی Shifted BG/BG-BB یا مدل بقا/ریزش متناسب با دوره تمدید. برای MMM، PyMC-Marketing انتخاب اول است چون MMM، CLV و budget optimization را در یک کتابخانه عرضه می‌کند. Google Meridian گزینه مقایسه‌ای است؛ به Python 3.11/3.12 و JAX backend متکی است و GPU را توصیه می‌کند. هر دو را از ابتدا هم‌زمان نصب نکنیم.
+6. **B01/E03 — CLV و MMM:** PyMC-Marketing 1.5.0 یک مجموعه تخصصی بازاریابی است؛ برای CLV غیرقراردادی BG/NBD/Pareto-NBD و Gamma-Gamma فقط با فرض‌های سازگار؛ Gamma-Gamma نیازمند خرید تکراری و نبود رابطه مهم میان frequency و متوسط monetary value است. برای اشتراک قراردادی Shifted BG/BG-BB یا مدل بقا/ریزش متناسب با دوره تمدید. برای CLV و MMM سفارشی PyMC-Marketing 1.5.0 مناسب است؛ برای MMM بسته‌بندی‌شده و budget optimization، Google Meridian نامزد اول است. Meridian و PyMC-Marketing به‌دلیل تعارض ArviZ در یک environment مشترک نصب نمی‌شوند؛ در صورت نیاز به هر دو، worker جدا لازم است.
 7. **B06/E01/E06 — بهینه‌سازی:** `scipy.optimize.linprog` برای LP و `scipy.optimize.milp` برای MILP خطی؛ هر دو بر HiGHS. OR-Tools CP-SAT برای تخصیص/زمان‌بندی با متغیرهای صحیح/Boolean مناسب است و همه ضرایب/قیود باید integer شوند. اگر مسئله continuous است CP-SAT انتخاب اول نیست.
 8. **B03/E04 — پیش‌بینی مشتری:** LogisticRegression baseline، CatBoost challenger برای داده جدولی و دسته‌ای. split زمانی/group-aware و calibration الزامی. SHAP feature attribution است، نه causal explanation؛ Optuna فقط با validation داخلی و بدون دست‌زدن به test set.
 9. **B05 — داده حجیم:** Pandas مبنا می‌ماند. Polars و DuckDB فقط پس از benchmark روی داده نماینده و بررسی null، decimal، timezone و سازگاری خروجی افزوده می‌شوند؛ پایگاه اصلی داده همچنان PostgreSQL است.
@@ -191,11 +187,11 @@
 
 - Python 3.15 release: https://docs.python.org/3.15/whatsnew/3.15.html
 - Django 6.1 Python compatibility: https://docs.djangoproject.com/en/6.1/releases/6.1/
-- NumPy 2.5.5: https://numpy.org/news/ و https://pypi.org/project/numpy/2.5.5/
+- NumPy 2.3.5: https://numpy.org/news/ و https://pypi.org/project/numpy/2.5.5/
 - pandas 2.3.3: https://pandas.pydata.org/docs/whatsnew/ و https://pandas.pydata.org/docs/getting_started/install
-- SciPy 1.18.1: https://scipy.org/news/ و https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html
+- SciPy 1.15.3: https://scipy.org/news/ و https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html
 - scikit-learn 1.9.1: https://scikit-learn.org/stable/ و https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html
-- Statsmodels 0.15.0: https://www.statsmodels.org/stable/ و https://www.statsmodels.org/stable/generated/statsmodels.stats.proportion.confint_proportions_2indep.html
+- Statsmodels 0.14.5: https://www.statsmodels.org/stable/ و https://www.statsmodels.org/stable/generated/statsmodels.stats.proportion.confint_proportions_2indep.html
 - StatsForecast 2.1.1: https://pypi.org/project/statsforecast/2.1.1/ و https://github.com/Nixtla/statsforecast
 - DoWhy: https://pypi.org/project/dowhy/0.14/ و https://www.pywhy.org/dowhy/main/
 - EconML 0.17.1: https://pypi.org/project/econml/0.17.1/ و https://github.com/py-why/EconML
@@ -257,3 +253,8 @@
 - scikit-learn — HDBSCAN: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html
 - StatsForecast 2.1.1 — release metadata and development status: https://pypi.org/project/statsforecast/2.1.1/
 - Forecasting: Principles and Practice — rolling-origin evaluation: https://otexts.com/fpp3/tscv.html
+
+
+## ۸. پیوند به مرور پژوهش ۲۹ ابزار
+
+روش‌شناسی، پژوهش‌های داوری‌شده، بنچمارک‌ها، انتخاب کتابخانه و محدودیت هر ۲۹ ابزار در [marketing-29-tools-evidence-review.md](marketing-29-tools-evidence-review.md) ثبت شده است. این سند برای انتخاب الگوریتم و شواهد، مرجع مکمل و لازم‌الاجراست؛ این سند حاضر برای API، وابستگی، baseline و قرارداد فنی موتور علمی مرجع است.
