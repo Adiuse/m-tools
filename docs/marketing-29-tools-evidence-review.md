@@ -162,9 +162,9 @@
 ### B04 — آزمایش و سنجش اثر
 **روش:** RCT/A-B با randomization unit درست، metric و estimand از پیش تعریف‌شده، power/MDE، sample ratio mismatch، stopping rule و کنترل multiple testing. CUPED فقط با covariateهای pre-treatment؛ post-treatment covariate ممکن است bias بسازد. برای داده مشاهده‌ای، DAG و روش شناسایی قبل از estimator.
 
-**فناوری:** SciPy/Statsmodels برای آزمون و power؛ DoWhy برای graph → identify → estimate → refute؛ EconML برای DML/CATE و ناهمگنی اثر؛ CUPED/variance reduction مرحله طراحی آزمایش است، نه جایگزین تصادفی‌سازی.
+**فناوری:** SciPy/Statsmodels برای آزمون و power؛ DoWhy برای graph → identify → estimate → refute؛ EconML برای DML/CATE و ناهمگنی اثر؛ CUPED/variance reduction مرحله طراحی آزمایش است، نه جایگزین تصادفی‌سازی؛ فقط covariateهای pre-treatment مجازند.
 
-**دلیل و شواهد:** در تبلیغات پلتفرمی، divergent delivery ممکن است حتی A/B ظاهراً تصادفی را مخدوش کند. [DoWhy causal workflow](https://www.pywhy.org/dowhy/main/user_guide/intro.html)؛ [EconML](https://www.microsoft.com/en-us/research/project/econml/)؛ [Learning from Many Experiments (2026)](https://thearf-org-unified-admin.s3.amazonaws.com/MSI/2026/MSI_Report_26-107.pdf)؛ [Where A/B Testing Goes Wrong (Journal of Marketing, 2025)](https://doi.org/10.1177/00222429241275886)؛ [Statsmodels power](https://www.statsmodels.org/stable/stats.html).
+**دلیل و شواهد:** مقاله PMLR 2026 درباره ترکیب داده pre-experiment و in-experiment، variance reduction را بررسی می‌کند؛ این روش‌ها باید با طراحی تصادفی و covariateهای مجاز pre-treatment همراه باشند. در تبلیغات پلتفرمی، divergent delivery ممکن است حتی A/B ظاهراً تصادفی را مخدوش کند. [DoWhy causal workflow](https://www.pywhy.org/dowhy/main/user_guide/intro.html)؛ [EconML](https://www.microsoft.com/en-us/research/project/econml/)؛ [Learning from Many Experiments (2026)](https://thearf-org-unified-admin.s3.amazonaws.com/MSI/2026/MSI_Report_26-107.pdf)؛ [Where A/B Testing Goes Wrong (Journal of Marketing, 2025)](https://doi.org/10.1177/00222429241275886)؛ [Statsmodels power](https://www.statsmodels.org/stable/stats.html).
 
 ### B05 — KPI و گزارش عملکرد
 **روش:** metric registry با تعریف، واحد، منبع، owner، grain، cadence، numerator/denominator و قواعد null؛ کنترل کیفیت و reconciliation قبل از داشبورد؛ anomaly flag فقط پس از baseline و فصل‌مندی.
