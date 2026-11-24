@@ -6,20 +6,13 @@ on:
       - "docs/marketing-scientific-engine-specification.md"
       - "tests/scientific_stack_smoke.py"
       - ".github/workflows/scientific-stack-compatibility.yml"
-  push:
-    branches:
-      - "docs/marketing-manager-competency-framework"
-    paths:
-      - "docs/marketing-scientific-engine-specification.md"
-      - "tests/scientific_stack_smoke.py"
-      - ".github/workflows/scientific-stack-compatibility.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: scientific-stack-${{ github.ref }}
+  group: scientific-stack-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
