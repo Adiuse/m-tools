@@ -16,7 +16,7 @@ def core() -> None:
     from statsmodels.stats.proportion import confint_proportions_2indep
 
     assert np.__version__ == "2.5.5"
-    assert pd.__version__ == "3.1.1"
+    assert pd.__version__ == "2.3.3"
 
     result = milp(
         c=np.array([-3.0, -2.0]),
