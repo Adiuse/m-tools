@@ -277,7 +277,7 @@
 - [DoWhy v0.14 release notes](https://github.com/py-why/dowhy/releases/tag/v0.14)
 - [EconML 0.17.1](https://pypi.org/project/econml/0.17.1/)
 - [PyMC-Marketing 1.5.0 metadata](https://pypi.org/project/pymc-marketing/1.5.0/) و [pyproject at the exact 1.5.0 build commit](https://github.com/pymc-labs/pymc-marketing/blob/ede5d75a0d1ba880c61467aaaa7760182b00e1de/pyproject.toml)
-- [Google Meridian 2.2.1 (released 19 Nov 2026)](https://pypi.org/project/google-meridian/2.2.1/)؛ [Meridian installation requirements](https://developers.google.com/meridian/docs/user-guide/installing)؛ [dependency metadata](https://github.com/google/meridian/blob/main/pyproject.toml)
+- [Google Meridian 2.2.1 (released 19 Nov 2026)](https://pypi.org/project/google-meridian/2.2.1/)؛ [Meridian installation requirements](https://developers.google.com/meridian/docs/user-guide/installing)؛ [dependency metadata](https://github.com/google/meridian/blob/v2.2.1/pyproject.toml)
 - [StatsForecast 2.1.1 metadata](https://pypi.org/project/statsforecast/2.1.1/)
 - [Statsmodels 0.14.5](https://pypi.org/project/statsmodels/0.14.5/)؛ [SciPy 1.15.3](https://pypi.org/project/scipy/1.15.3/)؛ [NumPy 2.3.5](https://pypi.org/project/numpy/2.3.5/)؛ [pandas 2.3.3](https://pypi.org/project/pandas/2.3.3/)
 - [PyMCDM 1.4.0](https://pypi.org/project/pymcdm/)؛ [clustMixType 0.5-2](https://cran.r-project.org/web/packages/clustMixType/index.html)؛ [KAMILA 0.2.0](https://cran.r-project.org/web/packages/kamila/index.html)
