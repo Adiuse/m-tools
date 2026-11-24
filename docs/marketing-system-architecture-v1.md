@@ -133,7 +133,7 @@ flowchart TD
     OUT --> CORE
 ```
 
-Modular monolith: چهار ماژول دامنه، core مشترک، repository داده، registry روش‌ها و adapter اختیاری AI. یک worker در همان codebase فقط برای کار طولانی؛ در آغاز صف مبتنی بر DB کافی است. هیچ agent مستقل، orchestrator پیچیده، vector DB یا microservice لازم نیست. انتخاب زبان برنامه‌نویسی و ارائه‌دهنده AI فعلاً باز است.
+Modular monolith: چهار ماژول دامنه، core مشترک، repository داده، registry روش‌ها و adapter اختیاری AI. یک worker در همان codebase فقط برای کار طولانی؛ در آغاز صف مبتنی بر DB کافی است. هیچ agent مستقل، orchestrator پیچیده، vector DB یا microservice لازم نیست. هسته محاسبات علمی با Python 3.12.x طراحی می‌شود؛ backend وب Django و رابط React/TypeScript گزینه‌های اصلی‌اند. نسخه‌های دقیق فقط پس از عبور از ماتریس CI و lockfile تثبیت می‌شوند. ارائه‌دهنده AI مستقل از هسته علمی و قابل تعویض می‌ماند.
 
 رجیستری هر ابزار شامل tool_id، input_schema، output_schema، method_id/version، validate، run، تست مرجع. تابع run روی snapshot فقط می‌خواند و خروجی تحلیلی می‌دهد؛ اثر بیرونی، پرداخت، انتشار، ارسال یا تغییر CRM در آن ممنوع. محاسبات قطعی از مدل زبانی مستقل؛ AI فقط روی داده مجاز برای خلاصه‌سازی/پیشنهاد، پاسخ JSON اعتبارسنجی‌شده و ثبت نسخه مدل/پرامپت. شکست AI به نتیجه ناقص یا خطای مشخص منجر شود، نه حدس عدد.
 
@@ -240,3 +240,8 @@ MVP همان ۸ ابزار سند مشخصات و سنجش پایه مشترک �
 - **Release gate:** پیش از انتشار عمومی، ارائه SaaS به مشتری، توزیع یا بهره‌برداری تجاری (و هر مرحله زودتری که مجوز الزام کند)، بررسی همه وابستگی‌ها، تهیه مجوزهای لازم، رعایت شروط توزیع/اعلان/انتساب و ثبت تأیید مالک الزامی است. اگر مجوز قابل اخذ یا سازگار نیست، آن بخش باید قبل از استفاده مربوطه جایگزین یا غیرفعال شود. مجوزهای ضروری توسعه از این تعویق مستثنا هستند.
 
 مراجع برای تفاوت مشاهده کد عمومی و مجوز استفاده، و نمونه مجوز توسعه: [GitHub — Licensing a repository](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository)؛ [SurveyJS Licensing FAQ](https://surveyjs.io/faq/licensing). شرایط هر مؤلفه و نسخه باید مستقلاً بررسی شود. این سیاست، انتخاب معماری را تثبیت می‌کند و به معنی اجازه قانونی استفاده از همه مؤلفه‌ها نیست.
+
+
+## ۹. مرجع فناوری و سازگاری علمی
+
+انتخاب دقیق کتابخانه‌ها، نسخه‌ها، APIهای واقعی، محدودیت‌های داده و برنامه آزمون ۲۹ ابزار در [Scientific Engine & Technology Specification](marketing-scientific-engine-specification.md) نگهداری می‌شود. baseline علمی CPython 3.12.x است؛ این انتخاب برای اشتراک سازگاری DoWhy، EconML، PyMC-Marketing و Google Meridian انجام شده، نه به دلیل جدیدترین بودن. تا زمان موفقیت workflow سازگاری و تثبیت lockfile، نسخه‌ها کاندیدند و نباید به‌عنوان runtime تأییدشده معرفی شوند.
