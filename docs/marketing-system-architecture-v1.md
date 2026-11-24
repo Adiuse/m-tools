@@ -133,7 +133,7 @@ flowchart TD
     OUT --> CORE
 ```
 
-Modular monolith: چهار ماژول دامنه، core مشترک، repository داده، registry روش‌ها و adapter اختیاری AI. یک worker در همان codebase فقط برای کار طولانی؛ در آغاز صف مبتنی بر DB کافی است. هیچ agent مستقل، orchestrator پیچیده، vector DB یا microservice لازم نیست. هسته محاسبات علمی با Python 3.13.x طراحی می‌شود؛ backend وب Django و رابط React/TypeScript گزینه‌های اصلی‌اند. نسخه‌های دقیق فقط پس از عبور از ماتریس CI و lockfile تثبیت می‌شوند. ارائه‌دهنده AI مستقل از هسته علمی و قابل تعویض می‌ماند.
+Modular monolith: چهار ماژول دامنه، core مشترک، repository داده، registry روش‌ها و adapter اختیاری AI. یک worker در همان codebase فقط برای کار طولانی؛ در آغاز صف مبتنی بر DB کافی است. هیچ agent مستقل، orchestrator پیچیده، vector DB یا microservice لازم نیست. هسته محاسبات علمی با CPython 3.12.x طراحی می‌شود؛ candidateهای اصلی NumPy 2.3.5، pandas 2.3.3، SciPy 1.15.3، scikit-learn 1.9.1 و Statsmodels 0.14.5 هستند. backend وب Django و رابط React/TypeScript گزینه‌های اصلی‌اند. Meridian در صورت فعال‌سازی به‌دلیل تعارض ArviZ با PyMC-Marketing در virtualenv/worker جدا اجرا می‌شود؛ این microservice دامنه‌ای جدید ایجاد نمی‌کند. نسخه‌های دقیق پس از resolver و lockfile تثبیت می‌شوند. ارائه‌دهنده AI مستقل از هسته علمی و قابل تعویض می‌ماند.
 
 رجیستری هر ابزار شامل tool_id، input_schema، output_schema، method_id/version، validate، run، تست مرجع. تابع run روی snapshot فقط می‌خواند و خروجی تحلیلی می‌دهد؛ اثر بیرونی، پرداخت، انتشار، ارسال یا تغییر CRM در آن ممنوع. محاسبات قطعی از مدل زبانی مستقل؛ AI فقط روی داده مجاز برای خلاصه‌سازی/پیشنهاد، پاسخ JSON اعتبارسنجی‌شده و ثبت نسخه مدل/پرامپت. شکست AI به نتیجه ناقص یا خطای مشخص منجر شود، نه حدس عدد.
 
@@ -244,4 +244,4 @@ MVP همان ۸ ابزار سند مشخصات و سنجش پایه مشترک �
 
 ## ۹. مرجع فناوری و سازگاری علمی
 
-انتخاب دقیق کتابخانه‌ها، نسخه‌ها، APIهای واقعی، محدودیت‌های داده و برنامه آزمون ۲۹ ابزار در [Scientific Engine & Technology Specification](marketing-scientific-engine-specification.md) نگهداری می‌شود. baseline علمی CPython 3.13.x است؛ این انتخاب برای اشتراک سازگاری DoWhy، EconML، PyMC-Marketing و Google Meridian (محیط جداگانه Python 3.12) انجام شده، نه به دلیل جدیدترین بودن. تا زمان موفقیت workflow سازگاری و تثبیت lockfile، نسخه‌ها کاندیدند و نباید به‌عنوان runtime تأییدشده معرفی شوند.
+انتخاب دقیق کتابخانه‌ها، نسخه‌ها، APIهای واقعی، محدودیت‌های داده و برنامه آزمون ۲۹ ابزار در [Scientific Engine & Technology Specification](marketing-scientific-engine-specification.md) نگهداری می‌شود. baseline پیشنهادی علمی CPython 3.12.x است؛ NumPy 2.3.5، pandas 2.3.3، SciPy 1.15.3 و Statsmodels 0.14.5 برای اشتراک محدودیت‌های DoWhy، StatsForecast و Meridian انتخاب شده‌اند. PyMC-Marketing و Meridian به‌دلیل تعارض ArviZ در environmentهای جدا اجرا می‌شوند. baseline جدید هنوز به‌دلیل محدودیت اعتبار CI نصب و lock نشده؛ نسخه‌ها candidate هستند و نباید runtime تأییدشده معرفی شوند. شواهد و انتخاب روش ۲۹ ابزار در [مرور پژوهش](marketing-29-tools-evidence-review.md) است.
