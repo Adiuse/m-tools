@@ -1,6 +1,6 @@
-# Scientific Engine & Technology Specification — M-Tools v1.2
+# Scientific Engine & Technology Specification — M-Tools v1.3
 
-تاریخ بازبینی منابع رسمی: ۲۴ نوامبر ۲۰۲۶؛ نسخه 1.1 پس از تطبیق API و فراداده انتشار. مکمل [معماری فنی](marketing-system-architecture-v1.md)، [مشخصات ابزارها](marketing-tool-specifications.md) و [UX](marketing-ux-design-v1.md). سند طراحی و برنامه آزمون است؛ هیچ‌کدام از ۲۹ ابزار پیاده‌سازی یا آزمون انتهابه‌انتها نشده‌اند. نمونه‌های زیر fixture مصنوعی و خروجی مورد انتظار هستند، نه گزارش تست اجراشده. سیاست Capability-First در AGENTS.md برقرار است.
+تاریخ بازبینی منابع رسمی و CI: ۲۴ نوامبر ۲۰۲۶؛ نسخه 1.3. مکمل [معماری فنی](marketing-system-architecture-v1.md)، [مشخصات ابزارها](marketing-tool-specifications.md) و [UX](marketing-ux-design-v1.md). سند طراحی و برنامه آزمون است؛ هیچ‌کدام از ۲۹ ابزار پیاده‌سازی یا آزمون انتهابه‌انتها نشده‌اند. نمونه‌های زیر fixture مصنوعی و خروجی مورد انتظار هستند، نه گزارش تست اجراشده. سیاست Capability-First در AGENTS.md برقرار است.
 
 ## ۱. انتخاب روش و معماری علمی
 
@@ -153,7 +153,7 @@
 8. **B03/E04 — پیش‌بینی مشتری:** LogisticRegression baseline، CatBoost challenger برای داده جدولی و دسته‌ای. split زمانی/group-aware و calibration الزامی. SHAP feature attribution است، نه causal explanation؛ Optuna فقط با validation داخلی و بدون دست‌زدن به test set.
 9. **B05 — داده حجیم:** Pandas مبنا می‌ماند. Polars و DuckDB فقط پس از benchmark روی داده نماینده و بررسی null، decimal، timezone و سازگاری خروجی افزوده می‌شوند؛ پایگاه اصلی داده همچنان PostgreSQL است.
 
-### ۷.۳ APIهای مشخصی که باید در smoke test اجرا شوند
+### ۷.۳ APIهای پوشش‌داده‌شده در smoke test
 
 | بخش | API واقعی | انتظار تست |
 |---|---|---|
@@ -185,7 +185,7 @@
 | benchmark فارسی و داده واقعی کسب‌وکار | انجام نشده |
 | ارزیابی علمی مدل‌های MMM/CLV و causal روی داده واقعی | انجام نشده |
 
-CI موفق شده است: workflow شماره ۲۷ در commit `72682d5` روی Linux و CPython 3.13.18، تمام ۸ گروه و محیط ترکیبی را PASS کرده است. تست Qwen3 نیز وزن مدل را دانلود و embedding فارسی تولید کرده است. این نتیجه، سازگاری نصب/API و fixtureهای نماینده را ثابت می‌کند؛ نه اعتبار علمی روی داده واقعی، کیفیت معنایی فارسی، اجرای تمام ۲۹ الگوریتم در محصول یا fit/sampling مدل‌های Bayesian. برای هر کدام وضعیت جداگانه نگه‌دار.
+آخرین CI موفق در commit `ceb1d861ecbe9e94709e01b4329171cbdbdbb71f` روی Linux و CPython 3.13.18، ۹ job از ۹ job را PASS کرده است: ۸ گروه مجزا و یک محیط ترکیبی. در محیط ترکیبی، نصب همه وابستگی‌های منتخب، `pip check` و اجرای smoke suiteهای نماینده موفق بوده‌اند. job NLP نیز وزن Qwen3-Embedding-0.6B را دانلود و برای سه جمله فارسی embedding با ابعاد `(3, 1024)` تولید کرده است. این نتیجه سازگاری نصب/API و fixtureهای نماینده را ثابت می‌کند؛ نه اعتبار علمی روی داده واقعی، کیفیت معنایی فارسی، اجرای end-to-end تمام ۲۹ ابزار یا fit/sampling مدل‌های Bayesian.
 
 ### ۷.۵ منابع رسمی بررسی‌شده
 
@@ -213,19 +213,19 @@ CI موفق شده است: workflow شماره ۲۷ در commit `72682d5` روی
 - DuckDB: https://duckdb.org/docs/current/clients/python/overview
 - SurveyJS: https://surveyjs.io/form-library/documentation/overview
 
-**جمع‌بندی:** انتخاب اصلی M-Tools اکنون بر یک پشته سازگار Python 3.13 و کتابخانه‌های تخصصی با نقش مشخص استوار است. این تطبیق، خطاهای شناخته‌شده طراحی را رفع می‌کند؛ تأیید عملی نهایی منوط به اجرای workflow سازگاری و آزمون مدل‌هاست.
+**جمع‌بندی:** پشته منتخب روی Linux/Python 3.13 هم به‌صورت گروهی و هم در یک محیط مشترک نصب شده و smoke testهای API را PASS کرده است. Qwen3 نیز واقعاً روی CPU بارگذاری شده و embedding فارسی تولید کرده است. هنوز lockfile قطعی، ماتریس Windows/macOS، benchmark کیفیت معنایی فارسی، fit و posterior diagnostics مدل‌های Bayesian، backtest پیش‌بینی، و اعتبارسنجی علی/تجاری روی داده واقعی لازم‌اند. بنابراین پشته از نظر سازگاری اولیه تأیید شده، اما موتور ۲۹ ابزار از نظر عملکرد end-to-end و اعتبار علمی هنوز کامل اعتبارسنجی نشده است.
 
 
 ### اصلاح تعارض Pandas و StatsForecast
 
-آزمون resolver در Python 3.13 نشان داد StatsForecast 2.1.1 شرط `pandas<3.0.0` دارد. بنابراین Pandas 3.1.1 با این نسخه قابل نصب در یک محیط واحد نیست. انتخاب baseline به Pandas 2.3.3 تغییر کرد؛ این نسخه Python 3.13 و NumPy 2.5.5 را پشتیبانی می‌کند و با حداقل pandas اعلام‌شده PyMC-Marketing و DoWhy نیز سازگار است. Pandas 3.x فقط زمانی به baseline برمی‌گردد که نسخه StatsForecast انتخابی شرط آن را بردارد و CI مشترک سبز شود.
+آزمون resolver در Python 3.13 نشان داد StatsForecast 2.1.1 شرط `pandas<3.0.0` دارد. بنابراین Pandas 3.1.1 با این نسخه قابل نصب در یک محیط واحد نیست. انتخاب baseline به Pandas 2.3.3 تغییر کرد؛ این نسخه Python 3.13 و NumPy 2.5.5 را پشتیبانی می‌کند و با حداقل pandas اعلام‌شده PyMC-Marketing و DoWhy نیز سازگار است. این انتخاب در CI ترکیبی نیز تأیید شده است. Pandas 3.x فقط زمانی به baseline برمی‌گردد که نسخه StatsForecast انتخابی شرط آن را بردارد و CI مشترک سبز شود.
 
 
 ### ۷.۶ نتیجه CI واقعی
 
-- Workflow: [Scientific stack compatibility — run 45444696774](https://github.com/Adiuse/m-tools/actions/runs/45444696774)
-- Commit آزموده‌شده: `72682d5fd7b23e84d2d0aff7a0b80e958b649acd`؛ CPython 3.13.18 روی Ubuntu runner.
-- نتیجه: ۹ job موفق (۸ گروه جداگانه + یک محیط ترکیبی). در job ترکیبی `pip check` و اجرای همه suiteهای نماینده موفق شد.
-- Qwen3-Embedding-0.6B روی CPU بارگذاری شد و سه متن فارسی embedding با ابعاد 1024 تولید کردند. هشدار سرعت CPU ثبت شد؛ benchmark latency/GPU هنوز لازم است.
+- Workflow: [Scientific stack compatibility — run 45445594222](https://github.com/Adiuse/m-tools/actions/runs/45445594222)
+- Commit آزموده‌شده: `ceb1d861ecbe9e94709e01b4329171cbdbdbb71f`؛ CPython 3.13.18 روی Ubuntu runner.
+- نتیجه: ۹ job از ۹ job موفق (۸ گروه جداگانه + یک محیط ترکیبی). در job ترکیبی نصب تمام وابستگی‌های منتخب، `pip check` و اجرای suiteهای نماینده موفق شدند.
+- Qwen3-Embedding-0.6B روی CPU بارگذاری شد و سه متن فارسی embedding با ابعاد `(3, 1024)` تولید کردند؛ benchmark کیفیت معنایی و latency/GPU هنوز لازم است.
 - PyMC-Marketing فقط import و دسترسی به کلاس‌های MMM/CLV را گذراند؛ sampling و posterior diagnostics انجام نشده‌اند. BERTopic import شد، اما fit روی corpus واقعی انجام نشده است.
 - این run شامل دانلود/آزمون Chronos-2 یا Google Meridian نیست؛ این دو در نقش گزینه‌های اختیاری/مقایسه‌ای باقی می‌مانند.
