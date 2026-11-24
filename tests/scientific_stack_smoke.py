@@ -155,7 +155,7 @@ def analytics() -> None:
     import duckdb
     import polars as pl
 
-    assert duckdb.sql("SELECT 6 * 7").fetchone()[0] == 42
+    assert duckdb.sql("SELECT 6 * 7").fetchall()[0][0] == 42
     total = pl.DataFrame({"amount": [10, 20, 30]}).select(pl.col("amount").sum()).item()
     assert total == 60
 
