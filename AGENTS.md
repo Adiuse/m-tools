@@ -12,3 +12,7 @@ Read the architecture and tool specification documents before making design or i
 - Maintain the four-engine, 29-tool modular monolith architecture; no unnecessary complexity.
 
 This file records project policy, not a legal grant of permissions.
+
+## Scientific engine implementation reference
+
+Use [Scientific Engine & Technology Specification](docs/marketing-scientific-engine-specification.md) for all 29 tools: baseline, conditional advanced methods, dependency selection, evidence gates, fixtures and validation. Do not report PASS before actual tests; freeze compatible dependency versions in DEV.
