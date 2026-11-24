@@ -164,7 +164,7 @@
 
 **فناوری:** SciPy/Statsmodels برای آزمون و power؛ DoWhy برای graph → identify → estimate → refute؛ EconML برای DML/CATE و ناهمگنی اثر؛ CUPED/variance reduction مرحله طراحی آزمایش است، نه جایگزین تصادفی‌سازی؛ فقط covariateهای pre-treatment مجازند.
 
-**دلیل و شواهد:** مقاله PMLR 2026 درباره ترکیب داده pre-experiment و in-experiment، variance reduction را بررسی می‌کند؛ این روش‌ها باید با طراحی تصادفی و covariateهای مجاز pre-treatment همراه باشند. در تبلیغات پلتفرمی، divergent delivery ممکن است حتی A/B ظاهراً تصادفی را مخدوش کند. [DoWhy causal workflow](https://www.pywhy.org/dowhy/main/user_guide/intro.html)؛ [EconML](https://www.microsoft.com/en-us/research/project/econml/)؛ [Learning from Many Experiments (2026)](https://thearf-org-unified-admin.s3.amazonaws.com/MSI/2026/MSI_Report_26-107.pdf)؛ [Where A/B Testing Goes Wrong (Journal of Marketing, 2025)](https://doi.org/10.1177/00222429241275886)؛ [Statsmodels power](https://www.statsmodels.org/stable/stats.html).
+**دلیل و شواهد:** مقاله PMLR 2026 درباره ترکیب داده pre-experiment و in-experiment، variance reduction را بررسی می‌کند؛ این روش‌ها باید با طراحی تصادفی و covariateهای مجاز pre-treatment همراه باشند. در تبلیغات پلتفرمی، divergent delivery ممکن است حتی A/B ظاهراً تصادفی را مخدوش کند. [DoWhy causal workflow](https://www.pywhy.org/dowhy/main/user_guide/intro.html)؛ [EconML](https://www.microsoft.com/en-us/research/project/econml/)؛ [CUPED original paper (KDD 2013)](https://doi.org/10.1145/2487575.2488217)؛ [Variance reduction with pre-experiment and in-experiment data (PMLR 2026)](https://proceedings.mlr.press/v323/lin26a.html)؛ [Learning from Many Experiments (2026)](https://thearf-org-unified-admin.s3.amazonaws.com/MSI/2026/MSI_Report_26-107.pdf)؛ [Where A/B Testing Goes Wrong (Journal of Marketing, 2025)](https://doi.org/10.1177/00222429241275886)؛ [Statsmodels power](https://www.statsmodels.org/stable/stats.html).
 
 ### B05 — KPI و گزارش عملکرد
 **روش:** metric registry با تعریف، واحد، منبع، owner، grain، cadence، numerator/denominator و قواعد null؛ کنترل کیفیت و reconciliation قبل از داشبورد؛ anomaly flag فقط پس از baseline و فصل‌مندی.
@@ -202,9 +202,9 @@
 **روش:** برای داده ناکافی، طرح آزمایش و بودجه محدود با stop rule؛ نه ROI تخمینی. برای MMM پیشرفته، مدل باید carryover/adstock، saturation، trend/seasonality، کنترل‌ها، causal DAG، prior و experiment calibration، posterior diagnostics و holdout را پوشش دهد.
 
 **انتخاب فناوری بر اساس مرور ۲۰۲۶:**
-- **Google Meridian:** انتخاب اول برای MMM بسته‌بندی‌شده و budget optimization وقتی داده زمانی/geo و توان محاسباتی کافی داریم. راهنمای رسمی Python 3.11/3.12 و GPU را توصیه می‌کند؛ JAX backend پیش‌فرض است.
+- **Google Meridian 2.2.1 (۱۹ نوامبر ۲۰۲۶):** انتخاب اول برای MMM بسته‌بندی‌شده و budget optimization وقتی داده زمانی/geo و توان محاسباتی کافی داریم. راهنمای رسمی Python 3.11/3.12 و GPU را توصیه می‌کند؛ JAX backend از نسخه 2.0 پیش‌فرض است و TensorFlow backend قدیمی deprecated شده است.
 - **PyMC-Marketing 1.5.0:** گزینه انعطاف‌پذیر برای مدل سفارشی Bayesian، time-varying media و یکپارچگی با CLV؛ برای زنجیره کامل MMM و بودجه‌ریزی به کدنویسی/تخصص بیشتر نیاز دارد.
-- **Meta Robyn:** challenger خودکارتر و سریع‌تر برای مدل‌های time-series، اما مقاله ۲۰۲۶ اجزای multi-objective calibration آن را کمتر بررسی‌شده می‌داند و محدودیت‌هایی در geo-panel می‌بیند.
+- **Meta Robyn 3.12.1:** challenger پایدار در R، با ridge regression، evolutionary optimization و budget allocation. Python port آن رسماً Beta و LLM-translated اعلام شده؛ بنابراین نسخه Python را production انتخاب نمی‌کنیم.
 
 **محدودیت زیرساخت:** Meridian و PyMC-Marketing نباید کورکورانه در یک environment نصب شوند؛ metadata نسخه Meridian 2.2.1 بازه ArviZ کمتر از 0.20 می‌خواهد، درحالی‌که PyMC-Marketing 1.5.0 به ArviZ 1.2 یا بالاتر متکی است. اگر هر دو انتخاب شوند، worker/environment جدا لازم است. این جداسازی به‌دلیل dependency واقعی است، نه سلیقه معماری.
 
