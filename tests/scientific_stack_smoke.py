@@ -211,6 +211,12 @@ def nlp_model() -> None:
     print(f"Loaded Qwen3-Embedding-0.6B; Persian embedding shape={embeddings.shape}")
 
 
+def combined() -> None:
+    # Run all selected library suites in one shared environment to catch cross-stack conflicts.
+    for suite in (core, forecast, causal, bayesian, optimization, analytics, ml, nlp):
+        suite()
+
+
 if __name__ == "__main__":
     suites = {
         "core": core,
@@ -222,6 +228,7 @@ if __name__ == "__main__":
         "ml": ml,
         "nlp": nlp,
         "nlp_model": nlp_model,
+        "combined": combined,
     }
     selected = sys.argv[1] if len(sys.argv) > 1 else "core"
     if selected not in suites:
