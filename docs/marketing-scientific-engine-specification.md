@@ -10,12 +10,12 @@
 
 ## ۲. انتخاب فناوری و سیاست نسخه
 
-انتخاب baseline علمی برای شروع توسعه: CPython 3.12.x؛ Django 6.1 در صورت استفاده از نسخه جدید و سازگار، PostgreSQL 18، React/TypeScript و ECharts (UI در سند دیگر)، uv و Pydantic 2. Python 3.12 انتخاب اشتراک سازگار برای DoWhy، Meridian، PyMC-Marketing، EconML و پشته علمی است؛ نه ادعای جدیدترین بودن. نسخه‌های دقیق بعد از CI و lockfile تثبیت می‌شوند. Python 3.14/3.15 در این پروژه فعلاً baseline نیستند؛ فقط پس از عبور همه گروه‌های وابستگی از ماتریس سازگاری بررسی شوند. نسخه‌های دقیق در lockfile واقعی تعیین می‌شوند؛ اعداد نسخه پاسخ‌های قبلی یا latest متغیر جایگزین lockfile نیستند.
+انتخاب baseline علمی برای شروع توسعه: CPython 3.13.x؛ Django 6.1 در صورت استفاده از نسخه جدید و سازگار، PostgreSQL 18، React/TypeScript و ECharts (UI در سند دیگر)، uv و Pydantic 2. Python 3.13 انتخاب اشتراک سازگار برای DoWhy، PyMC-Marketing، EconML و پشته علمی اصلی است؛ Meridian به دلیل محدودیت Python 3.11/3.12 فقط در محیط مقایسه‌ای جدا اجرا می‌شود. نسخه‌های دقیق بعد از CI و lockfile تثبیت می‌شوند. Python 3.14/3.15 در این پروژه فعلاً baseline نیستند؛ فقط پس از عبور همه گروه‌های وابستگی از ماتریس سازگاری بررسی شوند. نسخه‌های دقیق در lockfile واقعی تعیین می‌شوند؛ اعداد نسخه پاسخ‌های قبلی یا latest متغیر جایگزین lockfile نیستند.
 
 | گروه | فناوری/خط نسخه هدف | وابستگی و شرایط | مرجع رسمی |
 |---|---|---|---|
 | هسته | Python 3.14 (fallback 3.13)، Decimal و stdlib | مالی دقیق؛ هیچ float برای پول به عنوان مرجع نهایی | https://docs.python.org/3/library/decimal.html |
-| داده | NumPy 2.5.5، pandas 3.1.1 | هر دو دارای پشتیبانی Python 3.12؛ pandas 3.1 به NumPy >=2.0.2 نیاز دارد | https://pypi.org/project/numpy/2.5.5/ ; https://pypi.org/project/pandas/3.1.1/ |
+| داده | NumPy 2.5.5، pandas 3.1.1 | هر دو دارای پشتیبانی Python 3.13؛ pandas 3.1 به NumPy >=2.0.2 نیاز دارد | https://pypi.org/project/numpy/2.5.5/ ; https://pypi.org/project/pandas/3.1.1/ |
 | آمار | SciPy 1.18.1، Statsmodels 0.15.0 | هر دو برای Python 3.12 قابل نصب‌اند؛ APIهای آزمون نسبت در بخش آزمون مشخص شده‌اند | https://pypi.org/project/scipy/1.18.1/ ; https://pypi.org/project/statsmodels/0.15.0/ |
 | ML | scikit-learn 1.9.1 | Python >=3.11، NumPy/SciPy، Narwhals، joblib و threadpoolctl؛ با EconML 0.17.1 چون شرط sklearn <1.10 است سازگار از نظر بازه نسخه | https://pypi.org/project/scikit-learn/1.9.1/ ; https://scikit-learn.org/stable/ |
 | schema | Pydantic 2.x | strict validation، explicit null، JSON Schema | https://pypi.org/project/pydantic/ |
@@ -119,7 +119,7 @@
 
 این بخش مرجع نهایی انتخاب نسخه و API است. ترتیب اعتبار: metadata نسخه منتشرشده در PyPI و فایل pyproject همان release، سپس مستندات stable/API همان نسخه، و در آخر README یا branch اصلی. مستندات قدیمی/توسعه‌ای ممکن است با metadata release اختلاف داشته باشند.
 
-### ۷.۱ چرا Python 3.12.x انتخاب می‌شود؟
+### ۷.۱ چرا Python 3.13.x انتخاب می‌شود؟
 
 | مؤلفه | شرط رسمی/نسخه منتشرشده | نتیجه برای M-Tools |
 |---|---|---|
@@ -128,10 +128,10 @@
 | pandas 3.1.1 | Python 3.12 در classifier؛ NumPy >=2.0.2 | سازگار با NumPy 2.5.5 |
 | scikit-learn 1.9.1 | Python >=3.11؛ NumPy >=1.24.1 و SciPy >=1.10 | سازگار |
 | Statsmodels 0.15.0 | wheel برای CPython 3.12؛ API stable docs | سازگار |
-| DoWhy 0.14 | Python >=3.9 و <3.14 | 3.12 لازم |
+| DoWhy 0.14 | Python >=3.9 و <3.14؛ برای Python<3.13، SciPy<=1.15.3؛ برای Python>=3.13، SciPy>=1.15 | 3.13 با SciPy 1.18.1 سازگار؛ 3.12 با آن ناسازگار |
 | EconML 0.17.1 | wheel CPython 3.12؛ scikit-learn >=1.6 و <1.10 | sklearn 1.9.1 در بازه |
 | PyMC-Marketing 1.5.0 | Python >=3.12؛ PyMC >=6.0 و ArviZ >=1.2؛ NumPy <2.6 در pyproject فعلی | NumPy 2.5.5 در بازه |
-| Google Meridian | فقط Python 3.11 یا 3.12؛ JAX backend پیش‌فرض | 3.12 نقطه اشتراک؛ جایگزین جداگانه |
+| Google Meridian | فقط Python 3.11 یا 3.12؛ JAX backend پیش‌فرض | خارج از محیط اصلی 3.13؛ در صورت نیاز، worker/محیط مقایسه‌ای Python 3.12 جدا |
 | StatsForecast 2.1.1 | Python >=3.11؛ statsmodels >=0.14.5 و SciPy >=1.7.3 | 3.12 و stack انتخابی سازگار از نظر شروط اعلام‌شده |
 | Numba 0.68.1 | Python 3.10 تا قبل از 3.16؛ NumPy 2.0 تا قبل از 2.6 | با NumPy 2.5.5 سازگار |
 | DuckDB 2.0.1 | Python >=3.11؛ wheel cp312-abi3 | سازگار |
@@ -139,7 +139,7 @@
 | CatBoost 1.2.10 | wheelهای CPython 3.12 برای Windows/Linux/macOS | سازگار |
 | Sentence Transformers | Python >=3.10، PyTorch >=1.11 و Transformers >=4.41؛ Qwen3 model نیازمند Transformers >=4.51 | 3.12 سازگار؛ وزن مدل جداگانه benchmark شود |
 
-**تصمیم:** baseline توسعه و CI برابر CPython 3.12.x است. NumPy 2.5.5، pandas 3.1.1، SciPy 1.18.1، scikit-learn 1.9.1 و Statsmodels 0.15.0 کاندیدهای pin اولیه‌اند. DoWhy 0.14 و EconML 0.17.1 نیز در همین محیط قرار می‌گیرند. این جدول تطبیق شروط رسمی است و هنوز جایگزین اجرای resolver و تست نصب نیست.
+**تصمیم:** baseline توسعه و CI برابر CPython 3.13.x است. NumPy 2.5.5، pandas 3.1.1، SciPy 1.18.1، scikit-learn 1.9.1 و Statsmodels 0.15.0 کاندیدهای pin اولیه‌اند. DoWhy 0.14 و EconML 0.17.1 نیز در Python 3.13 قرار می‌گیرند؛ DoWhy 0.14 برای Python<3.13 سقف SciPy<=1.15.3 دارد، اما برای Python>=3.13 به SciPy>=1.15 نیاز دارد. این جدول تطبیق شروط رسمی است و هنوز جایگزین اجرای resolver و تست نصب نیست. دلیل انتخاب 3.13 نیز در CI آشکار شد: DoWhy 0.14 در Python 3.12 به SciPy<=1.15.3 محدود می‌شود و با SciPy 1.18.1 تعارض دارد؛ Python 3.13 قید متفاوت و سازگار دارد.
 
 ### ۷.۲ اصلاحات مهم در انتخاب الگوریتم و API
 
