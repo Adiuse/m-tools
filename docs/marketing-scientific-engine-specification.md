@@ -15,8 +15,8 @@
 | گروه | فناوری/خط نسخه هدف | وابستگی و شرایط | مرجع رسمی |
 |---|---|---|---|
 | هسته | Python 3.12، Decimal و stdlib | مالی دقیق؛ هیچ float برای پول به عنوان مرجع نهایی | https://docs.python.org/3/library/decimal.html |
-| داده | NumPy 2.3.5، pandas 2.3.3 | در بازه NumPy<2.4 Meridian و NumPy<2.6 PyMC-Marketing؛ pandas<3 برای StatsForecast و Meridian | https://pypi.org/project/numpy/2.5.5/ ; https://pypi.org/project/pandas/2.3.3/ |
-| آمار | SciPy 1.15.3، Statsmodels 0.14.5 | SciPy سقف DoWhy 0.14 در Python 3.12 را رعایت می‌کند؛ Statsmodels حداقل موردنیاز StatsForecast و Meridian را برآورده می‌کند | https://pypi.org/project/scipy/1.18.1/ ; https://pypi.org/project/statsmodels/0.15.0/ |
+| داده | NumPy 2.3.5، pandas 2.3.3 | در بازه NumPy<2.4 Meridian و NumPy<2.6 PyMC-Marketing؛ pandas<3 برای StatsForecast و Meridian | https://pypi.org/project/numpy/2.3.5/ ; https://pypi.org/project/pandas/2.3.3/ |
+| آمار | SciPy 1.15.3، Statsmodels 0.14.5 | SciPy سقف DoWhy 0.14 در Python 3.12 را رعایت می‌کند؛ Statsmodels حداقل موردنیاز StatsForecast و Meridian را برآورده می‌کند | https://pypi.org/project/scipy/1.15.3/ ; https://pypi.org/project/statsmodels/0.14.5/ |
 | ML | scikit-learn 1.9.1 | با Python 3.12، NumPy 2.3.5 و SciPy 1.15.3 و بازه EconML 0.17.1 سازگار از نظر شروط metadata | https://pypi.org/project/scikit-learn/1.9.1/ ; https://scikit-learn.org/stable/ |
 | schema | Pydantic 2.x | strict validation، explicit null، JSON Schema | https://pypi.org/project/pydantic/ |
 | فرم | SurveyJS Form Library + Creator، نسخه هم‌خانواده | React و بسته‌های survey-core/creator؛ مجوز توسعه و انتشار طبق سیاست | https://surveyjs.io/documentation |
@@ -89,7 +89,7 @@
 | مرحله | معیار عبور | وضعیت فعلی |
 |---|---|---|
 | V0 مستندات | ۲۹ شناسه منطبق، روش/فناوری/شرایط/fixture/fallback برای هر ابزار | پوشش سند بررسی‌شده؛ انتخاب علمی نیازمند بازبینی تخصصی |
-| V1 قابلیت نصب | resolve و نصب گروه‌ها، import/API smoke، ثبت lock و نسخه، مجوز توسعه | PASS برای ۸ گروه و محیط ترکیبی روی Linux/Python 3.12؛ lockfile نهایی و ماتریس پلتفرم‌ها باقی است |
+| V1 قابلیت نصب | resolve و نصب گروه‌ها، import/API smoke، ثبت lock و نسخه، مجوز توسعه | PASS تاریخی برای ۸ گروه و محیط ترکیبی روی Linux/Python 3.13.18؛ این اجرا baseline جدید Python 3.12 را تأیید نمی‌کند |
 | V2 صحت و یکپارچگی | golden fixture هر ابزار، ورودی ناقص، ورودی ناسازگار، reproducibility، آزمون عدم نشت و خروجی بی‌شاهد؛ CI سبز | smoke/API و fixtureهای نماینده PASS؛ golden test کامل ۲۹ ابزار و آزمون‌های نشت/داده ناقص باقی است |
 | V3 اعتبار علمی و کاربردی | مقایسه با روش پایه/محاسبه مستقل، مرور خبره، پایلوت داده واقعی مجاز با معیار پیشینی، امنیت و release gate | انجام نشده |
 
@@ -187,11 +187,11 @@
 
 - Python 3.15 release: https://docs.python.org/3.15/whatsnew/3.15.html
 - Django 6.1 Python compatibility: https://docs.djangoproject.com/en/6.1/releases/6.1/
-- NumPy 2.3.5: https://numpy.org/news/ و https://pypi.org/project/numpy/2.5.5/
+- NumPy 2.3.5: https://pypi.org/project/numpy/2.3.5/ و https://numpy.org/news/
 - pandas 2.3.3: https://pandas.pydata.org/docs/whatsnew/ و https://pandas.pydata.org/docs/getting_started/install
-- SciPy 1.15.3: https://scipy.org/news/ و https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html
+- SciPy 1.15.3: https://pypi.org/project/scipy/1.15.3/ و https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.milp.html
 - scikit-learn 1.9.1: https://scikit-learn.org/stable/ و https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html
-- Statsmodels 0.14.5: https://www.statsmodels.org/stable/ و https://www.statsmodels.org/stable/generated/statsmodels.stats.proportion.confint_proportions_2indep.html
+- Statsmodels 0.14.5: https://pypi.org/project/statsmodels/0.14.5/ و https://www.statsmodels.org/stable/
 - StatsForecast 2.1.1: https://pypi.org/project/statsforecast/2.1.1/ و https://github.com/Nixtla/statsforecast
 - DoWhy: https://pypi.org/project/dowhy/0.14/ و https://www.pywhy.org/dowhy/main/
 - EconML 0.17.1: https://pypi.org/project/econml/0.17.1/ و https://github.com/py-why/EconML
