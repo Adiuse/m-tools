@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: "3.13"
       - run: python -m pip install --upgrade pip
-      - run: python -m pip install numpy==2.5.5 pandas==3.1.1 scipy==1.18.1 scikit-learn==1.9.1 statsmodels==0.15.0
+      - run: python -m pip install numpy==2.5.5 pandas==2.3.3 scipy==1.18.1 scikit-learn==1.9.1 statsmodels==0.15.0
       - run: python tests/scientific_stack_smoke.py core
 
   forecast:
@@ -40,7 +40,7 @@ jobs:
         with:
           python-version: "3.13"
       - run: python -m pip install --upgrade pip
-      - run: python -m pip install numpy==2.5.5 pandas==3.1.1 scipy==1.18.1 statsmodels==0.15.0 statsforecast==2.1.1
+      - run: python -m pip install numpy==2.5.5 pandas==2.3.3 scipy==1.18.1 statsmodels==0.15.0 statsforecast==2.1.1
       - run: python tests/scientific_stack_smoke.py forecast
 
   causal:
@@ -52,7 +52,7 @@ jobs:
         with:
           python-version: "3.13"
       - run: python -m pip install --upgrade pip
-      - run: python -m pip install numpy==2.5.5 pandas==3.1.1 scipy==1.18.1 scikit-learn==1.9.1 statsmodels==0.15.0 dowhy==0.14 econml==0.17.1
+      - run: python -m pip install numpy==2.5.5 pandas==2.3.3 scipy==1.18.1 scikit-learn==1.9.1 statsmodels==0.15.0 dowhy==0.14 econml==0.17.1
       - run: python tests/scientific_stack_smoke.py causal
 
   bayesian:
@@ -64,7 +64,7 @@ jobs:
         with:
           python-version: "3.13"
       - run: python -m pip install --upgrade pip
-      - run: python -m pip install numpy==2.5.5 pandas==3.1.1 scipy==1.18.1 pymc-marketing==1.5.0
+      - run: python -m pip install numpy==2.5.5 pandas==2.3.3 scipy==1.18.1 pymc-marketing==1.5.0
       - run: python tests/scientific_stack_smoke.py bayesian
 
   optimization:
@@ -88,7 +88,7 @@ jobs:
         with:
           python-version: "3.13"
       - run: python -m pip install --upgrade pip
-      - run: python -m pip install pandas==3.1.1 polars==2.1.0 duckdb==2.0.1
+      - run: python -m pip install pandas==2.3.3 polars==2.1.0 duckdb==2.0.1
       - run: python tests/scientific_stack_smoke.py analytics
 
   ml:
@@ -100,7 +100,7 @@ jobs:
         with:
           python-version: "3.13"
       - run: python -m pip install --upgrade pip
-      - run: python -m pip install numpy==2.5.5 pandas==3.1.1 scipy==1.18.1 catboost==1.2.10 shap optuna
+      - run: python -m pip install numpy==2.5.5 pandas==2.3.3 scipy==1.18.1 catboost==1.2.10 shap optuna
       - run: python tests/scientific_stack_smoke.py ml
 
   nlp:
