@@ -11,7 +11,7 @@ M-Tools is a professional marketing manager's workbench and external memory, for
 - **Minimize Cognitive Load:** reuse relevant data, ask only for missing prerequisites, choose or suggest appropriate methods, and show understandable results, rationale and limitations. Keep formulas, assumptions, evidence and method details inspectable without requiring memorization. Never conceal uncertainty or replace human judgment.
 - Every capability must address a real managerial task and define how practical utility, scientific validity and comprehensibility will be assessed. Do not expand solely to cover more concepts.
 
-Canonical policy: [system architecture, section 0](docs/marketing-system-architecture-v1.md). Apply it to all design, UX, tools, engines, recipes, prioritization and implementation sessions. Preserve the existing four engines, 29 tools, eight-tool MVP and specialist libraries unless the owner explicitly changes scope.
+Canonical policy: [system architecture, section 0](docs/marketing-system-architecture-v1.md). Apply it to all design, UX, tools, engines, recipes, prioritization and implementation sessions. Preserve the existing four engines, 29 full tools, eight-full-tool MVP and specialist libraries unless the owner explicitly changes scope. Read [Workbench Design](docs/marketing-workbench-design.md) for F-01–F-05; Quick Tools are independently gated method-level views, not new full tools.
 
 ## Standing owner decision: capability-first dependency selection
 
@@ -54,3 +54,9 @@ Use [Scientific Engine & Technology Specification](docs/marketing-scientific-eng
 - Read [Brand Positioning & Mental Availability Library](docs/marketing-positioning-library.md) before implementing M06/M08, brand positioning, CEP, mental availability, distinctive assets or brand tracking. 14 PO capabilities compose existing tools; keep four engines, 29 tools, 26 ST, 34 PL and eight-tool MVP unchanged.
 - Separate observed perception, desired position, estimate and hypothesis; no invented perceptual maps, universal brand score, unsupported claims, or causal inference from tracking/attribution. Enforce common survey bases, missingness, comparability, model fit, proof, approvals and privacy.
 - Reuse existing scientific stack and ST05/PL13; Prince is optional candidate, not a new required dependency. Use evidence and limited code fixtures in DEV; no paid CI or runtime PASS claim for these documents.
+
+## Workbench — standing design and acceptance rule
+
+- Implement the 13 QT contracts and 35 starter KN entries according to the staged catalog, not a new engine. Authenticated scratch calculations and knowledge lookup must work without creating or selecting a company. Scratch inputs/results are not silently persisted; save explicitly in an authorized workspace using existing runs, snapshots and evidence gates. Never grant full-tool/pipeline readiness merely because a QT is ready.
+- Knowledge definitions have a reviewed source, version, limitation and linked method/tool; no hallucinated glossary, no duplicate formula implementation, no compulsory learning path. Keep account preferences scoped to the user, public catalog IDs and allowlisted generic settings; never put company refs or analytical data into personal preferences. Reuse authorized workspace history for company analyses.
+- Keep eight full tools as the provisional baseline, plus B05 basics and independently validated initial QT slices; reassess B05/B02/B04/S04/S05/E02/E03 using documented real managerial tasks and owner approval, not invented frequency or rankings. F-03 field evidence and F-05 paired workflow/time/error/comprehension/workload study are pending until actually performed. No claims of user validation, scientific performance, or CI PASS from documentation alone.
