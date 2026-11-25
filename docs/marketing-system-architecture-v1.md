@@ -192,7 +192,7 @@ Idempotency key در workspace یکتا؛ درخواست تکراری همان p
 - [ ] تست جداسازی workspace، مجوز شیء، تکرار درخواست، شکست AI، منبع جعلی، حذف داده، بازیابی backup.
 - [ ] مرور متخصص بازار/مالی/آمار برای روش‌های مرتبط؛ پایلوت حداقل با نمونه کسب‌وکار خدماتی و فروشگاهی و داده واقعی مجاز؛ معیار نتیجه پیش از آزمون تعیین شود. هیچ ادعای علمی اثربخشی یا بهبود درآمد تا شواهد کافی مطرح نشود.
 
-MVP همان ۸ ابزار سند مشخصات و سنجش پایه مشترک باقی می‌ماند؛ ۲۱ ابزار دیگر بر اساس نیاز اضافه می‌شوند. معماری توسعه برای هر ۲۹ تعریف شده، اما ساخت همه در یک مرحله لازم نیست.
+MVP ابزارهای کامل همان ۸ ابزار سند مشخصات و سنجش پایه مشترک B05 باقی می‌ماند؛ ۲۱ ابزار کامل دیگر بر اساس نیاز و شواهد اضافه می‌شوند. لایه Workbench اولیه و قابلیت‌های محدود QT مشخص در سند آن، با gate مستقل روش عرضه می‌شوند؛ این به معنی فعال‌شدن ابزار کامل مالک یا مرحله pipeline نیست. اولویت نهایی توسعه ابزارهای کامل با داده وظایف واقعی و تأیید مالک بازبینی می‌شود.
 
 ## ۷. منابع بررسی‌شده در ۲۴ نوامبر ۲۰۲۶
 
@@ -211,7 +211,7 @@ MVP همان ۸ ابزار سند مشخصات و سنجش پایه مشترک �
 
 ## ۸. تکمیل معماری برای حساب، پروفایل و پایپلاین — v1.1
 
-مکمل [UX v1.1](marketing-ux-design-v1.md). هر کسب‌وکار معادل یک Workspace است، نه یک حساب. حساب کاربر مستقل و عضویت چندبه‌چند است. همه تحلیل‌ها به Workspace تعلق دارند.
+مکمل [UX v1.1](marketing-ux-design-v1.md). هر کسب‌وکار معادل یک Workspace است، نه یک حساب. حساب کاربر مستقل و عضویت چندبه‌چند است. همه تحلیل‌های پایدار (AnalysisRun/PipelineRun) به Workspace تعلق دارند؛ محاسبه دستی موقت Quick Tools مطابق قرارداد Workbench بدون Workspace و بدون ثبت run مجاز است.
 
 | موجودیت افزوده | فیلد حداقلی |
 |---|---|
@@ -272,3 +272,11 @@ MVP همان ۸ ابزار سند مشخصات و سنجش پایه مشترک �
 
 ## ۱۲. قرارداد جایگاه‌سازی و دسترس‌پذیری ذهنی
 [Positioning Library](marketing-positioning-library.md) شامل ۱۴ زیرمسیر PO01–PO14 در M06/M08 با همکاری M01/M04/M05/M03/S04/B01/B04/B05 و اجرا از E01–E04/E08 است. PositioningResult یک artifact نسخه‌دار AnalysisRun/PipelineRun با StudySpec، داده respondent pseudonymous، metric/map refs، گزینه‌ها، شواهد، decision/plan refs و coverage است؛ داده و registry موجود reuse، بدون جدول دامنه مستقل برای هر زیرمسیر یا موتور جدید. metadata recipe_id/version در namespace PO و modeهای موجود؛ وابستگی artifact نه حلقه ابزار؛ S03 تصمیم و E01 برنامه، ST05/PL13 reuse. مشاهده، هدف، تخمین و فرضیه جدا؛ no-data/low-fit نقشه یا درصد نسازد. wave/instrument/base comparability، access و privacy ضروری؛ هیچ export PII غیرمجاز یا external action. هشت ابزار MVP ثابت و قابلیت اجرا از registry، قرارداد علمی و UX مرجع.
+
+## ۱۳. Professional Marketing Workbench — قرارداد F-01 تا F-05
+
+مرجع تفصیلی: [Workbench Design v1.0](marketing-workbench-design.md). چهار مسیر UX (Quick Tools، Knowledge، Professional Tools، Integrated Pipelines) از همان چهار موتور و ۲۹ ابزار استفاده می‌کنند؛ سه mode تحلیل single/domain/full تغییر نمی‌کنند. QT یک نمای محدود روی method مالک در registry است؛ status هر QT مستقل از availability ابزار کامل، و pipeline فقط با قرارداد full فعال و شواهد واقعی اجرا می‌شود. فرمول/اعتبارسنجی/نسخه مشترک است.
+
+- حساب پس از ورود می‌تواند بدون شرکت به دانش و محاسبه دستی موقت دسترسی داشته باشد. همه AnalysisRun/Decision/Action/Observationهای ذخیره‌شده به workspace دارای مجوز تعلق دارند. بدون Workspace فقط POST /quick-tools/{quick_id}/calculate با input دستی تجمیعی و بدون ref، بدون AI/side effect/ذخیره ورودی و خروجی، no-store؛ پاسخ دارای نسخه روش و محدودیت. ذخیره صریح با POST /workspaces/{wid}/runs و quick_id اختیاری، محاسبه مجدد سرور، snapshot/provenance و owner/editor؛ ورودی فرضی observed نمی‌شود. GET /quick-tools و GET /knowledge (جست‌وجو)/GET /knowledge/{id} از کاتالوگ نسخه‌دار همین برنامه؛ هیچ سرویس یا جدول دانش موازی.
+- User.workbench_preferences JSONB نسخه‌دار شامل pins، recents/counters و presets عمومی allowlisted و بدون company refs/نتیجه؛ GET/PATCH /me/workbench-preferences با مالکیت و version. تاریخچه سازمانی از AnalysisRun/PipelineRun مجاز موجود؛ no cross-workspace leakage. دسترسی حساب و داده سازمان مستقل بمانند.
+- مجموعه هشت ابزار کامل حفظ شده؛ ۱۳ QT طراحی‌شده (۱۱ هدف اولیه، دو مورد بعدی) و ۳۵ مدخل پایه دانش، توسعه تدریجی و وابسته به validation و شواهد نیاز. تحلیل اولویت B05/B02/B04/S04/S05/E02/E03 و مطالعه وظایف واقعی، پروتکل مقایسه روش معمول با Workbench و NASA-TLX در سند Workbench؛ معیار علمی و usability gate جداگانه و بدون ادعای PASS. طراحی و اولویت پیشنهادی، نه اجرای آزمون.
