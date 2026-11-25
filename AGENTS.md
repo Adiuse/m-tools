@@ -32,3 +32,9 @@ Use [Scientific Engine & Technology Specification](docs/marketing-scientific-eng
 - Read [Strategy Library](docs/marketing-strategy-library.md) for the 26 strategy recipes, research evidence, implementation contract, KPI definitions and UX. Recipes compose the existing 29 tools and four engines; do not introduce a new tool, engine, database, agent or service merely for a new strategy.
 - Preserve the eight-tool MVP and existing pipeline modes. Recipe availability derives from actual implemented capabilities; do not label a draft/partial strategy complete. Human approval, evidence and privacy gates remain mandatory.
 - Use published research and official documentation as methodological evidence; validate the implementation with limited fixtures/API tests. Do not rerun paid CI or assert new runtime PASS for documentation changes.
+
+
+## Marketing Planning Library — standing design rule
+- Read [Marketing Planning Library](docs/marketing-planning-library.md) before implementing E01 or a planning recipe. 34 PL recipes reuse the 29 tools, 26 ST recipes and existing data/pipeline. E01 owns the integrated plan; no new engine, tool, database or service.
+- Keep approved baseline immutable, separate forecast/actual/commitment/cash, validate resource and cost constraints independently, and require human approval. CPM is precedence-only; CP-SAT is conditional on resource constraints. No fictitious optimum or automatic external action.
+- Preserve eight-tool MVP; unavailable required steps remain draft/partial. Use published evidence and limited implementation fixtures; no new CI claims or paid CI runs for these documents.
