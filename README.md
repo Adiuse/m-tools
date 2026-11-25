@@ -14,4 +14,6 @@ See the [canonical product policy and architecture (section 0)](docs/marketing-s
 
 [Workbench design](docs/marketing-workbench-design.md): Quick Tools, Marketing Knowledge Library, Professional Tools and Integrated Pipelines, with personal shortcuts, evidence-led priorities and productivity acceptance. The four engines and 29 full tools remain unchanged; individual Quick methods have their own readiness gates.
 
+[Competitive design enhancements](docs/marketing-competitive-enhancements.md): data templates and demos, four-format executive reporting, pricing research, organization lessons, preference mapping, Bass diffusion, LTV/payback, document intake and relationship network analysis. Direct read-only connections are limited to GA4, Google Ads, Search Console and CRM (vendor pending).
+
 Current status: design and documentation, not an implemented or validated product.
