@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "python": "3.12.16",
+  "core": "pyproject.toml",
+  "policy": "Candidate direct pins; resolve exact transitive hashes per approved combination before activation. No optional model downloaded by default.",
+  "groups": {
+    "forecast": [
+      "statsforecast==2.1.1"
+    ],
+    "causal": [
+      "dowhy==0.14",
+      "econml==0.17.1"
+    ],
+    "bayesian": [
+      "pymc-marketing==1.5.0"
+    ],
+    "optimization": [
+      "SALib==1.6.0",
+      "ortools==9.15.6755",
+      "pymcdm==1.4.0"
+    ],
+    "analytics": [
+      "polars==2.1.0",
+      "duckdb==2.0.1"
+    ],
+    "ml": [
+      "catboost==1.2.10",
+      "shap==0.54.1",
+      "optuna==5.1.0",
+      "lifelines==0.30.3"
+    ],
+    "nlp": [
+      "sentence-transformers==5.7.0",
+      "bertopic==0.17.4"
+    ],
+    "survey": [
+      "svy==0.36.0"
+    ],
+    "choice": [
+      "biogeme==3.3.5"
+    ],
+    "monitoring": [
+      "ruptures==1.1.10"
+    ]
+  },
+  "isolated": {
+    "meridian": {
+      "project": "deps/meridian/pyproject.toml",
+      "reason": "Documented incompatible ArviZ requirements with PyMC-Marketing; separately resolved and installed; never imported into common Django process."
+    }
+  },
+  "deferred": {
+    "process_mining": {
+      "candidate": "pm4py==2.7.23.15",
+      "gate": "AGPL/commercial license authorization; resolve with approved combination; not auto-installed"
+    },
+    "survey_creator": {
+      "candidate": "SurveyJS Creator matching 2.5.48 family",
+      "gate": "Confirm package existence, peer metadata and required development license before integration"
+    },
+    "chronos": {
+      "candidate": "chronos-forecasting==2.3.2",
+      "gate": "Challenger; benchmark/weight pin before activation"
+    },
+    "other": "R challengers, Prince, optional model versions, connectors' API versions, browser PDF renderer selected when needed; no mandatory dependency, no lock claim."
+  }
+}
