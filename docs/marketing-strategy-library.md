@@ -401,3 +401,6 @@ Recipe catalog در کد نسخه‌دار (JSON/YAML یا ساختار Python �
 
 ## ۱۱. اتصال استراتژی به برنامه‌ریزی
 [Marketing Planning Library](marketing-planning-library.md) برای همه ST01–ST26 یک recipe تخصصی PL09–PL34 و ۸ الگوی مشترک دارد. استراتژی انتخاب‌ها و هدف را نگه می‌دارد؛ E01 و PLها زمان، هزینه، ظرفیت، مالک، acceptance، measurement و baseline را یکپارچه می‌کنند. برنامه اولیه در StrategyResult یک پیش‌نویس یا plan_ref است؛ بودجه/کار را دوباره نسازد. برنامه مصوب و forecast/actual جدا؛ تغییر استراتژیک به S03 ارجاع شود.
+
+## ۱۲. اتصال جایگاه‌سازی ذهنی به استراتژی برند
+ST05 از [Brand Positioning & Mental Availability Library](marketing-positioning-library.md) و زیرمسیرهای PO01–PO14 برای تشخیص ادراک فعلی، تمایز/PoP-PoD، موقعیت خرید، سنجه‌های MA و DBA، انتخاب جایگاه، آزمون و بازجایگاه‌سازی استفاده می‌کند. ST03/04/07 و سایر استراتژی‌های مرتبط همان شواهد و PositioningResult را reuse می‌کنند؛ هیچ strategy جدید یا محاسبه تکراری ایجاد نمی‌شود. S03 مالک انتخاب مصوب و PL13 مالک برنامه فعال‌سازی/سنجش، نه ساختن جایگاه واقعی از شعار. محدودیت داده و تایید انسانی حاکم است.
