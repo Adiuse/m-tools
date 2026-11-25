@@ -104,3 +104,6 @@ AI برای دسته‌بندی متن، ساخت فرضیه و پیش‌نوی�
 
 ## کتابخانه برنامه‌ریزی بازاریابی
 [Marketing Planning Library v1.0](marketing-planning-library.md) قرارداد برنامه E01 و ۳۴ recipe شامل برنامه جامع/سالانه، rolling، ماهانه، بودجه، تحقیق، KPI/آزمایش، منابع، ریسک و ۲۶ حوزه تخصصی است. همه برنامه‌ها بر تصمیم مصوب، هدف، WBS، موعد، مالک، ظرفیت، هزینه، معیار پذیرش و review استوارند؛ E02–E08 و B01–B06 خروجی تخصصی را تأمین می‌کنند. هدف، forecast، approved baseline و actual/commitment جدا هستند؛ قیود نقض‌شده و داده نامعلوم نمایش داده شوند. هیچ ابزار یا فرمول تکراری، تغییر دامنه MVP یا ادعای پیاده‌سازی ایجاد نشود.
+
+## کتابخانه جایگاه‌سازی ذهنی
+[Positioning Library](marketing-positioning-library.md) ۱۴ capability در M06/M08: تحقیق، ادراک فعلی، تداعی و شبکه، laddering، نقشه رقبا، CEP، mental availability، دارایی متمایز، PoP/PoD، conjoint/choice، فرصت، انتخاب/آزمون جایگاه، بازجایگاه‌سازی و tracking. M06 مالک انتخاب/بیانیه و M08 مالک اندازه‌گیری؛ M01/M04 برای شواهد، S03 تایید، PL13/E01 اجرا، B04/B05/E08 کنترل. خروجی مشترک PositioningResult با مخرج، روش، عدم قطعیت، evidence، وضعیت actual/desired/hypothesis، proof gate و plan_ref. اگر داده ناقص، research plan و فرضیه نه سنجه واقعی. بدون ابزار جدید و تغییر MVP.
