@@ -262,3 +262,7 @@
 
 ## مصرف موتور علمی در کتابخانه استراتژی
 [Strategy Library](marketing-strategy-library.md) مسیرهای کاربردی ۲۶ استراتژی بر ۲۹ ابزار را تعریف می‌کند. روش‌ها و وابستگی‌ها از همین قرارداد علمی و [مرور شواهد](marketing-29-tools-evidence-review.md) reuse می‌شوند؛ recipeها الگوریتم یا runtime تازه نیستند. KPI و قواعد مالی/causal از B01–B06 و قیود مدل از موتور مشترک. هیچ هدف یا نرخ جهانی، اثر علّی از attribution، رتبه قطعی با داده ناقص، یا بودجه بهینه از داده ناکافی تولید نشود. هیچ تغییر نسخه کتابخانه یا CI جدید برای این افزوده لازم نیست؛ فقط تست اتصال recipe، coverage، قیود و fixtureهای آن هنگام DEV.
+
+
+## موتور علمی برنامه‌ریزی E01
+[Planning Library](marketing-planning-library.md) قرارداد محاسبات CPM forward/backward، RCPSP، بودجه/تعهد/نقد، EAC، EVM اختیاری، reverse funnel، risk و rolling forecast را تکمیل می‌کند. از NetworkX (3.7 candidate) برای DAG، OR-Tools CP-SAT (9.15.6755 candidate) برای منابع محدود، SciPy linprog/milp برای هدف/قیود خطی، Decimal برای پول و B02/B03/B04/E03 برای مدل‌های تخصصی استفاده شود. metadata این دو candidate و منابع روش بررسی شده‌اند؛ lockfile و runtime تأیید نشده. CPM بدون ظرفیت، تقویم feasible نیست؛ solver status/constraint recheck الزامی؛ forecast مجوز بودجه نیست. هیچ تغییر در baseline علمی و وابستگی خارج معماری لازم نیست. fixtureهای محدود سند در DEV، بدون CI جدید در این مرحله.
