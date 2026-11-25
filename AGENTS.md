@@ -2,6 +2,17 @@
 
 Read the architecture and tool specification documents before making design or implementation decisions.
 
+## Standing owner decision: Professional Marketing Workbench
+
+M-Tools is a professional marketing manager's workbench and external memory, for practical use in the owner's future workplace and as everyday handy tools for marketing managers. Delegate recall of definitions, formulas, frameworks, procedural details and appropriate analysis to the tool; preserve conceptual understanding, strategic thinking, creativity, interpretation and human judgment.
+
+- **Daily Utility first:** each tool must deliver standalone practical value. Never require a full pipeline or unrelated profile fields for a simple task.
+- **Scientific Depth first:** eight reliable, scientifically grounded tools are more valuable than 29 superficial ones. Prioritize appropriate methods, evidence, validation and honest limitations over feature count.
+- **Minimize Cognitive Load:** reuse relevant data, ask only for missing prerequisites, choose or suggest appropriate methods, and show understandable results, rationale and limitations. Keep formulas, assumptions, evidence and method details inspectable without requiring memorization. Never conceal uncertainty or replace human judgment.
+- Every capability must address a real managerial task and define how practical utility, scientific validity and comprehensibility will be assessed. Do not expand solely to cover more concepts.
+
+Canonical policy: [system architecture, section 0](docs/marketing-system-architecture-v1.md). Apply it to all design, UX, tools, engines, recipes, prioritization and implementation sessions. Preserve the existing four engines, 29 tools, eight-tool MVP and specialist libraries unless the owner explicitly changes scope.
+
 ## Standing owner decision: capability-first dependency selection
 
 - Evaluate and select the best technically suitable algorithms, libraries, models and components without excluding paid, commercial, dual-licensed or proprietary candidates merely because of license cost or business model. Do not ask the owner to reconfirm this policy in each session.
