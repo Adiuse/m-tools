@@ -259,3 +259,6 @@ flowchart TD
 
 ## مسیرهای برنامه‌ریزی و کنترل اجرا
 [Marketing Planning Library](marketing-planning-library.md) الگوهای PL01–PL34 را بر تصمیم S03 و خروجی ۲۹ ابزار تعریف می‌کند. E01 یکپارچه‌کننده برنامه، WBS، زمان، منابع، هزینه و acceptance؛ تخصص محتوا در ابزار مالک مربوطه. وابستگی مراحل recipe به artifact نسخه‌دار و وابستگی taskها به Action مستقل‌اند. قبل از تأیید فقط پیش‌نویس؛ feasibility و reconciliation قبل از baseline؛ actual/forecast و E08 review پس از اجرای واقعی، اصلاح در نسخه بعدی. هیچ موتور جدید و تغییر mode/MVP لازم نیست.
+
+## زیرمسیر جایگاه‌سازی در چهار موتور
+[Positioning Library](marketing-positioning-library.md) PO01–PO14 را در M06/M08 و ابزارهای پژوهش/تحلیل حاضر تعریف می‌کند: M01 research → M04/M08 diagnosis → M06/S04 options → S03 approval → PL13/E01 activation → B04/B05/E08 measurement. ابزارها حسب داده/مسئله؛ preview و draft قبل از approval؛ feedback run جدید، no cyclic dependency. بدون تغییر چهار موتور، ۲۹ ابزار، ۱۲۰ competency یا roadmap.
