@@ -100,7 +100,7 @@
 - خدماتی: M01 سؤال و طرح تحقیق → پاسخ واقعی آزمایشیِ برچسب‌خورده → M05 بخش‌بندی → M06 جایگاه → S03 تصمیم → E01 برنامه. انتظار: شواهد در هر مرحله منتقل، انتخاب هدف و تصمیم انسان، هزینه‌ها در سقف.
 - فروشگاهی: ۱۰۰ مشتری واجد شرایط، ۴۰ تبدیل، هزینه جذب ۲۰۰۰ و ۲۰ مشتری جدید → B03 conversion=.4 و B01 CAC=100 → S01 شکاف هدف/واقعی → B04 پروتکل → B05 ثبت نتیجه. انتظار: شمارش cohort صحیح، علت فرضیه و عدم ادعای اثربخشی بدون داده آزمون.
 - پایپلاین جامع با M01 بدون پاسخ و B01 بدون هزینه: مراحل وابسته blocked/needs_data، شاخه مستقل ادامه، خروجی ناقص صریح؛ pause/resume بدون تکرار مرحله موفق و با workspace isolation. هیچ هزینه یا انتشار بیرونی خودکار.
-- MVP همان ۸ ابزار تعریف‌شده (S01,S03,M01,M05,M06,B01,B03,E01) و ثبت KPI پایه است؛ ۲۱ ابزار دیگر در طرح کامل موجود ولی اجرا پس از ساخت/آزمون. فعال‌سازی هر روش پیشرفته مستقل از فعال‌سازی ابزار پایه.
+- MVP ابزارهای کامل همان ۸ ابزار تعریف‌شده (S01,S03,M01,M05,M06,B01,B03,E01) و ثبت KPI پایه است؛ ۲۱ ابزار کامل دیگر پس از ساخت/آزمون. روش‌های محدود Quick Tools طبق [Workbench Design](marketing-workbench-design.md) gate مستقل دارند و ممکن است پیش از ابزار کامل مالک فعال شوند؛ این مجوز اجرای full/pipeline نیست. فعال‌سازی روش پیشرفته نیز مستقل از ابزار پایه است.
 
 ## ۶. منابع روش‌شناختی و API
 
@@ -269,3 +269,7 @@
 
 ## موتور علمی M06/M08 — Positioning, Mental Availability, DBA
 [Brand Positioning & Mental Availability Library](marketing-positioning-library.md) قرارداد روش و فرمول‌های PO01–PO14، طراحی نمونه، آگاهی/تداعی/CBBE، laddering و BCM، CEP/MP/NS/MMS، fame/uniqueness، PCA/MDS/CA، choice، MCDA و tracking را تکمیل می‌کند. MP×NS=links per buyer، نه MMS؛ missing≠zero، مخرج و wave ثابت؛ fame و uniqueness جدا. MDS 1.9.1 با metric='precomputed', metric_mds و n_init صریح؛ محور latent/fit، CA با SciPy SVD پایه و Prince فقط candidate مشروط، no new mandatory dependency. SurveyJS/svy، Pandas/NumPy، NetworkX، sklearn، Biogeme، S04، B04 موجود reuse؛ هیچ نسخه جدید قطعی یا اجرای CI ادعا نمی‌شود. جایگاه واقعی از تحقیق مشتری، نه حدس تیم/LLM؛ فضای خالی نقشه دلیل فرصت نیست؛ آزمون پیام و tracking observed/causal جدا. معیارهای فنی و fixture در سند تخصصی؛ baseline runtime/MVP بدون تغییر.
+
+## ۹. مصرف موتور علمی در Professional Marketing Workbench
+
+[Workbench Design](marketing-workbench-design.md) بخش ۲، ۱۳ QT را به مالک روش B01/B02/B03/B04/B05/M01/M02 متصل می‌کند؛ همان registry، روش، schema، Decimal/NumPy/SciPy/Statsmodels و قرارداد شواهد. محاسبات QT مستقل از AI و بدون نیاز به heavy model؛ مرجع KN از method_id/version استفاده می‌کند، نه فرمول اجرایی دوم. نمونه SRS با z و finite-population correction طبق W5/W6؛ نمونه غیر احتمالی بدون MOE احتمالی. ROAS و شاخص رسانه توصیفی (W4) و ROMI افزایشی مستقل؛ سناریوی قیمت پیش‌بینی نیست. power دوگروهی QT13 تقریب و conditional با validation نسخه پین‌شده؛ fixture حدود 681 در هر گروه در مثال مشخص، نتیجه API هنوز آزموده نشده. محاسبه با ورودی دستی فقط نتیجه مشروط به داده/فرض، نه مشاهده تأییدشده؛ save سازمانی همان Run و evidence gate. صحت/برابری نتیجه Quick و full، صفر/مفقود/واحد/مخرج، منبع و نسخه دانش، صلاحیت و حریم خصوصی در DEV آزمون شوند؛ کاهش بار شناختی و زمان در پایلوت F-05 جداگانه. هیچ پکیج/نسخه جدید اجباری و هیچ PASS جدید ادعا نمی‌شود.
