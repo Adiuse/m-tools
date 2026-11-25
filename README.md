@@ -18,4 +18,6 @@ See the [canonical product policy and architecture (section 0)](docs/marketing-s
 
 [Development baseline and architecture freeze](docs/marketing-development-baseline.md): Python/Django backend, React/TypeScript frontend, PostgreSQL, direct dependency pins, [72 typed method contracts](contracts/analysis.v1.schema.json), [230 synthetic fixtures](contracts/fixtures.v1.json) and DEV roadmap.
 
+[Full-product development plan](docs/marketing-full-product-development-plan.md): 7 phases, 22 planned PRs (VS00–VS21), 19 capability-oriented delivery slices, explicit coverage and acceptance of the complete approved product. The eight-tool MVP is an intermediate milestone, not the final deliverable.
+
 Current status: FROZEN_DESIGN / RUNTIME_LOCK_PENDING / NOT_IMPLEMENTED. Run `python3 scripts/verify_stack.py` with the specified target runtimes and registry access to verify the candidate stack. No verified lockfiles or product validation yet. Compatibility CI is manual only.
