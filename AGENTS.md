@@ -31,6 +31,7 @@ Use [Scientific Engine & Technology Specification](docs/marketing-scientific-eng
 ## Scientific technology baseline and verification
 
 - Read `docs/marketing-scientific-engine-specification.md` before selecting or changing a scientific method, library, model or API for any of the 29 tools.
+- Owner-approved backend is Python 3.12 + Django; frontend React + TypeScript, DRF REST and PostgreSQL. Node is build/development only. The [development baseline](docs/marketing-development-baseline.md) and committed manifests define exact direct candidate versions, not a verified lock. Do not change the language/architecture or replace scientific libraries without owner approval and evidence.
 - Proposed scientific runtime baseline is CPython 3.12.x with NumPy 2.3.5, pandas 2.3.3, SciPy 1.15.3, scikit-learn 1.9.1 and Statsmodels 0.14.5. These pins are selected from official package metadata intersections; they are not yet resolver/CI-verified. The earlier successful CI run was historical CPython 3.13.18 and does not validate this new baseline. CI credits are currently unavailable; never claim a new PASS until it is run.
 - The smoke tests verify package installation/API compatibility and representative fixtures only; they do not establish scientific validity on real business data or prove all 29 tools are implemented. Persian semantic-quality benchmarks, full 29-tool golden tests, MMM/CLV sampling and causal validation remain separate gates.
 - Do not add Numba as a direct StatsForecast dependency without evidence; StatsForecast 2.1.1's published dependency metadata uses coreforecast/utilsforecast. Numba is required by other optional stacks where their metadata specifies it.
@@ -38,6 +39,12 @@ Use [Scientific Engine & Technology Specification](docs/marketing-scientific-eng
 
 - Research evidence for each tool is documented in `docs/marketing-29-tools-evidence-review.md`; review it before changing a method or package. The scientific-engine specification is the runtime/API contract.
 
+
+## Development freeze and execution contract
+
+- Follow [Development Baseline & Architecture Freeze](docs/marketing-development-baseline.md). D0 lock/compatibility is BLOCKED in the current environment, D1–D6 are planned, and no application has been implemented. No fabricated lockfiles or scientific PASS.
+- Use `contracts/analysis.v1.schema.json` and `contracts/fixtures.v1.json`: 72 versioned methods, 24 dataset row schemas, 13 artifact types, 230 synthetic cases; all availability planned. JSON Schema validation is not semantic validation or model validity. Add full method-specific synthetic data, implementation and authorization tests before activation. Keep one registry, four engines, 29 tools and the approved MVP.
+- Run `python3 scripts/verify_stack.py` on the target runtime/network, review actual resolver and test evidence before recording locks. Optional groups only as needed, Meridian isolated. Existing compatibility workflow is manual-only; do not dispatch paid CI without owner approval. 22 stdlib reference calculations passed in the historical local Python 3.13.5 environment; no new target-runtime PASS.
 
 ## Strategy Library — standing design rule
 - Read [Strategy Library](docs/marketing-strategy-library.md) for the 26 strategy recipes, research evidence, implementation contract, KPI definitions and UX. Recipes compose the existing 29 tools and four engines; do not introduce a new tool, engine, database, agent or service merely for a new strategy.
