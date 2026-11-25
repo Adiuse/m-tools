@@ -38,3 +38,8 @@ Use [Scientific Engine & Technology Specification](docs/marketing-scientific-eng
 - Read [Marketing Planning Library](docs/marketing-planning-library.md) before implementing E01 or a planning recipe. 34 PL recipes reuse the 29 tools, 26 ST recipes and existing data/pipeline. E01 owns the integrated plan; no new engine, tool, database or service.
 - Keep approved baseline immutable, separate forecast/actual/commitment/cash, validate resource and cost constraints independently, and require human approval. CPM is precedence-only; CP-SAT is conditional on resource constraints. No fictitious optimum or automatic external action.
 - Preserve eight-tool MVP; unavailable required steps remain draft/partial. Use published evidence and limited implementation fixtures; no new CI claims or paid CI runs for these documents.
+
+## Positioning Library — standing design rule
+- Read [Brand Positioning & Mental Availability Library](docs/marketing-positioning-library.md) before implementing M06/M08, brand positioning, CEP, mental availability, distinctive assets or brand tracking. 14 PO capabilities compose existing tools; keep four engines, 29 tools, 26 ST, 34 PL and eight-tool MVP unchanged.
+- Separate observed perception, desired position, estimate and hypothesis; no invented perceptual maps, universal brand score, unsupported claims, or causal inference from tracking/attribution. Enforce common survey bases, missingness, comparability, model fit, proof, approvals and privacy.
+- Reuse existing scientific stack and ST05/PL13; Prince is optional candidate, not a new required dependency. Use evidence and limited code fixtures in DEV; no paid CI or runtime PASS claim for these documents.
