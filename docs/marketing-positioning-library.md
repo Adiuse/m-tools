@@ -309,3 +309,7 @@ A: L=6، P=3، MP=60%، NS=2، links/buyer=1.2؛ B: L=5، P=5، MP=100%، NS=1؛
 
 ## ۱۲. مسیر توسعه
 M06/M01 MVP: brief، research questionnaire plan، descriptive metrics from validated supplied data، PoP/PoD و option/statement مشروط؛ هیچ ابزار غیرفعال را active اعلام نکن. بعد از توسعه M04/M08/B04 و داده لازم، MA/DBA، network و tracking؛ advanced maps/choice فقط با data gate، ابزار فنی مطابق موتور. PL13/E01 و ST05/S03 همزمان reuse؛ ترتیب backlog مصوب تغییر نکرده است. افزودن capability نیازمند evidence و acceptance gate است، نه افزایش تعداد ابزار.
+
+## تکمیل PO05/PO10 — Preference Mapping (C-07)
+
+[Competitive Enhancements](marketing-competitive-enhancements.md) بخش ۶، external PREFMAP را در PO05/PO10 و M06 تعریف می‌کند: regression ترجیح روی coordinate version معتبر، vector β، مدل circular y=α+β^T x−γ||x||² و ideal point β/(2γ) فقط γ مثبت و fit/rank/CV مناسب؛ نقطه خارج hull extrapolated، عدم کفایت → جدول/طرح تحقیق، مدل داخلی PCA ترجیح فضای متفاوت. uncertainty، گروه و domain صریح؛ perceived/preferences/desired سه لایه جدا. بدون PO15 یا مدل conjoint موازی. PR03 choice pricing همان PO10؛ C-11 graph روابط انسانی M09 با graph co-occurrence PO03 یکی نیست. C-01 template preference/coordinates و نمونه، C-02 export چهارفرمت؛ تمام gate و proof قبلی حفظ. هیچ اجرا/fit/CI جدید.
