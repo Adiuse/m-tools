@@ -26,3 +26,9 @@ Use [Scientific Engine & Technology Specification](docs/marketing-scientific-eng
 - Keep Chronos-2, BERTopic, SHAP and other heavy/optional stacks lazy. Meridian 2.2.1 is the packaged MMM choice and must run in an isolated Python 3.12 environment because its ArviZ constraint conflicts with PyMC-Marketing 1.5.0; do not load model weights or execute expensive inference in the core path without a benchmark and user data/privacy review.
 
 - Research evidence for each tool is documented in `docs/marketing-29-tools-evidence-review.md`; review it before changing a method or package. The scientific-engine specification is the runtime/API contract.
+
+
+## Strategy Library — standing design rule
+- Read [Strategy Library](docs/marketing-strategy-library.md) for the 26 strategy recipes, research evidence, implementation contract, KPI definitions and UX. Recipes compose the existing 29 tools and four engines; do not introduce a new tool, engine, database, agent or service merely for a new strategy.
+- Preserve the eight-tool MVP and existing pipeline modes. Recipe availability derives from actual implemented capabilities; do not label a draft/partial strategy complete. Human approval, evidence and privacy gates remain mandatory.
+- Use published research and official documentation as methodological evidence; validate the implementation with limited fixtures/API tests. Do not rerun paid CI or assert new runtime PASS for documentation changes.
