@@ -308,7 +308,7 @@ A: L=6، P=3، MP=60%، NS=2، links/buyer=1.2؛ B: L=5، P=5، MP=100%، NS=1؛
 | R30 | Measuring effect and experiments — B04/B05 | marketing-29-tools-evidence-review.md | روش‌های آزمایش و گزارش اثر؛ استفاده از شواهد قبلی پروژه، بدون ادعای مرور مستقل تمام مقالات. |
 
 ## ۱۲. مسیر توسعه
-M06/M01 MVP: brief، research questionnaire plan، descriptive metrics from validated supplied data، PoP/PoD و option/statement مشروط؛ هیچ ابزار غیرفعال را active اعلام نکن. بعد از توسعه M04/M08/B04 و داده لازم، MA/DBA، network و tracking؛ advanced maps/choice فقط با data gate، ابزار فنی مطابق موتور. PL13/E01 و ST05/S03 همزمان reuse؛ ترتیب backlog مصوب تغییر نکرده است. افزودن capability نیازمند evidence و acceptance gate است، نه افزایش تعداد ابزار.
+M06/M01 MVP: brief، research questionnaire plan، descriptive metrics from validated supplied data، PoP/PoD و option/statement مشروط؛ هیچ ابزار غیرفعال را active اعلام نکن. بعد از توسعه M04/M08/B04 و داده لازم، MA/DBA، network و tracking؛ advanced maps/choice فقط با data gate، ابزار فنی مطابق موتور. PL13/E01 و ST05/S03 همزمان reuse؛ مرجع ترتیب تحویل [Full Product Vertical Slice Development Plan](marketing-full-product-development-plan.md) است: VS05 پایه M01/M05/M06 و VS15 پذیرش تک‌تک PO01–14 با روش‌های کامل و gateهای علمی؛ ST05/PL13 در VS19. تمام ۱۴ PO در محصول نهایی الزام دامنه‌اند، نه backlog بعد از MVP. افزودن capability نیازمند evidence و acceptance gate است، نه افزایش تعداد ابزار.
 
 ## تکمیل PO05/PO10 — Preference Mapping (C-07)
 
