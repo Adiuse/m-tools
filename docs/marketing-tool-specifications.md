@@ -112,4 +112,20 @@ AI برای دسته‌بندی متن، ساخت فرضیه و پیش‌نوی�
 
 ## Workbench: کاتالوگ Quick و Knowledge
 
-[Workbench Design v1.0](marketing-workbench-design.md) قرارداد ۱۳ QT و ۳۵ KN اولیه را با ورودی، فرمول/روش، محدودیت، نمونه و fixture تعیین می‌کند. QT همان method مالک در registry، بدون pipeline یا فیلدهای نامرتبط؛ محاسبه دستی موقت بدون workspace، ذخیره فقط با مجوز و provenance. B05 مالک ROAS/CTR/CPC/CPM/CPA و gap توصیفی؛ B01 CAC/CM/ROMI؛ B02 سربه‌سر و سناریو؛ B03 conversion/churn؛ M01 حجم نمونه SRS؛ M02 TAM و B04 power به‌عنوان کاندید بعدی. جزئیات نسخه، scope، status و validation مستقل QT از full؛ ابزار/موتور جدید یا محاسبه دوم ایجاد نشود. مدخل دانش منبع قابل بررسی، کاربرد، محدودیت و CTA روش مشترک دارد. معیارهای پذیرش F-01 تا F-05، عدم ادعای اثربخشی قبل از پایلوت و اولویت‌بندی مبتنی بر وظایف واقعی الزامی‌اند.
+[Workbench Design v1.1](marketing-workbench-design.md) قرارداد ۱۵ QT و ۳۶ KN اولیه را با ورودی، فرمول/روش، محدودیت، نمونه و fixture تعیین می‌کند. QT همان method مالک در registry، بدون pipeline یا فیلدهای نامرتبط؛ محاسبه دستی موقت بدون workspace، ذخیره فقط با مجوز و provenance. B05 مالک ROAS/CTR/CPC/CPM/CPA و gap توصیفی؛ B01 CAC/CM/ROMI/LTV/Payback؛ B02 سربه‌سر و سناریو؛ B03 conversion/churn؛ M01 حجم نمونه SRS؛ M02 TAM و B04 power به‌عنوان کاندید بعدی. جزئیات نسخه، scope، status و validation مستقل QT از full؛ ابزار/موتور جدید یا محاسبه دوم ایجاد نشود. مدخل دانش منبع قابل بررسی، کاربرد، محدودیت و CTA روش مشترک دارد. معیارهای پذیرش F-01 تا F-05، عدم ادعای اثربخشی قبل از پایلوت و اولویت‌بندی مبتنی بر وظایف واقعی الزامی‌اند.
+
+## تکمیل رقابتی — روش‌ها و قراردادهای مشترک
+
+[Competitive Design Enhancements](marketing-competitive-enhancements.md) قرارداد C-01,C-02,C-03,C-04,C-05,C-07,C-08,C-09,C-10,C-11,C-12 است. C-01 template Excel/CSV و demo/guide برای هر method از schema؛ C-02 ReportViewModel مشترک و چهار فرمت حرفه‌ای؛ E08 LessonRecord قابل جست‌وجو؛ C-10/C-12 intake پروفایل و استراتژی با evidence/preview/approval. C-05 دقیقاً چهار connector read-only GA4/Google Ads/Search Console/CRM، سایر منابع دستی/فایل؛ CRM vendor تعیین نشده.
+
+| ابزار مالک | افزوده علمی یا کاربردی | مرجع |
+|---|---|---|
+| B02 | PR01 PSM، PR02 GG، PR03 conjoint reuse M06، PR04 experiment reuse B04؛ Bass initial adoption | بخش ۳ و ۷ |
+| M06 | preference vector و ideal point با fit/holdout، در PO05/PO10 | بخش ۶ |
+| B01 | QT14 LTV افق محدود و QT15 CAC Payback؛ نه CLV پیش‌بینی بدون شواهد | بخش ۸ |
+| M09 | social/referral network analysis با داده رابطه واقعی، نه شبکه اجتماعی connector | بخش ۱۰ |
+| E08 | review و reuse درس‌آموخته با evidence و applicability | بخش ۴ |
+| S03/E01 | استراتژی/برنامه imported draft و approval انسانی | بخش ۹ |
+| B05/E05 و مصرف‌کنندگان | metric/source definition، sync و reconciliation چهار منبع | بخش ۵ |
+
+هیچ ابزار کامل سی‌ام یا روش اجرایی موازی ایجاد نمی‌شود. روش‌های advanced و اتصال‌ها پس از gate خود، هشت full MVP و ۱۵ QT (۱۳ اولیه) بدون تغییر دامنه کامل؛ هیچ قابلیت فعلاً implemented نیست.
