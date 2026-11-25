@@ -1,4 +1,4 @@
-# Scientific Engine & Technology Specification — M-Tools v1.5
+# Scientific Engine & Technology Specification — M-Tools v1.6
 
 تاریخ بازبینی روش‌شناختی و منابع رسمی: ۲۴ نوامبر ۲۰۲۶؛ نسخه 1.4. این بازبینی مستقل از CI است؛ CI فقط نصب و smoke test نرم‌افزار را می‌سنجد. مکمل [معماری فنی](marketing-system-architecture-v1.md)، [مشخصات ابزارها](marketing-tool-specifications.md) و [UX](marketing-ux-design-v1.md). سند طراحی و برنامه آزمون است؛ هیچ‌کدام از ۲۹ ابزار پیاده‌سازی یا آزمون انتهابه‌انتها نشده‌اند. نمونه‌های زیر fixture مصنوعی و خروجی مورد انتظار هستند، نه گزارش تست اجراشده. سیاست Capability-First در AGENTS.md برقرار است.
 
@@ -9,6 +9,8 @@
 ترتیب: کنترل داده و مجوز → انتخاب روش پایه معتبر → بررسی شرایط روش پیشرفته → مقایسه با پایه روی داده مستقل/ارزیابی انسانی → ثبت نسخه، فرض‌ها، نتیجه و عدم قطعیت → تأیید انسانی. در صورت شکست، fallback مجاز با ذکر دلیل؛ نه تغییر پنهانی روش یا جعل نتیجه. خروجی‌های observed/estimate/hypothesis/recommendation مطابق معماری مرجع. برای نتیجه مشروط، شروط صریح؛ برای داده ناکافی needs_data.
 
 ## ۲. انتخاب فناوری و سیاست نسخه
+
+الحاقیه مصوب: [Development Baseline](marketing-development-baseline.md). Python/Django backend و React/TypeScript frontend قطعی‌اند؛ direct pins در [pyproject](../pyproject.toml)، [science groups](../deps/science-groups.json)، [frontend manifest](../frontend/package.json) و [Meridian project](../deps/meridian/pyproject.toml) ثبت شده‌اند و تا resolver/test candidate هستند. ۷۲ قرارداد method، ۲۳۰ fixture، ۲۴ row schema و ۱۳ artifact type در [contracts](../contracts/analysis.v1.schema.json) و [fixtures](../contracts/fixtures.v1.json) برای DEV تعریف شده‌اند؛ هیچ method فعال یا آزمون پیاده‌سازی انجام نشده. اجرای gate با python3 scripts/verify_stack.py. جدول انتخاب‌های علمی و شروط روش زیر حفظ می‌شود.
 
 انتخاب baseline علمی برای شروع توسعه: CPython 3.12.x؛ NumPy 2.3.5، pandas 2.3.3، SciPy 1.15.3، scikit-learn 1.9.1 و Statsmodels 0.14.5 به‌عنوان candidateهای سازگار با اشتراک DoWhy 0.14، PyMC-Marketing 1.5.0 و StatsForecast 2.1.1. Google Meridian به‌دلیل تعارض ArviZ با PyMC-Marketing در محیط/worker جدا اجرا می‌شود. این baseline از روی metadata و شروط رسمی انتخاب شده و تا lockfile و اجرای مجدد resolver تأیید اجرایی نشده است. مرور پژوهش‌ها و انتخاب روش برای هر ۲۹ ابزار در [سند Evidence Review](marketing-29-tools-evidence-review.md) ثبت شده است.
 
@@ -33,7 +35,7 @@
 
 ### قرارداد تثبیت وابستگی
 
-در آغاز DEV: pyproject.toml و uv.lock، نسخه Python و platform هدف، lockfile frontend، نسخه solver و مدل/وزن/پرامپت. گروه core کوچک، extras مجزا forecast/nlp/causal/bayesian/optimization؛ هر گروه مورد نیاز با هسته و گروه‌های هم‌زمان لازم resolve/install شود. آزمون import و API smoke، تست fixture، pip/uv dependency check یا معادل، گزارش امنیت و SBOM/رجیستری مجوز. اگر ترکیب ناممکن بود، نسخه سازگار یا جایگزین مجاز و دلیل ثبت شود؛ سرویس مستقل فقط در صورت ضرورت اثبات‌شده. هیچ lockfile در این PR ساخته نشده؛ مرحله DEV مسئول آن است. برای مجوز توسعه و release gate به AGENTS.md مراجعه شود.
+Manifestهای exact direct pins و runtime هدف ثبت شده‌اند. D0: ایجاد و تأیید uv.lock و frontend/pnpm-lock.yaml با runner مشترک، گروه‌های optional ترکیبی با core constraints و lock دارای hash؛ Meridian جدا. آزمون import/API، schema/oracle، uv pip check، سپس امنیت و SBOM/رجیستری مجوز. اگر ترکیب ناممکن بود، conflict واقعی و اصلاح کمینه با دلیل ثبت شود. هیچ lockfile معتبر در محیط فعلی تولید نشده و runner جدید NOT_RUN است؛ شبکه و interpreter هدف در D0 لازم‌اند. ۲۲ oracle مستقل روی Python 3.13.5 اجرا و PASS شدند، نه تست محصول یا baseline پین‌شده. برای مجوز توسعه و release gate به AGENTS.md مراجعه شود.
 
 ## ۳. مشخصات علمی و فناوری ۲۹ ابزار
 
