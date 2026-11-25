@@ -266,3 +266,7 @@ flowchart TD
 ## مسیر مستقل Workbench
 
 [Workbench Design](marketing-workbench-design.md) لایه Quick و Knowledge و شخصی‌سازی را بر همان ابزارها تعریف می‌کند. Quick دستی بدون Workspace، وابستگی یا pipeline و بدون ثبت AnalysisRun؛ ذخیره صریح نتیجه/تحلیل کامل در workspace با شواهد و مجوز. QTهای محدود می‌توانند قبل از ابزار کامل مالک پس از validation خود عرضه شوند؛ هیچ recipe یا مرحله domain/full با صرف فعال بودن QT آماده تلقی نشود. سه mode single/domain/full، مالکیت artifact، تأیید انسانی و ۲۹ ابزار تغییر نمی‌کنند. اولویت ابزارهای کامل فعلاً هشت مورد اولیه و B05 پایه است؛ F-03 بررسی وظایف و تصمیم مالک و F-05 پایلوت مقایسه بهره‌وری را تعریف می‌کند.
+
+## تکمیل رقابتی Workbench
+
+[Competitive Enhancements](marketing-competitive-enhancements.md) ۱۱ قابلیت منتخب روی registry موجود: template/demo و import validation، export مدیریتی از artifact، LessonRecord E08، intake پروفایل/استراتژی draft، چهار connector read-only GA4/Google Ads/Search Console/CRM، روش‌های B02/M06/B01/M09. هیچ connector اجتماعی، pipeline mode، full tool یا موتور جدید. QT14/15 مستقل از full، PR/PREFMAP/Bass/SNA gate علمی؛ dependency فقط artifact معتبر و approval انسانی. داده imported/partial با coverage و evidence؛ no auto-action. 
