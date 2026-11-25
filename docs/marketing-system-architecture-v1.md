@@ -1,6 +1,6 @@
 # معماری پایه نهایی M-Tools — v1.0 (بدون UI)
 
-این سند تصمیم‌های معماری لازم برای شروع پیاده‌سازی را تثبیت می‌کند، نه اثبات تجربی محصول. همراه با [بانک شایستگی](marketing-manager-competency-framework.md)، [معماری مفهومی](marketing-decision-pipeline-architecture.md) و [مشخصات ابزارها](marketing-tool-specifications.md) خوانده شود. در تعارض فنی، این سند مقدم است. ۴ موتور، ۲۹ ابزار و ۱۲۰ شناسه بانک بدون تغییر می‌مانند. هیچ UI، کد اجرایی یا زیرساخت واقعی در این مرحله ساخته نمی‌شود.
+این سند تصمیم‌های معماری لازم برای شروع پیاده‌سازی را تثبیت می‌کند، نه اثبات تجربی محصول. همراه با [بانک شایستگی](marketing-manager-competency-framework.md)، [معماری مفهومی](marketing-decision-pipeline-architecture.md) و [مشخصات ابزارها](marketing-tool-specifications.md) خوانده شود. در تعارض فنی، این سند مقدم است؛ در موضوع پشته مصوب، قرارداد ماشین‌خوان و ترتیب توسعه، [Development Baseline & Architecture Freeze](marketing-development-baseline.md) الحاقیه حاکم است. ۴ موتور، ۲۹ ابزار و ۱۲۰ شناسه بانک بدون تغییر می‌مانند. در این مرحله UI یا backend محصول ساخته نشده؛ manifest، schema، fixture و اسکریپت آزمون پیش از DEV طبق الحاقیه ثبت شده‌اند.
 
 ## ۰. هویت محصول و اصول حاکم بر توسعه (تصمیم مالک پروژه)
 
@@ -76,7 +76,7 @@
 
 ## ۳. قرارداد ۲۹ ابزار و ارتباط آن‌ها
 
-فیلدهای زیر قرارداد سطح معماری هستند. نوع object برای ساختارهای اختصاصی است و پیش از کدنویسی هر ابزار schema دقیق زیرکلیدها در کنار تست همان ابزار نوشته می‌شود؛ نه ایجاد یک زبان مدل‌سازی عمومی. همه ابزارها علاوه بر موارد جدول، workspace، سؤال تصمیم، نسخه روش، refs شواهد و constraints مشترک دارند. علامت ? یعنی اختیاری/مشروط، [] آرایه؛ خروجی ? در نبود پیش‌شرط null است. وابستگی‌ها منابع پیشنهادی‌اند نه پیش‌نیاز اجرای اجباری: داده معتبر واردشده دستی جایگزین می‌شود. وابستگی به نسخه اجرای قبلی است؛ چرخه منطقی بین ابزارها باعث اجرای بازگشتی خودکار نمی‌شود.
+فیلدهای زیر نمای خلاصه قرارداد سطح معماری‌اند. schema نوع‌دار و بسته زیرکلیدها و envelopeها در [analysis.v1.schema.json](../contracts/analysis.v1.schema.json) و نمونه‌های پذیرش در [fixtures.v1.json](../contracts/fixtures.v1.json) ثبت شده‌اند. پیش از active شدن هر method، validation معنایی، fixture کامل و آزمون کد واقعی لازم است. همه ابزارها علاوه بر موارد جدول، workspace، سؤال تصمیم، نسخه روش، refs شواهد و constraints مشترک دارند. علامت ? یعنی اختیاری/مشروط، [] آرایه؛ خروجی ? در نبود پیش‌شرط null است. وابستگی‌ها منابع پیشنهادی‌اند نه پیش‌نیاز اجرای اجباری: داده معتبر واردشده دستی جایگزین می‌شود. وابستگی به نسخه اجرای قبلی است؛ چرخه منطقی بین ابزارها باعث اجرای بازگشتی خودکار نمی‌شود.
 
 | ID | ورودی اختصاصی:نوع | منابع خروجی قبلی (اختیاری) | خروجی اختصاصی:نوع | خانواده روش | نمونه معیار پذیرش |
 |---|---|---|---|---|---|
@@ -115,11 +115,12 @@
 ```text
 RunRequest {
   workspace_id, tool_id, question,
-  method_version, input, evidence_refs[],
+  method_id, method_version, input, evidence_refs[],
   dependency_run_ids[], idempotency_key
 }
 RunResult {
-  run_id, status, method_id, method_version,
+  run_id, workspace_id, tool_id, status, analysis_status,
+  method_id, method_version,
   input_hash, findings[], options[], assumptions[],
   evidence_refs[], limitations[], missing_fields[],
   output, next_action, error_code?
@@ -149,7 +150,7 @@ flowchart TD
     OUT --> CORE
 ```
 
-Modular monolith: چهار ماژول دامنه، core مشترک، repository داده، registry روش‌ها و adapter اختیاری AI. یک worker در همان codebase فقط برای کار طولانی؛ در آغاز صف مبتنی بر DB کافی است. هیچ agent مستقل، orchestrator پیچیده، vector DB یا microservice لازم نیست. هسته محاسبات علمی با CPython 3.12.x طراحی می‌شود؛ candidateهای اصلی NumPy 2.3.5، pandas 2.3.3، SciPy 1.15.3، scikit-learn 1.9.1 و Statsmodels 0.14.5 هستند. backend وب Django و رابط React/TypeScript گزینه‌های اصلی‌اند. Meridian در صورت فعال‌سازی به‌دلیل تعارض ArviZ با PyMC-Marketing در virtualenv/worker جدا اجرا می‌شود؛ این microservice دامنه‌ای جدید ایجاد نمی‌کند. نسخه‌های دقیق پس از resolver و lockfile تثبیت می‌شوند. ارائه‌دهنده AI مستقل از هسته علمی و قابل تعویض می‌ماند.
+Modular monolith: چهار ماژول دامنه، core مشترک، repository داده، registry روش‌ها و adapter اختیاری AI. یک worker در همان codebase فقط برای کار طولانی؛ در آغاز صف مبتنی بر DB کافی است. هیچ agent مستقل، orchestrator پیچیده، vector DB یا microservice لازم نیست. طبق تصمیم صریح مالک، backend و هسته علمی Python 3.12 / Django، REST با DRF، frontend React/TypeScript و PostgreSQL 17 قطعی‌اند. Node.js فقط ابزار build/dev است. نسخه‌های مستقیم هدف و gate نصب در [Development Baseline](marketing-development-baseline.md) و manifestهای repo ثبت شده‌اند؛ هیچ سازگاری اجرایی جدیدی تأیید نشده است. Meridian در صورت فعال‌سازی به‌دلیل تعارض ArviZ با PyMC-Marketing در virtualenv/worker جدا اجرا می‌شود؛ این microservice دامنه‌ای جدید ایجاد نمی‌کند. نسخه‌های دقیق پس از resolver و lockfile تثبیت می‌شوند. ارائه‌دهنده AI مستقل از هسته علمی و قابل تعویض می‌ماند.
 
 رجیستری هر ابزار شامل tool_id، input_schema، output_schema، method_id/version، validate، run، تست مرجع. تابع run روی snapshot فقط می‌خواند و خروجی تحلیلی می‌دهد؛ اثر بیرونی، پرداخت، انتشار، ارسال یا تغییر CRM در آن ممنوع. محاسبات قطعی از مدل زبانی مستقل؛ AI فقط روی داده مجاز برای خلاصه‌سازی/پیشنهاد، پاسخ JSON اعتبارسنجی‌شده و ثبت نسخه مدل/پرامپت. شکست AI به نتیجه ناقص یا خطای مشخص منجر شود، نه حدس عدد.
 
@@ -186,7 +187,8 @@ Idempotency key در workspace یکتا؛ درخواست تکراری همان p
 
 - [x] ۲۹ قرارداد سطح معماری و نمونه معیار پذیرش؛ پوشش ۱۲۰ شناسه در سند قبلی.
 - [x] روش پایه و محدوده اعتبار، مدل داده و وابستگی نسخه‌دار، جریان اجرا، API، خطا و امنیت طراحی شده‌اند.
-- [ ] برای هر ابزار پیش از توسعه: زیرکلیدهای object در JSON Schema، migration و تست دقیق تعریف شود.
+- [x] ثبت قرارداد JSON Schema و کاتالوگ fixture برای ۲۹ ابزار و ۱۵ QT، همراه با row/artifact schemas.
+- [ ] اجرای checker استاندارد روی baseline، migration، validation معنایی و تست پیاده‌سازی واقعی هر method پیش از active شدن.
 - [ ] تست واحد فرمول، حالت صفر/مفقود/ارز متفاوت/زمان و cohort ناسازگار؛ تست قرارداد هر ابزار با ورودی صحیح، ناقص، نامعتبر.
 - [ ] تست یکپارچه مسیر M01→M05→M06→S03→E01→Outcome و مسیر B03→S01→B04→B05؛ داده مصنوعی با برچسب، خروجی از پیش محاسبه‌شده.
 - [ ] تست جداسازی workspace، مجوز شیء، تکرار درخواست، شکست AI، منبع جعلی، حذف داده، بازیابی backup.
@@ -260,7 +262,7 @@ MVP ابزارهای کامل همان ۸ ابزار سند مشخصات و سن
 
 ## ۹. مرجع فناوری و سازگاری علمی
 
-انتخاب دقیق کتابخانه‌ها، نسخه‌ها، APIهای واقعی، محدودیت‌های داده و برنامه آزمون ۲۹ ابزار در [Scientific Engine & Technology Specification](marketing-scientific-engine-specification.md) نگهداری می‌شود. baseline پیشنهادی علمی CPython 3.12.x است؛ NumPy 2.3.5، pandas 2.3.3، SciPy 1.15.3 و Statsmodels 0.14.5 برای اشتراک محدودیت‌های DoWhy، StatsForecast و Meridian انتخاب شده‌اند. PyMC-Marketing و Meridian به‌دلیل تعارض ArviZ در environmentهای جدا اجرا می‌شوند. baseline جدید هنوز به‌دلیل محدودیت اعتبار CI نصب و lock نشده؛ نسخه‌ها candidate هستند و نباید runtime تأییدشده معرفی شوند. شواهد و انتخاب روش ۲۹ ابزار در [مرور پژوهش](marketing-29-tools-evidence-review.md) است.
+انتخاب دقیق کتابخانه‌ها، نسخه‌ها، APIهای واقعی، محدودیت‌های داده و برنامه آزمون ۲۹ ابزار در [Scientific Engine & Technology Specification](marketing-scientific-engine-specification.md) نگهداری می‌شود. baseline پیشنهادی علمی CPython 3.12.x است؛ NumPy 2.3.5، pandas 2.3.3، SciPy 1.15.3 و Statsmodels 0.14.5 برای اشتراک محدودیت‌های DoWhy، StatsForecast و Meridian انتخاب شده‌اند. PyMC-Marketing و Meridian به‌دلیل تعارض ArviZ در environmentهای جدا اجرا می‌شوند. baseline جدید هنوز به‌دلیل نبود runtime هدف و دسترسی registry در محیط این مرحله و عدم اجرای CI نصب و lock نشده؛ نسخه‌های مستقیم در manifest ثبت شده‌اند، candidate هستند و نباید runtime تأییدشده معرفی شوند. شواهد و انتخاب روش ۲۹ ابزار در [مرور پژوهش](marketing-29-tools-evidence-review.md) است.
 
 
 ## ۱۰. Strategy Library — مسیرهای استراتژی بر موتور موجود
