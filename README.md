@@ -16,4 +16,6 @@ See the [canonical product policy and architecture (section 0)](docs/marketing-s
 
 [Competitive design enhancements](docs/marketing-competitive-enhancements.md): data templates and demos, four-format executive reporting, pricing research, organization lessons, preference mapping, Bass diffusion, LTV/payback, document intake and relationship network analysis. Direct read-only connections are limited to GA4, Google Ads, Search Console and CRM (vendor pending).
 
-Current status: design and documentation, not an implemented or validated product.
+[Development baseline and architecture freeze](docs/marketing-development-baseline.md): Python/Django backend, React/TypeScript frontend, PostgreSQL, direct dependency pins, [72 typed method contracts](contracts/analysis.v1.schema.json), [230 synthetic fixtures](contracts/fixtures.v1.json) and DEV roadmap.
+
+Current status: FROZEN_DESIGN / RUNTIME_LOCK_PENDING / NOT_IMPLEMENTED. Run `python3 scripts/verify_stack.py` with the specified target runtimes and registry access to verify the candidate stack. No verified lockfiles or product validation yet. Compatibility CI is manual only.
