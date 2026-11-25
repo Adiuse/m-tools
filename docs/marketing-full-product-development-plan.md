@@ -27,7 +27,7 @@ MVP در پایان D3 پس از gate VS00–07 یک محصول پایه قاب�
 | D5 — روش‌های پیشرفته و کتابخانه‌های کامل | VS15–20 | روش‌های پیشرفته مصوب و همه PO/ST/PL با pipeline و full-tool readiness |
 | D6 — پذیرش نهایی | VS21 | پذیرش یکپارچه و شواهد واقعی/پایلوت؛ تصمیم release مالک |
 
-جدول برنامه PR و وابستگی مستقیم (تمام وابستگی‌های transitively لازم نیز اعمال می‌شوند؛ فازها به ترتیب اجرا/پذیرش می‌شوند):
+جدول برنامه PR و وابستگی مستقیم (تمام وابستگی‌های transitively لازم نیز اعمال می‌شوند؛ ترتیب فازها پیش‌فرض اجرا و پذیرش است؛ وابستگی‌های مستقیم و انتقالی gate سخت هستند و ادامه مستقل با ثبت blocker و تایید مالک مجاز است):
 
 | PR plan ID | فاز | موضوع | پیش‌نیاز مستقیم | روش‌های قرارداد |
 |---|---|---|---|---:|
@@ -48,13 +48,13 @@ MVP در پایان D3 پس از gate VS00–07 یک محصول پایه قاب�
 | VS14 | D4 | چهار اتصال داده و کیفیت گزارش چندمنبعی | VS02، VS06، VS11، VS12 | 0 |
 | VS15 | D5 | Scientific research & full positioning library | VS05، VS08، VS09، VS10، VS11، VS12، VS13 | 5 |
 | VS16 | D5 | Pricing research, demand forecast & causal analytics | VS08، VS10، VS15 | 7 |
-| VS17 | D5 | Customer lifetime, churn, lead & media models | VS06، VS10، VS11، VS12، VS14، VS16 | 4 |
+| VS17 | D5 | Customer lifetime, churn, lead & media models | VS06، VS10، VS11، VS12، VS16 | 4 |
 | VS18 | D5 | Pipeline execution & common strategy/planning recipes | VS04، VS05، VS06، VS07، VS08، VS09، VS10، VS11، VS12، VS13، VS15، VS16، VS17 | 0 |
 | VS19 | D5 | Growth, commercial & customer strategy/planning recipes | VS18 | 0 |
 | VS20 | D5 | Digital, communications & channel strategy/planning recipes | VS18 | 0 |
 | VS21 | D6 | Full-product acceptance, pilot & release gate | VS00، VS01، VS02، VS03، VS04، VS05، VS06، VS07، VS08، VS09، VS10، VS11، VS12، VS13، VS14، VS15، VS16، VS17، VS18، VS19، VS20 | 0 |
 
-VS14 و VS17/18–20 وابستگی عملیاتی به داده زنده برای اجرای fixture ندارند؛ اگر live C05 مسدود شد، کار توسعه مستقل با داده دستی/fixture در branch پذیرفته‌شده و با ثبت blocker قابل انجام است، نه merge با ادعای C05 کامل. ترتیب فاز/گیت پذیرش کامل محصول تا رفع آن برقرار می‌ماند. VS17 وابسته به قرارداد و کیفیت connector برای مصرف داده است، نه داشتن حساب تجاری در اجرای آزمایش synthetic. هیچ merge یا تایید خودکار با وجود پیش‌نیاز مسدود؛ تغییر ترتیب عملی با ثبت تصمیم مالک.
+VS14 برای پذیرش نهایی خودش نیازمند آزمون زنده است؛ VS17–20 برای اجرای روش‌ها/recipeهای مستقل به حساب زنده provider وابسته نیستند. اگر live C05 مسدود شد، برش VS14 وضعیت BLOCKED_LIVE دارد و با ثبت علت و تایید مالک، برش‌های مستقل می‌توانند بر پایه داده دستی/fixture و قرارداد Dataset/Evidence پذیرفته‌شده ادامه یابند؛ integration داده connector پس از VS14 آزمون شود. هیچ برشی با پیش‌نیاز سخت پذیرفته‌نشده merge نشود. VS21 به پذیرش همه VSها از جمله VS14 وابسته است؛ هیچ پذیرش کامل محصول تا رفع blocker C05.
 
 ## ۳. Definition of Done مشترک تمام برش‌ها
 
@@ -233,7 +233,7 @@ VS14 و VS17/18–20 وابستگی عملیاتی به داده زنده برا
 
 ### VS17 — Customer lifetime, churn, lead & media models (D5)
 
-- پیش‌نیاز: VS06، VS10، VS11، VS12، VS14، VS16.
+- پیش‌نیاز: VS06، VS10، VS11، VS12، VS16.
 - قرارداد method: B01.clv_model، B03.churn_model، E03.mmm، E04.lead_scoring.
 - تحویل قابل استفاده: تحلیل پیش‌بینی ارزش/ریزش مشتری، امتیازدهی شفاف لید و تحلیل اثر و تخصیص رسانه مبتنی بر پاسخ معتبر، بدون اجرای خودکار.
 - محدوده PR: B01 PyMC-Marketing CLV خانواده BG/NBD/Pareto/NBD/BG-BB/Shifted BG و Gamma-Gamma با شرط مناسب؛ B03 logistic/CatBoost/lifelines و calibration/temporal validation؛ E04 rules/logistic/CatBoost و fairness/consent؛ E03 Meridian 2.2.1 محیط جدا و PyMC-Marketing model، adstock/saturation، priors/calibration/holdout/posterior diagnostics، budget optimization reuse B06 با response curve معتبر؛ SHAP/Optuna فقط طبق شواهد. B05/B01/E03 consumption، fallback توصیفی/سناریو نه جعل مدل. اتصال live برای اجرای fixture لازم نیست؛ داده مجاز واقعی/فایل جایگزین است.
