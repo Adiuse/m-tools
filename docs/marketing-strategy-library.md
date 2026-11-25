@@ -396,6 +396,8 @@ Recipe catalog در کد نسخه‌دار (JSON/YAML یا ساختار Python �
 | R32 | Digital standardization vs. adaptation: Mitigating the liability of outsidership (2025), IBR | https://doi.org/10.1016/j.ibusrev.2025.102487 | مرور ادبیات استانداردسازی/انطباق؛ انتخاب وابسته به بازار و قابلیت‌ها. |
 
 ## ۱۰. تصمیم توسعه
+
+مرجع ترتیب و تحویل کامل [Full Product Vertical Slice Development Plan](marketing-full-product-development-plan.md) است. پذیرش ST01 در VS18، ST02–06/ST13–20/ST23/ST24/ST26 در VS19، ST07–12/ST21/ST22/ST25 در VS20؛ هر ۲۶ مسیر fixture و UI/coverage مستقل دارند. MVP نقطه عطف میانی است و هیچ ST مصوب از دامنه نهایی حذف نمی‌شود؛ قیود علمی و مالکیت روش همین سند برقرارند.
 تمام مسیرها طراحی و در catalog مستندند. اجرای اولیه از Marketing/Digital/Social با ابزارهای موجود به‌عنوان پیش‌نویس شفاف، سپس تکمیل قابلیت‌های E02/E03/B04/B05 و سایر ابزارها طبق roadmap مصوب؛ ترتیب دقیق توسعه تابع backlog مالک است و MVP بدون تایید مالک توسعه دامنه نمی‌یابد. استراتژی‌های تخصصی جدید در آینده به‌صورت recipe اضافه می‌شوند و تا زمانی که ابزار موجود کفایت دارد ابزار سی‌ام ایجاد نمی‌شود.
 
 
