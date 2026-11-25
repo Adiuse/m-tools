@@ -62,19 +62,21 @@ python3 scripts/verify_stack.py --groups forecast causal
 
 **وضعیت واقعی این مرحله:** در محیط فعلی Python 3.13.5، uv 0.10.0 و Node 22.16.0 موجود بود؛ Python 3.12.16 و pnpm در دسترس نبودند. DNS برای pypi.org و registry.npmjs.org شکست خورد (curl 6) و uv lock --offline --python 3.12.16 با exit 2 به دلیل نبود interpreter شکست خورد. بنابراین هیچ uv.lock/pnpm-lock.yaml معتبر تولید و هیچ سازگاری مشترک جدیدی تأیید نشده است. این blocker محیط است، نه کشف conflict جدید کتابخانه. اجرای مستقل ۲۲ oracle روی Python 3.13.5: ۲۲/۲۲ PASS؛ QT13 با Statsmodels محلی 0.14.6: n=680.3526619، ceil=681، توان 0.8003728؛ فقط شاهد مرجع و نه PASS نسخه پین‌شده 0.14.5. کنترل ساختاری اولیه در محیط ابزار روی کاتالوگ و نمونه‌های اصلی انجام شد؛ checker استاندارد و runner جدید هنوز اجرا نشده‌اند. CI قبلی ۹/۹ روی Python 3.13.18 (commit ceb1d861ecbe9e94709e01b4329171cbdbdbb71f، run 45445594222) تاریخی است و این baseline را تأیید نمی‌کند.
 
-## ۶. نقشه توسعه (PRهای مستقل، بدون خرد کردن غیرضروری)
+## ۶. نقشه توسعه کامل محصول (مصوبه مالک)
 
-| مرحله | محدوده و شرط خروج |
-|---|---|
-| D0 — Stack gate | اجرای core resolve/lock/install/test واقعی، PostgreSQL 17 و driver test، رفع conflict مستند و ثبت lockها و شواهد. برای هر گروه optional قبل از فعال‌سازی همان گروه/ترکیب و Meridian جدا. **BLOCKED** در محیط فعلی. |
-| D1 — Foundation | Django/React skeleton، auth، workspace و roles، storage/migration، evidence/dataset و validation، registry، Run/Scratch contracts، job/approval پایه، history و privacy. تست isolate/idempotency/atomicity/invalid refs و مسیر واقعی ثبت/خواندن. |
-| D2 — Daily workbench | ۱۳ QT اولیه، KN اولیه ۳۶ مدخل با source/version، personal bookmarks/recents، C01 template/demo/guide، scratch و save صریح؛ بدون اجبار profile. هر QT فقط بعد از fixture واقعی و UX gate مستقل active. |
-| D3 — MVP scientific tools | ۸ ابزار کامل S01/S03/M01/M05/M06/B01/B03/E01 + B05 پایه؛ ابتدا روش پایه و vertical slice قابل استفاده، سپس مدل پیشرفته طبق کفایت داده و gate. هر روش unit+integration، داده مصنوعی کامل، schema/semantic، evidence، fallback و محدودیت. C02 reporting مشترک، C10 profile و C12 strategy draft intake مطابق نیاز مسیر و approval. |
-| D4 — Pipelines & approved enhancements | single/domain/full opt-in، recipe ST/PL/PO با پوشش واقعی و draft/partial، گزارش PDF/DOCX/XLSX/PPTX، C04 درس‌آموخته روی E08 و چهار اتصال read-only مصوب در زمان آمادگی owner/endpoint؛ C01–05/C07–12 در owner tool موجود، نه افزایش شمار ابزار. هر قابلیت پس از gate واقعی، CRM vendor pending. |
-| D5 — Beyond MVP | اولویت ابزارهای باقی‌مانده و QT12/13 طبق F03 وظایف واقعی و تأیید مالک؛ forecast/causal/MMM/CLV/choice/optimization/NLP و سایر روش‌ها با fixture کامل، validation خارج نمونه/diagnostics و مقایسه baseline. روش optional تا کسب شواهد active نشود. |
-| D6 — Pilot & release | F05 paired workflow/time/error/comprehension/workload study، F03 field evidence، اصلاحات مستند، علمی/کاربردی روی داده مجاز، security/backup/RTL/accessibility/license/release checks؛ هیچ ادعای تجربی بدون داده. |
+[Full Product Vertical Slice Development Plan v1.0](marketing-full-product-development-plan.md) مرجع حاکم ترتیب، محدوده PR، وابستگی و معیار پذیرش مستقل است. دامنه تحویل کل محصول نهایی است؛ MVP فقط milestone میانی و نه نقطه پایان. ۷ فاز، ۲۲ PR برنامه‌ریزی‌شده VS00–VS21؛ ۱۹ برش تحویلی قابلیت‌محور VS02–VS20، دو مرحله gate/زیرساخت و یک مرحله پذیرش نهایی.
 
-D0 مانع شروع برنامه‌ریزی و طراحی نیست، اما پیش‌شرط پذیرش کد وابسته و freeze اجرایی است. D1–D6 برنامه‌اند، نه PRهای پیاده‌سازی‌شده. مرحله DEV بعد از تأیید مالک، با کمترین تعداد PR مستقل و منطقی آغاز شود. تکمیل ۲۹ ابزار شرط انتشار MVP نیست.
+| فاز | PR plan | شرط خروج |
+|---|---|---|
+| D0 — Stack gate | VS00 | core resolve/lock/install/test و PostgreSQL/driver واقعی؛ فعلاً BLOCKED |
+| D1 — Foundation & IO | VS01–02 | حساب، workspace، registry و قرارداد مشترک؛ داده، template/demo، گزارش ۴ فرمت و intake پروفایل |
+| D2 — Daily workbench | VS03 | ۱۳ QT اولیه، ۳۶ KN، شخصی‌سازی، scratch/save |
+| D3 — MVP milestone | VS04–07 | ۸ ابزار پایه مصوب S01/S03/M01/M05/M06/B01/B03/E01 و B05 پایه، برنامه یکپارچه و import استراتژی؛ پایان MVP نیست |
+| D4 — Full tool expansion & connections | VS08–14 | روش پایه همه ۲۹ ابزار، QT12/13، حافظه سازمانی، SNA/process، ۴ اتصال داده مصوب |
+| D5 — Advanced science & full libraries | VS15–20 | همه روش‌های مصوب با gate علمی، PO01–14، ST01–26، PL01–34 و pipeline یکپارچه؛ readiness نهایی ابزارها |
+| D6 — Full-product acceptance | VS21 | همه VSها، F03/F05 و pilot واقعی، scientific/functional/security/license gates؛ تایید مالک برای release |
+
+هر ۷۲ method و همه شناسه‌های ST/PL/PO/KN/F/C و providerها مالک تحویل صریح در سند تفصیلی دارند. برای هر برش، scope و نتیجه قابل استفاده، آزمون مثبت/منفی و محدودیت مشخص شده است؛ هیچ قابلیت مصوب در backlog نامعلوم رها نشود. تغییر ترتیب صرفاً با evidence و تایید مالک، نه تغییر دامنه. D0 precondition پذیرش کد وابسته است؛ optional group قبل از اجرای method مربوط lock/test شود. همه فازها برنامه‌اند؛ هیچ برش DEV اجرا یا merge نشده است. اگر داده، مجوز، CRM vendor یا pilot لازم در دسترس نباشد، وضعیت gate مربوط BLOCKED/NOT_READY و سایر برش‌های مستقل فقط طبق نقشه ادامه می‌یابند. انتشار محصول کامل منوط به پذیرش همه VS00–21 و تایید مالک است.
 
 ## ۷. وضعیت فریز و پذیرش
 
