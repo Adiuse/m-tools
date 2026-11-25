@@ -1,0 +1,14 @@
+[project]
+name = "m-tools-meridian-worker"
+version = "0.1.0"
+requires-python = ">=3.12.16,<3.13"
+dependencies = [
+  "google-meridian==2.2.1",
+  "numpy==2.3.5",
+  "pandas==2.3.3",
+]
+
+[tool.uv]
+package = false
+required-version = "==0.13.10"
+environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
