@@ -292,3 +292,7 @@
 
 ## جمع‌بندی
 برای ۲۹ ابزار، روش و فناوری منتخب همراه با شواهد و محدودیت‌های آن‌ها مشخص شد. نتیجه، نصب ۲۹ نرم‌افزار یا استفاده اجباری از ML نیست؛ یک موتور تصمیم‌سازی ترکیبی است: فرمول‌های دقیق برای محاسبات، روش‌های آماری برای استنباط، مدل‌های ML فقط برای مسئله مناسب، و چارچوب انسانی برای تصمیم‌های استراتژیک و اجرایی. انتخاب‌های این سند مبنای DEV هستند؛ تست محدود در DEV باید صحت اتصال API و fixtureهای هر ابزار را بررسی کند، نه اینکه پژوهش‌های منتشرشده را از صفر بازتولید کند.
+
+## شواهد تکمیل رقابتی (C-01 تا C-12 منتخب)
+
+[Competitive Enhancements](marketing-competitive-enhancements.md) بخش ۱۲، E1–E18 را به روش و قرارداد وصل می‌کند: مطالعه مقایسه‌ای Müller/Heim/Matthys 2022 و راهنمای صنعتی PSM/GG (B02، stated preference)، Bass 1969 و bounded SciPy fit (B02، first adoption)، PREFMAP literature Carroll/2022 و 2002 internal/external (M06، regression on validated coordinates)، NetworkX centrality/Louvain (M09، structural not causal). منابع رسمی API GA4/Google Ads/Search Console و مثال SDK CRM (بدون انتخاب vendor)، python-docx/XlsxWriter و candidate renderer. مرور هدفمند چکیده/مستندات عمومی، نه full-text systematic review؛ نسخه‌های runtime و QA RTL/format و tests و live data بعد از DEV. هیچ روش از صرف رقابت یا ادعای محصول برتر انتخاب قطعی نمی‌شود. شواهد موجود برای B01 CLV، PO10 Biogeme، B04 causal، F-05 UX reuse. هیچ اتصال Facebook/Meta یا provider دیگر در scope.
