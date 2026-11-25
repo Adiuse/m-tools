@@ -500,3 +500,6 @@ A=2، B=4، C=3 بعد A و B، D=1 بعد C؛ ES A=0,B=0,C=4,D=7؛ finish=8، f
 
 ## ۱۰. مراحل DEV
 اول E01 common plan contract + محاسبات بودجه/قید/تقویم و PL01/02/03/04 draft روی ابزارهای MVP؛ سپس specialty recipeها فقط به میزان ابزار فعال و با reuse. در مرحله توسعه بعدی، E02/E03/E04/E06/B04 و B05 کامل به برنامه اضافه می‌شوند؛ ترکیب چند recipe و solver محدود منابع در صورت نیاز. ترتیب roadmap مصوب بدون اجازه تغییر نمی‌کند. هیچ فناوری یا نسخه صرفاً برای «جدید بودن» اضافه نمی‌شود. مرجع متد و شواهد این سند، قرارداد runtime موتور علمی، و انتخاب استراتژی سند ST است.
+
+## ۱۱. اتصال PL13 به جایگاه‌سازی و tracking
+PL13 و در صورت نیاز PL15/16/19/34 از [Positioning Library](marketing-positioning-library.md) و PositioningResult مصوب برای message architecture، CEP/asset plan، proof/offer/service changes، brand tracking، آزمون پیام و guardrail استفاده می‌کنند. E01 همان برنامه یکپارچه، owner/زمان/هزینه/ظرفیت و gate را نگه می‌دارد؛ هر کار/هزینه مشترک یک ID. baseline/target/actual و forecast جدا، change request برای تغییر جایگاه مصوب. هیچ مسیر PL اضافه نشده و برنامه جایگزین تحقیق ادراک نیست.
