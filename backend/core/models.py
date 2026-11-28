@@ -80,6 +80,11 @@ class CompanyProfile(Versioned):
     objective = models.CharField(max_length=400)
     business_model = models.CharField(max_length=200, blank=True)
     geography = models.CharField(max_length=160, blank=True)
+    company_name = models.CharField(max_length=160, blank=True, default="")
+    target_segment = models.CharField(max_length=200, blank=True, default="")
+    channels = models.CharField(max_length=240, blank=True, default="")
+    public_contact = models.CharField(max_length=240, blank=True, default="")
+    pricing_terms = models.CharField(max_length=400, blank=True, default="")
     constraints = models.JSONField(default=list)
 
 
@@ -264,15 +269,25 @@ class IntakePreview(TenantRow):
 
 class ReportExport(TenantRow):
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
-    source = models.ForeignKey(Dataset, on_delete=models.PROTECT)
+    source = models.ForeignKey(Dataset, on_delete=models.PROTECT, null=True)
+    source_artifact = models.ForeignKey(Artifact, on_delete=models.PROTECT, null=True)
     request_hash = models.CharField(max_length=64)
     format = models.CharField(max_length=4)
     state = models.CharField(max_length=12, default="queued")
     snapshot = models.JSONField()
     result = models.BinaryField(null=True)
+    checksum = models.CharField(max_length=64, blank=True, default="")
+    expires_at = models.DateTimeField(null=True)
     lease_token = models.UUIDField(null=True)
     lease_until = models.DateTimeField(null=True)
     attempts = models.PositiveSmallIntegerField(default=0)
 
     class Meta(TenantRow.Meta):
-        constraints = [models.UniqueConstraint(fields=["workspace", "request_hash"], name="export_request_once")]
+        constraints = [
+            models.UniqueConstraint(fields=["workspace", "request_hash"], name="export_request_once"),
+            models.CheckConstraint(
+                condition=(Q(source__isnull=False, source_artifact__isnull=True)
+                           | Q(source__isnull=True, source_artifact__isnull=False)),
+                name="export_exactly_one_source",
+            ),
+        ]

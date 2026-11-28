@@ -30,6 +30,26 @@ def row_types():
 
 
 @api_view(["GET"])
+def examples(request, tool_id):
+    methods = [method for method in contracts.CATALOG if method["tool_id"] == tool_id]
+    if not methods:
+        raise Http404
+    results = []
+    for method in methods:
+        ids = {schema for binding in method.get("dataset_requirements", {}).values()
+               if isinstance(binding, list) for schema in binding}
+        available = "numeric_series" in ids
+        results.append({
+            "method_id": method["method_id"], "method_version": method["method_version"],
+            "status": "synthetic_fixture" if available else "planned",
+            "schema_id": "numeric_series" if available else None,
+            "url": f"/api/tools/{tool_id}/templates?method_id={method['method_id']}&schema_id=numeric_series&example=1"
+                   if available else None,
+        })
+    return Response(results)
+
+
+@api_view(["GET"])
 def templates(request, tool_id=None):
     schemas = row_types()
     if tool_id is not None:

@@ -1,7 +1,6 @@
+import base64
 import hashlib
-import io
 from datetime import timedelta
-from html.parser import HTMLParser
 from pathlib import Path
 
 from django.db import transaction
@@ -16,8 +15,8 @@ from . import contracts, models
 from .accounts import allowed
 from .api import Conflict, InvalidInput, audit, fields, form, workspace_access
 from .dataset_intake import get_preview
-from .intake_files import IntakeError, check_package, read_upload, rows_from_file
-from .public_source import public_page
+from .intake_files import IntakeError, read_upload
+from .intake_sandbox import process
 from .validation import ProfileInput
 
 KEYS = {
@@ -26,85 +25,39 @@ KEYS = {
     "objective": ("objective", "هدف"),
     "business_model": ("business model", "مدل کسب‌وکار"),
     "geography": ("geography", "بازار جغرافیایی"),
+    "company_name": ("company name", "نام شرکت"),
+    "target_segment": ("target segment", "بخش هدف"),
+    "channels": ("channels", "کانال‌ها", "کانال ها"),
+    "public_contact": ("public contact", "تماس عمومی"),
+    "pricing_terms": ("pricing terms", "شرایط قیمت‌گذاری", "شرایط قیمت گذاری"),
 }
 
-
-class TextNodes(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self.lines = []
-        self.hidden = 0
-
-    def handle_starttag(self, tag, attrs):
-        if tag in ("script", "style", "template"):
-            self.hidden += 1
-
-    def handle_endtag(self, tag):
-        if tag in ("script", "style", "template") and self.hidden:
-            self.hidden -= 1
-
-    def handle_data(self, data):
-        if not self.hidden and data.strip():
-            self.lines.extend(data.splitlines())
-
-
-def units(raw, extension):
-    if extension in (".txt", ".html"):
-        text = raw.decode("utf-8-sig")
-        if extension == ".html":
-            parser = TextNodes()
-            parser.feed(text)
-            text = "\n".join(parser.lines)
-        yield from ((f"line:{index}", line) for index, line in enumerate(text.splitlines(), 1))
-    elif extension in (".xlsx", ".csv"):
-        for index, row in enumerate(rows_from_file(raw, extension), 1):
-            values = [str(cell) for cell in row if cell is not None]
-            if len(values) == 2:
-                yield f"row:{index}", ": ".join(values)
-            else:
-                yield f"row:{index}", " ".join(values)
-    elif extension == ".pdf":
-        from pypdf import PdfReader
-        reader = PdfReader(io.BytesIO(raw))
-        if reader.is_encrypted or len(reader.pages) > 30:
-            raise IntakeError("Use a text PDF with up to 30 pages.")
-        for index, page in enumerate(reader.pages, 1):
-            for offset, line in enumerate((page.extract_text() or "").splitlines(), 1):
-                yield f"page:{index}/line:{offset}", line
-    elif extension == ".docx":
-        from docx import Document
-        check_package(raw)
-        for index, paragraph in enumerate(Document(io.BytesIO(raw)).paragraphs, 1):
-            yield f"paragraph:{index}", paragraph.text
-    elif extension == ".pptx":
-        from pptx import Presentation
-        check_package(raw)
-        for index, slide in enumerate(Presentation(io.BytesIO(raw)).slides, 1):
-            for offset, shape in enumerate(slide.shapes, 1):
-                if shape.has_text_frame:
-                    for line in shape.text.splitlines():
-                        yield f"slide:{index}/shape:{offset}", line
-    else:
-        raise IntakeError("Choose PDF, DOCX, XLSX, PPTX, text or CSV.")
 
 
 def suggestions(raw, extension, profile):
     labels = {label: key for key, names in KEYS.items() for label in names}
     offered = {}
-    for index, (anchor, line) in enumerate(units(raw, extension)):
-        if index > 5000:
-            raise IntakeError("The source contains too much text.")
+    for anchor, line in process(extension, raw)["lines"]:
         label, sep, content = line.partition(":")
         name = labels.get(label.strip().casefold())
         content = content.strip()
-        if not sep or not name or not content or name in offered:
+        if not sep or not name or not content:
             continue
         spec = ProfileInput().fields[name]
         if len(content) > spec.max_length or any(ord(char) < 32 for char in content):
             continue
-        offered[name] = {"field": name, "proposed": content, "current": getattr(profile, name),
-                         "anchor": anchor, "excerpt_hash": hashlib.sha256(line.encode()).hexdigest()}
-    return {"fields": list(offered.values()), "missing_fields": sorted(KEYS.keys() - offered.keys())}
+        current = getattr(profile, name)
+        item = {"field": name, "proposed": content, "current": current,
+                "anchor": anchor, "excerpt_hash": hashlib.sha256(line.encode()).hexdigest(),
+                "classification": "source_claim", "conflict": bool(current and current != content)}
+        if name in offered and offered[name]["proposed"] != content:
+            offered[name]["ambiguous"] = True
+        else:
+            offered.setdefault(name, item)
+    ambiguous = [name for name, item in offered.items() if item.get("ambiguous")]
+    return {"fields": [item for name, item in offered.items() if name not in ambiguous],
+            "missing_fields": sorted((KEYS.keys() - offered.keys()) | set(ambiguous)),
+            "ambiguous_fields": ambiguous}
 
 
 @api_view(["POST"])
@@ -132,7 +85,8 @@ def preview(request, workspace_id):
         if source:
             if len(source) > 200:
                 raise IntakeError("Use a shorter source URL.")
-            raw, mime = public_page(source)
+            fetched = process("fetch", source.encode("ascii"))
+            raw, mime = base64.b64decode(fetched["raw"]), fetched["mime"]
             extension = ".html" if mime == "text/html" else ".txt"
             title = "Public company website"
         else:
@@ -195,6 +149,15 @@ def apply(request, workspace_id, pk):
     entry.save(update_fields=["applied_id", "payload"])
     audit(request, workspace, "profile_intake_applied", profile)
     return Response(applied_profile(entry, profile, evidence, choices), status=201)
+
+
+@api_view(["GET"])
+def detail(request, workspace_id, pk):
+    workspace, role = workspace_access(request, workspace_id)
+    if role == "viewer":
+        raise PermissionDenied()
+    entry = get_preview(workspace, request.user, pk, "profile")
+    return Response({"id": entry.pk, "checksum": entry.checksum, **entry.payload})
 
 
 def applied_profile(entry, profile, evidence, choices):

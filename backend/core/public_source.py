@@ -3,7 +3,6 @@
 import http.client
 import ipaddress
 import socket
-import ssl
 from urllib.parse import urlsplit
 from urllib.robotparser import RobotFileParser
 
@@ -14,7 +13,8 @@ class PublicHTTPSConnection(http.client.HTTPSConnection):
     def connect(self):
         records = socket.getaddrinfo(self.host, 443, type=socket.SOCK_STREAM)
         addresses = list(dict.fromkeys(item[4][0] for item in records))
-        if not addresses or any(not ipaddress.ip_address(address).is_global for address in addresses):
+        parsed = [ipaddress.ip_address(address) for address in addresses]
+        if not parsed or any(not address.is_global or address.is_multicast for address in parsed):
             raise IntakeError("The address must resolve only to public IPs.")
         # Use the resolved numeric address for TCP while retaining the original hostname for TLS.
         sock = socket.create_connection((addresses[0], 443), timeout=self.timeout)

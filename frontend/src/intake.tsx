@@ -4,7 +4,7 @@ import type { Translate, Workspace } from './api';
 import { Field, formValues, Message, useTask } from './shared';
 
 type Evidence = { id: string; title: string; version: number; kind: string };
-type Dataset = { id: string; title: string; version: number; payload: { synthetic: boolean } };
+type ReportSource = { id: string; title: string; version: number; synthetic: boolean; artifact_type: string };
 type Props = { workspace: Workspace; t: Translate };
 
 function useRows<T>(path: string, t: Translate) {
@@ -107,7 +107,7 @@ export function FileIntake({ workspace, t }: Props) {
 }
 
 type ProfilePreview = { id: string; checksum: string; base_version: number; missing_fields: string[];
-  fields: { field: string; current: string; proposed: string; anchor: string }[] };
+  ambiguous_fields?: string[]; fields: { field: string; current: string; proposed: string; anchor: string; conflict: boolean }[] };
 
 export function ProfileIntake({ workspace, t }: Props) {
   const base = '/workspaces/' + workspace.id + '/intakes/previews';
@@ -140,12 +140,14 @@ export function ProfileIntake({ workspace, t }: Props) {
     }}>
       <h2>{t('موارد پیشنهادی', 'Suggested fields')}</h2>
       {review.fields.map((item) => <div key={item.field} className="inset">
-        <p>{item.field} · {item.anchor}</p>
+        <p>{item.field} · {item.anchor} · {t('اظهار منبع', 'Source claim')}</p>
+        {item.conflict && <p>{t('مقدار منبع با اطلاعات ثبت‌شده متفاوت است.', 'The source differs from the saved value.')}</p>}
         <p>{t('مقدار فعلی', 'Current value')} · {item.current}</p>
         <Field label={t('مقدار پیشنهادی', 'Proposed value') + ' · ' + item.field}><input name={item.field} defaultValue={item.proposed} /></Field>
         <Field label={t('انتخاب فیلد', 'Select field') + ' · ' + item.field}><input type="checkbox" name={'accept-' + item.field} /></Field>
       </div>)}
       <p>{t('در انتظار شاهد', 'Pending evidence')} · {review.missing_fields.join(' · ')}</p>
+      {!!review.ambiguous_fields?.length && <p>{t('مقادیر متعارض در منبع', 'Conflicting values in the source')} · {review.ambiguous_fields.join(' · ')}</p>}
       <button className="primary" disabled={task.busy || saved || !review.fields.length}>{t('تأیید نسخهٔ جدید', 'Confirm new profile version')}</button>
       <Message text={saved ? t('نسخهٔ پروفایل ذخیره شد.', 'Profile version saved.') : ''} />
     </form>}
@@ -156,7 +158,7 @@ type Export = { id: string; state: string; format: string; stale: boolean; snaps
 
 export function Exports({ workspace, t }: Props) {
   const base = '/workspaces/' + workspace.id;
-  const datasets = useRows<Dataset>(base + '/datasets', t);
+  const datasets = useRows<ReportSource>(base + '/exports/sources', t);
   const earlier = useRows<Export>(base + '/exports', t);
   const [report, setReport] = useState<Export>();
   const [error, setError] = useState('');
@@ -177,12 +179,12 @@ export function Exports({ workspace, t }: Props) {
       const source = datasets.records.find((item) => item.id === data.id);
       if (!source) return;
       setError('');
-      task.run(async () => setReport(await api<Export>(base + '/exports', 'POST', { ...data, version: source.version })));
+      task.run(async () => setReport(await api<Export>(base + '/exports', 'POST', { ...data, version: source.version, artifact_type: source.artifact_type })));
     }}>
-      <Field label={t('نسخهٔ مجموعه‌داده', 'Dataset version')}><select name="id" required defaultValue="">
+      <Field label={t('نسخهٔ داده یا گزارش', 'Data or report version')}><select name="id" required defaultValue="">
         <option value="" disabled>{t('انتخاب کنید', 'Select')}</option>
         {datasets.records.map((item) => <option key={item.id} value={item.id}>
-          {item.title} · {item.version}{item.payload.synthetic ? ' · ' + t('مصنوعی', 'Synthetic') : ''}
+          {item.title} · {item.version}{item.synthetic ? ' · ' + t('مصنوعی', 'Synthetic') : ''}
         </option>)}
       </select></Field>
       <div className="form-grid">

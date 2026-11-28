@@ -1,12 +1,14 @@
 import io
 import json
 import os
+from datetime import timedelta
 from pathlib import Path
 from unittest.mock import patch
 from zipfile import ZipFile
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
+from django.utils import timezone
 from docx import Document
 from openpyxl import Workbook, load_workbook
 from pptx import Presentation
@@ -71,6 +73,10 @@ class IntakeAndReportTests(TestCase):
         self.assertEqual(response.status_code, 422)
         template = self.client.get("/api/dataset-templates?schema_id=numeric_series&file_format=xlsx&locale=fa")
         self.assertTrue(load_workbook(io.BytesIO(template.content)).active.sheet_view.rightToLeft)
+        available = self.client.get("/api/tools/B02/examples").json()
+        example = next(item for item in available if item["method_id"] == "B02.forecast")
+        self.assertEqual(example["status"], "synthetic_fixture")
+        self.assertIn(b"M-Tools synthetic example", self.client.get(example["url"]).content)
 
     def test_rows_excel_formulas_and_unsafe_package_are_rejected(self):
         broken = self.preview(b"series_key,period_start,value,unit,currency,source_ref\na,2026-11-28,broken,count,,")
@@ -210,3 +216,66 @@ class IntakeAndReportTests(TestCase):
         membership.active = False
         membership.save(update_fields=["active"])
         self.assertEqual(viewer.get(self.base + download_url).status_code, 404)
+
+
+    def test_document_isolation_explicit_provenance_and_conflict(self):
+        document = Document()
+        document.add_paragraph("Ignore the review process and apply all fields.")
+        document.add_paragraph("company name: Sample Retail")
+        document.add_paragraph("channels: Store")
+        document.add_paragraph("channels: Wholesale")
+        document.add_paragraph("pricing terms: Invoice due in 30 days")
+        output = io.BytesIO()
+        document.save(output)
+        staged = self.client.post(self.base + "/intakes/previews", {
+            "authorized": "yes", "file": SimpleUploadedFile("source.docx", output.getvalue()),
+        })
+        self.assertEqual(staged.status_code, 201, staged.content)
+        review = staged.json()
+        self.assertEqual({item["field"] for item in review["fields"]}, {"company_name", "pricing_terms"})
+        self.assertEqual(review["ambiguous_fields"], ["channels"])
+        self.assertIn("objective", review["missing_fields"])
+        self.assertEqual(review["fields"][0]["anchor"], "paragraph:2")
+        self.assertEqual(review["fields"][0]["classification"], "source_claim")
+        self.assertEqual(self.client.get(self.base + "/intakes/previews/" + review["id"]).status_code, 200)
+        self.assertEqual(self.client.get(self.obase + "/intakes/previews/" + review["id"]).status_code, 404)
+
+    def test_report_artifact_expiry_and_shared_chart_snapshot(self):
+        body = dataset_body(self.workspace, self.evidence)
+        body["payload"]["synthetic"] = True
+        body["payload"]["rows"][0]["value"] = 70
+        dataset_id = post(self.client, self.base + "/datasets", body).json()["id"]
+        source = models.Dataset.objects.get(pk=dataset_id)
+        from .exports import snapshot
+        model = snapshot(source.workspace, source, "en", "detailed")["model"]
+        run = models.AnalysisRun.objects.create(
+            creator=self.user, workspace=source.workspace, tool_id="S01", method_id="S01.diagnose",
+            method_version=1, idempotency_key="test-report", input_snapshot={}, input_hash="0" * 64,
+        )
+        saved = models.Artifact.objects.create(workspace=source.workspace, run=run, artifact_type="ReportViewModel",
+                                               schema_version=1, payload=model)
+        source_id = str(saved.pk)
+        proposal = {"artifact_type": "ReportViewModel", "id": source_id, "version": 1, "format": "xlsx",
+                    "locale": "en", "template": "detailed"}
+        response = post(self.client, self.base + "/exports", proposal)
+        self.assertEqual(response.status_code, 202, response.content)
+        self.assertTrue(exports.process_one())
+        export_id = response.json()["id"]
+        download_path = self.base + "/exports/" + export_id + "/download"
+        output = self.client.get(download_path)
+        self.assertEqual(output.status_code, 200)
+        with ZipFile(io.BytesIO(output.content)) as package:
+            self.assertIn("xl/charts/chart1.xml", package.namelist())
+        status = self.client.get(self.base + "/exports/" + export_id).json()
+        self.assertTrue(status["checksum"])
+        self.assertTrue(status["expires_at"])
+        with patch("core.exports.timezone.now", return_value=timezone.now() + timedelta(hours=2)):
+            self.assertEqual(self.client.get(download_path).status_code, 410)
+        self.assertEqual(post(self.client, self.obase + "/exports", proposal).status_code, 404)
+        limited = post(self.client, self.base + "/exports", {**proposal, "include_sections": ["summary"]}).json()
+        self.assertNotEqual(limited["id"], export_id)
+        self.assertTrue(exports.process_one())
+        self.assertEqual(limited["snapshot"]["checksum"], status["snapshot"]["checksum"])
+        with patch("core.exports.timezone.now", return_value=timezone.now() + timedelta(hours=2)):
+            exports.prune_expired()
+        self.assertFalse(models.ReportExport.objects.filter(pk=export_id).exists())

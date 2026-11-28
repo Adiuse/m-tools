@@ -110,7 +110,7 @@ try {
   await page.getByText('Profile version saved.').waitFor();
 
   await button('Reports').click();
-  await page.getByLabel('Dataset version').selectOption({ label: 'Imported ' + tag + ' · 1 · Synthetic' });
+  await page.getByLabel('Data or report version').selectOption({ label: 'Imported ' + tag + ' · 1 · Synthetic' });
   await page.getByLabel('Format', { exact: true }).selectOption('xlsx');
   await button('Create report').click();
   await page.getByRole('link', { name: 'Download report' }).waitFor();
