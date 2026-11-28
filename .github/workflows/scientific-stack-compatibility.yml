@@ -18,6 +18,20 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    services:
+      postgres:
+        image: postgres:17.12
+        env:
+          POSTGRES_USER: stack_check
+          POSTGRES_PASSWORD: stack_check
+          POSTGRES_DB: stack_check
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd "pg_isready -U stack_check -d stack_check"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -31,6 +45,7 @@ jobs:
       - name: Resolve and verify selected baseline
         env:
           STACK_PROFILE: ${{ inputs.profile }}
+          MTOOLS_STACK_POSTGRES_DSN: postgresql://stack_check:stack_check@127.0.0.1:${{ job.services.postgres.ports[5432] }}/stack_check
         run: python scripts/verify_stack.py --profile "$STACK_PROFILE"
       - name: Upload compatibility evidence
         if: always()

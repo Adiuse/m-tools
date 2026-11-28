@@ -2,7 +2,7 @@
 
 **شناسه:** MT-DEV-BASELINE-V1  
 **تاریخ:** 2026-11-25  
-**وضعیت:** FROZEN_DESIGN / RUNTIME_LOCK_PENDING / NOT_IMPLEMENTED  
+**وضعیت:** FROZEN_DESIGN / CORE_VERIFIED_LOCALLY / VS00_REVIEW_PENDING
 **مبنای طراحی:** c155952829c158fbdaca4280168fb8c030944776 و تکمیل‌های همین PR.  
 **تصمیم مالک:** Python + Django برای backend و موتورهای علمی؛ React + TypeScript برای frontend. سازگاری و کیفیت علمی مقدم بر یکسان‌سازی زبان دو سمت.
 
@@ -48,7 +48,7 @@
 
 ## ۵. Gate سازگاری و اجرای محلی
 
-پس از فراهم بودن شبکه مجاز، Linux x86_64، Python 3.12.16، uv 0.13.10، Node 24.22.3 و pnpm 11.29.0، در checkout تمیز همین branch:
+پس از فراهم بودن شبکه مجاز، Linux x86_64، Python 3.12.16، uv 0.13.10، Node 24.22.3 و pnpm 11.29.0، در checkout تمیز همین branch اجرا کنید. متغیر `MTOOLS_STACK_POSTGRES_DSN` را با مشخصات پایگاه توسعهٔ PostgreSQL 17.12 تنظیم کنید. نقش پایگاه باید مجوز اتصال و ساخت جدول موقت داشته باشد. بررسی PostgreSQL با psycopg در جدول موقت همان نشست، commit و rollback را آزمایش می‌کند. DSN در گزارش ثبت نمی‌شود.
 
 ```bash
 python3 scripts/verify_stack.py
@@ -58,9 +58,11 @@ python3 scripts/verify_stack.py --profile full
 python3 scripts/verify_stack.py --groups forecast causal
 ```
 
-[scripts/verify_stack.py](../scripts/verify_stack.py) ایجاد/بررسی uv.lock و pnpm-lock.yaml، نصب frozen، pip check، آزمون schema/oracle، import و API پایه، CLI frontend، و در profile منتخب resolve ترکیبی با core constraints و lock دارای hash؛ Meridian پروژه جدا. نسخه‌های lock جدید فقط پس از بررسی نتیجه و diff ثبت شوند. فایل evidence محلی .stack-check/report.json و lockها؛ گزارش کامل شامل commit، platform، versions، logs، scope، hash و وضعیت PASS/FAIL/BLOCKED/NOT_RUN نگهداری شود. CI قبلی برای doc-change خودکار اجرا نشود؛ workflow موجود manual-only شده و dispatch جدید انجام نشده است. اجرا اختیاری با منابع مجاز مالک، ترجیحاً local. Core بدون model download؛ full نصب/آزمون optional است، دانلود وزن و fit نیست.
+[scripts/verify_stack.py](../scripts/verify_stack.py) ایجاد/بررسی uv.lock و pnpm-lock.yaml، نصب frozen، pip check، آزمون schema/oracle، import و API پایه، CLI frontend و اتصال و تراکنش PostgreSQL را اجرا می‌کند. در profile منتخب، resolve ترکیبی با core constraints و lock دارای hash نیز انجام می‌شود. Meridian پروژه جدا است. نسخه‌های lock جدید فقط پس از بررسی نتیجه و diff ثبت شوند. `.stack-check/report.json` شامل commit، platform، مراحل و وضعیت اجرا، و SHA-256 فایل‌های lock است. خروجی فرمان را همراه گزارش نگه دارید. workflow سازگاری فقط دستی است و برای آن dispatch جدید انجام نشده است. Core بدون دانلود وزن مدل اجرا می‌شود. پروفایل full برای نصب و آزمون گروه‌های اختیاری است.
 
-**وضعیت واقعی این مرحله:** در محیط فعلی Python 3.13.5، uv 0.10.0 و Node 22.16.0 موجود بود؛ Python 3.12.16 و pnpm در دسترس نبودند. DNS برای pypi.org و registry.npmjs.org شکست خورد (curl 6) و uv lock --offline --python 3.12.16 با exit 2 به دلیل نبود interpreter شکست خورد. بنابراین هیچ uv.lock/pnpm-lock.yaml معتبر تولید و هیچ سازگاری مشترک جدیدی تأیید نشده است. این blocker محیط است، نه کشف conflict جدید کتابخانه. اجرای مستقل ۲۲ oracle روی Python 3.13.5: ۲۲/۲۲ PASS؛ QT13 با Statsmodels محلی 0.14.6: n=680.3526619، ceil=681، توان 0.8003728؛ فقط شاهد مرجع و نه PASS نسخه پین‌شده 0.14.5. کنترل ساختاری اولیه در محیط ابزار روی کاتالوگ و نمونه‌های اصلی انجام شد؛ checker استاندارد و runner جدید هنوز اجرا نشده‌اند. CI قبلی ۹/۹ روی Python 3.13.18 (commit ceb1d861ecbe9e94709e01b4329171cbdbdbb71f، run 45445594222) تاریخی است و این baseline را تأیید نمی‌کند.
+**سابقهٔ بررسی:** اجرای پیش از VS00 به‌علت نبود interpreter هدف و دسترسی registry مسدود بود. CI قبلی ۹/۹ روی Python 3.13.18 (commit ceb1d861ecbe9e94709e01b4329171cbdbdbb71f، run 45445594222) متعلق به محیط دیگری بود.
+
+**رکورد مجوز توسعهٔ Core:** metadata و فایل‌های توزیع نسخه‌های نصب‌شده بررسی شدند. بسته‌های مستقیم تحت MIT، BSD دو/سه‌بندی، Apache-2.0، PSFL و LGPL-3.0-only قرار می‌گیرند. `psycopg` و `psycopg-binary` از نوع LGPL-3.0-only هستند و در ارزیابی توسعه به‌کار رفتند. `survey-core` و `survey-react-ui` هر دو MIT هستند. این ثبت محدود به وابستگی‌های مستقیم Core است. بررسی وابستگی‌های انتقالی، کتابخانه‌های باینری همراه و تعهدات توزیع در مرحلهٔ انتشار انجام می‌شود.
 
 ## ۶. نقشه توسعه کامل محصول (مصوبه مالک)
 

@@ -2,6 +2,7 @@
 No package changes, model downloads or paid CI dispatch are made automatically.
 """
 import argparse
+import hashlib
 import json
 import os
 import platform
@@ -25,7 +26,7 @@ def save():
     report_path.write_text(json.dumps(report, indent=2) + "\n")
 
 
-def run(label, args, cwd=ROOT, env=None, capture=False):
+def run(label, args, cwd=ROOT, env=None, capture=False, blocked_exit_codes=()):
     args = [str(x) for x in args]
     print(f"\n--- {label}: {' '.join(args)}", flush=True)
     step = {"name":label,"command":args,"status":"RUNNING"}
@@ -37,7 +38,12 @@ def run(label, args, cwd=ROOT, env=None, capture=False):
         step.update(status="BLOCKED", error=type(e).__name__)
         save()
         raise RuntimeError(f"{label}: executable unavailable") from e
-    step.update(status="PASS" if result.returncode == 0 else "FAIL", exit_code=result.returncode)
+    status = "PASS" if result.returncode == 0 else "FAIL"
+    if result.returncode in blocked_exit_codes:
+        status = "BLOCKED"
+    step.update(status=status, exit_code=result.returncode)
+    if capture and not result.returncode:
+        step["output"] = result.stdout.strip()
     save()
     if result.returncode:
         raise RuntimeError(f"{label}: exit {result.returncode}")
@@ -79,6 +85,7 @@ def main():
     groups = sorted(GROUPS if args.profile == "full" else set(args.groups or []))
     meridian = args.profile == "full" or args.meridian
     report.update(profile=args.profile, groups=groups, meridian=meridian)
+    report["commit"] = run("Git revision", ["git", "rev-parse", "HEAD"], capture=True)
     if sys.platform != "linux" or platform.machine() != "x86_64":
         raise RuntimeError("Target is Linux x86_64; other platforms are not verified")
     uv_version = run("uv",["uv","--version"],capture=True)
@@ -99,6 +106,7 @@ def main():
     run("frontend frozen install",["pnpm","install","--frozen-lockfile"],frontend)
     run("TypeScript CLI",["pnpm","exec","tsc","--version"],frontend)
     run("Vite CLI",["pnpm","exec","vite","--version"],frontend)
+    run("PostgreSQL connectivity and transactions", [py, ROOT / "tests/postgres_stack_smoke.py"], blocked_exit_codes=(2,))
     if groups:
         constraints = OUT/"core-constraints.txt"
         run("export core pins",["uv","export","--locked","--no-dev","--no-hashes","--no-emit-project","-o",constraints],env=env)
@@ -138,7 +146,7 @@ def main():
         meridian_py, _ = project(ROOT/"deps/meridian")
         run("Meridian API",[meridian_py,ROOT/"tests/scientific_stack_smoke.py","meridian"])
     report["status"] = "PASS"
-    print("PASS: selected installation/import/API and structural tests only; no model fit, product or pilot verification.")
+    print("PASS: selected installation, API, contract, and PostgreSQL transaction checks.")
 
 
 if __name__ == "__main__":
@@ -150,4 +158,10 @@ if __name__ == "__main__":
         print(report["error"],file=sys.stderr)
         sys.exit(1)
     finally:
+        locks = [ROOT / "uv.lock", ROOT / "frontend/pnpm-lock.yaml", ROOT / "deps/meridian/uv.lock"]
+        locks.extend(sorted((ROOT / "deps/locks").glob("*.txt")))
+        report["lock_sha256"] = {
+            str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in locks if path.is_file()
+        }
         save()
