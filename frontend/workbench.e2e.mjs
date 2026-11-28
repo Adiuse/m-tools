@@ -83,6 +83,38 @@ try {
   await page.getByRole('button', { name: 'Why did visits fall this week? Version 2' }).waitFor();
   assert.equal(await sources.evaluate((select) => select.selectedOptions.length), 2);
 
+  await button('Import file').click();
+  await page.getByLabel('CSV or Excel file').setInputFiles({
+    name: 'demo.csv', mimeType: 'text/csv',
+    buffer: Buffer.from('series_key,period_start,value,unit,currency,source_ref\ndemo,2026-11-28,70,count,,'),
+  });
+  await page.getByLabel('Source evidence').selectOption({ label: 'Source ' + tag + ' · 2' });
+  await fill('Population or scope', 'Synthetic test');
+  await fill('Unit', 'count');
+  await fill('Period start', '2026-11-01');
+  await fill('Exclusive period end', '2026-12-01');
+  await page.getByLabel('Synthetic dataset').check();
+  await button('Preview file').click();
+  await fill('Dataset title', 'Imported ' + tag);
+  await button('Confirm and save dataset').click();
+  await page.getByText('Dataset version saved.').waitFor();
+
+  await button('Profile source').click();
+  await page.getByLabel('Source document').setInputFiles({
+    name: 'profile.txt', mimeType: 'text/plain', buffer: Buffer.from('industry: Footwear services'),
+  });
+  await page.getByLabel('I have permission to use this source').check();
+  await button('Review source').click();
+  await page.getByLabel('Select field · industry').check();
+  await button('Confirm new profile version').click();
+  await page.getByText('Profile version saved.').waitFor();
+
+  await button('Reports').click();
+  await page.getByLabel('Data or report version').selectOption({ label: 'Imported ' + tag + ' · 1 · Synthetic' });
+  await page.getByLabel('Format', { exact: true }).selectOption('xlsx');
+  await button('Create report').click();
+  await page.getByRole('link', { name: 'Download report' }).waitFor();
+
   await button('History').click();
   await page.getByText('Dataset recorded').waitFor();
   await button('Back to workbench').click();
@@ -98,7 +130,7 @@ try {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
   if (process.env.MTOOLS_SCREENSHOT) await page.screenshot({ path: process.env.MTOOLS_SCREENSHOT, fullPage: true });
   assert.deepEqual(errors, []);
-  console.log('PASS: browser sign-in, two workspaces, evidence versions, dataset, preflight, draft restore with source versions, history, RTL and mobile width.');
+  console.log('PASS: browser sign-in, two workspaces, evidence versions, dataset, preflight, draft restore, file intake, profile review, export, history, RTL and mobile width.');
 } finally {
   await browser.close();
 }

@@ -356,6 +356,30 @@ class WorkspaceTests(TestCase):
         self.assertFalse(contracts_validate("DatasetPayload", document))
         self.assertEqual(post(self.client, self.root + "/datasets", {"title": "Features", "payload": document}).status_code, 422)
 
+    def test_run_cannot_promote_synthetic_inputs_to_observed_results(self):
+        body = dataset_body(self.one, self.evidence)
+        body["payload"]["synthetic"] = True
+        dataset = post(self.client, self.root + "/datasets", body).json()
+        evidence_ref = {"kind": "evidence", "id": self.evidence["id"], "version": 1}
+        request = {**self.run_body(), "tool_id": "B02", "method_id": "B02.forecast",
+                   "input": {"history": {"kind": "dataset", "id": dataset["id"], "version": 1}},
+                   "evidence_refs": [evidence_ref]}
+        self.assertEqual(post(self.client, self.root + "/preflight", request).status_code, 200)
+        run = models.AnalysisRun.objects.create(
+            workspace_id=self.one, creator=self.owner, tool_id="B02", method_id="B02.forecast",
+            method_version=1, idempotency_key="synthetic-run", input_snapshot=request, input_hash=input_hash(request),
+        )
+        job = models.Job.objects.create(run=run, workspace_id=self.one, available_at=timezone.now())
+        lease = jobs.claim()
+        result = jobs.public_result(lease.run)
+        result.update(status="succeeded", analysis_status="conditional", findings=[
+            {"kind": "observed", "statement": "Observed result", "value": "70",
+             "evidence_refs": [evidence_ref], "assumption_refs": []},
+        ])
+        with self.assertRaisesRegex(ValueError, "Synthetic"):
+            jobs.finish(job.pk, lease.lease_token, result)
+        self.assertTrue(models.Job.objects.filter(pk=job.pk).exists())
+
     def test_database_requires_consistent_run_and_lease_states(self):
         run, job = self.queue()
         with self.assertRaises(IntegrityError), transaction.atomic():

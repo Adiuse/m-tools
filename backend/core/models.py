@@ -80,10 +80,18 @@ class CompanyProfile(Versioned):
     objective = models.CharField(max_length=400)
     business_model = models.CharField(max_length=200, blank=True)
     geography = models.CharField(max_length=160, blank=True)
+    company_name = models.CharField(max_length=160, blank=True, default="")
+    target_segment = models.CharField(max_length=200, blank=True, default="")
+    channels = models.CharField(max_length=240, blank=True, default="")
+    public_contact = models.CharField(max_length=240, blank=True, default="")
+    pricing_terms = models.CharField(max_length=400, blank=True, default="")
+    pricing_currency = models.CharField(max_length=3, blank=True, default="")
+    pricing_date = models.DateField(null=True, blank=True)
     constraints = models.JSONField(default=list)
 
 
 class Evidence(Versioned):
+    claim_only = models.BooleanField(default=False)
     kind = models.CharField(max_length=16, choices=[(x, x) for x in ("internal", "primary", "secondary", "assumption")])
     title = models.CharField(max_length=200)
     source_uri = models.URLField(blank=True)
@@ -251,3 +259,40 @@ class AuthThrottle(models.Model):
     key = models.CharField(max_length=64, primary_key=True)
     window_end = models.DateTimeField()
     count = models.PositiveIntegerField(default=1)
+
+
+class IntakePreview(TenantRow):
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    kind = models.CharField(max_length=12)
+    checksum = models.CharField(max_length=64)
+    payload = models.JSONField()
+    expires_at = models.DateTimeField()
+    applied_id = models.UUIDField(null=True)
+
+
+class ReportExport(TenantRow):
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    source = models.ForeignKey(Dataset, on_delete=models.PROTECT, null=True)
+    source_artifact = models.ForeignKey(Artifact, on_delete=models.PROTECT, null=True)
+    request_hash = models.CharField(max_length=64)
+    format = models.CharField(max_length=4)
+    state = models.CharField(max_length=12, default="queued")
+    snapshot = models.JSONField()
+    result = models.BinaryField(null=True)
+    checksum = models.CharField(max_length=64, blank=True, default="")
+    renderer_version = models.CharField(max_length=100, blank=True, default="")
+    error_code = models.CharField(max_length=32, blank=True, default="")
+    expires_at = models.DateTimeField(null=True)
+    lease_token = models.UUIDField(null=True)
+    lease_until = models.DateTimeField(null=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+
+    class Meta(TenantRow.Meta):
+        constraints = [
+            models.UniqueConstraint(fields=["workspace", "request_hash"], name="export_request_once"),
+            models.CheckConstraint(
+                condition=(Q(source__isnull=False, source_artifact__isnull=True)
+                           | Q(source__isnull=True, source_artifact__isnull=False)),
+                name="export_exactly_one_source",
+            ),
+        ]

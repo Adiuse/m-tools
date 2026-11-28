@@ -83,8 +83,8 @@ def retry(job_id, token, *, temporary):
 
 @transaction.atomic
 def finish(job_id, token, result, *, artifact_envelopes=()):
-    from . import artifacts
-    from .api import inspect_contract_values, resolve_ref
+    from . import artifacts, provenance
+    from .api import inspect_contract_values
 
     job = locked_lease(job_id, token)
     artifact_envelopes = tuple(artifact_envelopes)
@@ -98,36 +98,13 @@ def finish(job_id, token, result, *, artifact_envelopes=()):
         raise ValueError("Ready results require a method output.")
     inspect_contract_values(job.workspace, result)
     artifacts.store(job.run, artifact_envelopes)
-    values = [result, *(item["payload"] for item in artifact_envelopes)]
-    for finding in observed_claims(values):
-        if finding["kind"] == "observed" and not any(
-            valid_observed_source(job.workspace, ref, resolve_ref)
-            for ref in finding["evidence_refs"]
-        ):
-            raise ValueError("Observed findings require authorized evidence.")
+    content = [result, *(item["payload"] for item in artifact_envelopes)]
+    related = job.run.input_snapshot.get("dependency_run_ids", [])
+    dependencies = models.AnalysisRun.objects.filter(workspace=job.workspace, pk__in=related)
+    context = [job.run.input_snapshot]
+    for dependency in dependencies:
+        context.extend((dependency.input_snapshot, dependency.result))
+    provenance.validate_observed(job.workspace, content, context=context)
     job.run.status, job.run.result = "succeeded", result
     job.run.save(update_fields=["status", "result"])
     job.delete()
-
-
-def observed_claims(value):
-    if isinstance(value, dict):
-        if value.get("kind") == "observed" and "statement" in value and "evidence_refs" in value:
-            yield value
-        elif value.get("basis") == "observed" and "metric_key" in value and "source_ref" in value:
-            yield {"kind": "observed", "evidence_refs": [value["source_ref"]] if value["source_ref"] else []}
-        for item in value.values():
-            yield from observed_claims(item)
-    elif isinstance(value, list):
-        for item in value:
-            yield from observed_claims(item)
-
-
-def valid_observed_source(workspace, ref, resolve_ref):
-    if ref["kind"] == "evidence":
-        return resolve_ref(workspace, ref).kind != "assumption"
-    if ref["kind"] == "observation":
-        return resolve_ref(workspace, ref).evidence.kind != "assumption"
-    if ref["kind"] == "dataset":
-        return not resolve_ref(workspace, ref).payload["synthetic"]
-    return False
