@@ -15,8 +15,8 @@ type SeriesRow = {
   currency: string | null; source_ref: Ref;
 };
 type Dataset = Version & { title: string; row_count: number; payload: {
-  schema_id: string; source_ref: Ref; rows: SeriesRow[]; scope: {
-    population: string; unit: string; period: { start: string; end_exclusive: string; timezone: string };
+  schema_id: string; synthetic: boolean; source_ref: Ref; rows: SeriesRow[]; scope: {
+    population: string; unit: string; grain: string; cohort: string | null; period: { start: string; end_exclusive: string; timezone: string };
   };
 } };
 type HistoryEvent = { id: string; action: string; created_at: string; entity_id: string };
@@ -127,7 +127,9 @@ export function Datasets({ workspace, base, editable, t }: {
   const [rows, setRows] = useState<EditRow[]>([emptyRow()]);
   const task = useTask(t);
   const scope = selected?.payload.scope;
-  const edit = editable && (!selected || selected.payload.schema_id === 'numeric_series');
+  const edit = editable && (!selected || (selected.payload.schema_id === 'numeric_series' && selected.payload.scope.grain === 'day'
+    && selected.payload.rows.every((row) => row.series_key === 'manual' && row.currency === null
+      && row.source_ref.id === selected.payload.source_ref.id)));
   const current = selected && !list.items.some((row) => row.series === selected.series && row.version > selected.version);
 
   function select(item: Dataset | null) {
@@ -141,6 +143,7 @@ export function Datasets({ workspace, base, editable, t }: {
     <section className="panel">
       <h2>{selected ? selected.title : t('ثبت سری عددی', 'Record a numeric series')}</h2>
       <Message text={list.error || sources.error || task.error} error />
+      {selected?.payload.synthetic && <p className="status-tag">{t('دادهٔ مصنوعی', 'Synthetic dataset')}</p>}
       {!edit && selected && <pre className="technical" dir="ltr">{JSON.stringify(selected.payload, null, 2)}</pre>}
       {edit && <form key={selected?.id ?? 'new'} onSubmit={(event) => {
         const data = formValues(event);
@@ -156,17 +159,20 @@ export function Datasets({ workspace, base, editable, t }: {
             throw new ApiError(422, { field: t("مقدار", "Value") });
           }
           const payload = {
-            schema_id: 'numeric_series', schema_version: 1, workspace_id: workspace.id, source_ref,
-            scope: { population: data.population, grain: 'day', period: {
-              start: data.start, end_exclusive: data.end, timezone: workspace.timezone,
-            }, cohort: null, unit: data.unit },
-            rows: validated, columns: [], synthetic: false, coverage: 'unknown',
+            ...selected?.payload, schema_id: 'numeric_series', schema_version: 1, workspace_id: workspace.id, source_ref,
+            scope: { ...scope, population: data.population, grain: 'day', period: {
+              start: data.start, end_exclusive: data.end, timezone: scope?.period.timezone ?? workspace.timezone,
+            }, cohort: scope?.cohort ?? null, unit: data.unit },
+            rows: validated,
+            ...(selected ? {} : { columns: [], coverage: 'unknown' }),
+            synthetic: selected?.payload.synthetic ?? (data.synthetic === 'on'),
           };
           const result = await api<Dataset>(selected ? base + '/entities/datasets/' + selected.id : path,
             selected ? 'PATCH' : 'POST', { title: data.title, payload });
           list.add(result); select(result);
         });
       }}>
+        {!selected && <Field label={t('دادهٔ مصنوعی', 'Synthetic dataset')}><input type="checkbox" name="synthetic" /></Field>}
         <Field label={t('عنوان مجموعه‌داده', 'Dataset title')}><input name="title" defaultValue={selected?.title} maxLength={200} required /></Field>
         <Field label={t('شاهد مبنا', 'Source evidence')}><select name="evidence_id" required defaultValue={selected?.payload.source_ref.id ?? ''}>
           <option value="" disabled>{t('شاهد را انتخاب کنید', 'Select evidence')}</option>
@@ -196,7 +202,7 @@ export function Datasets({ workspace, base, editable, t }: {
       <div className="section-head"><h2>{t('داده‌ها و نسخه‌ها', 'Datasets and versions')}</h2>
         {editable && <button className="link" onClick={() => select(null)}>{t('دادهٔ جدید', 'New dataset')}</button>}
       </div>
-      <VersionList items={list.items} title={(item) => item.title} select={select} t={t} />
+      <VersionList items={list.items} title={(item) => item.title + (item.payload.synthetic ? ' · ' + t('مصنوعی', 'Synthetic') : '')} select={select} t={t} />
     </aside>
   </div>;
 }

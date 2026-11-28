@@ -182,6 +182,11 @@ class AnalysisRun(TenantRow):
         constraints = [
             models.UniqueConstraint(fields=["workspace", "idempotency_key"], name="run_workspace_idempotency"),
             models.CheckConstraint(condition=Q(status__in=["queued", "running", "succeeded", "failed"]), name="run_status_valid"),
+            models.CheckConstraint(
+                condition=(Q(status__in=["queued", "running"], result__isnull=True)
+                           | Q(status__in=["succeeded", "failed"], result__isnull=False)),
+                name="run_result_matches_lifecycle",
+            ),
         ]
 
 
@@ -191,6 +196,15 @@ class Job(TenantRow):
     attempts = models.PositiveSmallIntegerField(default=0)
     lease_token = models.UUIDField(null=True)
     lease_until = models.DateTimeField(null=True)
+
+    class Meta(TenantRow.Meta):
+        constraints = [
+            models.CheckConstraint(
+                condition=(Q(lease_token__isnull=True, lease_until__isnull=True)
+                           | Q(lease_token__isnull=False, lease_until__isnull=False)),
+                name="job_lease_fields_paired",
+            ),
+        ]
 
 
 class Artifact(Versioned):

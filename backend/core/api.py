@@ -1,3 +1,4 @@
+import math
 from decimal import Decimal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -135,6 +136,9 @@ def resolve_ref(workspace, ref):
     if model is None:
         raise Http404
     queryset = model.objects.filter(workspace=workspace)
+    if model is models.Artifact:
+        from .artifacts import PUBLIC_TYPES
+        queryset = queryset.filter(artifact_type__in=PUBLIC_TYPES)
     if issubclass(model, models.Versioned):
         queryset = queryset.filter(version=version)
     elif version != 1:
@@ -148,6 +152,8 @@ def inspect_contract_values(workspace, value, refs=None):
     if isinstance(value, dict):
         if set(value) == {"kind", "id", "version"}:
             validate_contract("Ref", value)
+            if workspace is None:
+                raise InvalidInput("Scratch inputs cannot contain workspace references.")
             key = (value["kind"], value["id"], value["version"])
             if key not in refs:
                 refs[key] = resolve_ref(workspace, value)
@@ -173,6 +179,8 @@ def inspect_contract_values(workspace, value, refs=None):
             raise InvalidInput("Use valid Unicode input.") from None
         if "\x00" in value:
             raise InvalidInput("Null characters are invalid.")
+    elif isinstance(value, float) and not math.isfinite(value):
+        raise InvalidInput("Numeric values must be finite.")
 
 
 def dataset_values(workspace, document):
@@ -188,6 +196,13 @@ def dataset_values(workspace, document):
         raise InvalidInput({"source_ref": "Observed data requires a source other than an assumption."})
     refs = {}
     inspect_contract_values(workspace, document, refs)
+    for row in document["rows"]:
+        source_ref = row["source_ref"]
+        if source_ref["kind"] != "evidence":
+            raise InvalidInput({"rows": "Each source must reference evidence."})
+        source = refs[(source_ref["kind"], source_ref["id"], source_ref["version"])]
+        if not document["synthetic"] and source.kind == "assumption":
+            raise InvalidInput({"rows": "Observed rows require evidence."})
     if document["schema_id"] == "numeric_series":
         scope = document["scope"]
         seen = set()
@@ -203,12 +218,6 @@ def dataset_values(workspace, document):
             value = row["value"]
             if row["unit"] == "count" and value is not None and (value < 0 or value % 1 != 0):
                 raise InvalidInput({"rows": "Count must be a nonnegative integer."})
-            if row["source_ref"]["kind"] != "evidence":
-                raise InvalidInput({"rows": "Each source must reference evidence."})
-            source_ref = row["source_ref"]
-            source = refs[(source_ref["kind"], source_ref["id"], source_ref["version"])]
-            if not document["synthetic"] and source.kind == "assumption":
-                raise InvalidInput({"rows": "Observed rows require evidence."})
     return {
         "evidence": evidence, "schema_id": document["schema_id"], "schema_version": document["schema_version"],
         "row_count": len(document["rows"]), "checksum": contracts.digest(document),
@@ -239,6 +248,10 @@ def entity_values(kind, model, request, workspace, previous=None):
     if kind == "evidence":
         data.update(created_by=request.user, checksum=contracts.digest(data))
     elif kind == "datasets":
+        if previous is not None and isinstance(data["payload"], dict) and (
+            previous.payload["synthetic"] != data["payload"].get("synthetic")
+        ):
+            raise InvalidInput({"synthetic": "A dataset series retains its synthetic provenance."})
         data.update(created_by=request.user, **dataset_values(workspace, data["payload"]))
     elif kind == "observations":
         evidence = models.Evidence.objects.get(pk=data["evidence_id"])

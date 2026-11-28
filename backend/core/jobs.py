@@ -61,9 +61,9 @@ def claim():
 
 def locked_lease(job_id, token):
     job = models.Job.objects.select_for_update(of=("self",)).select_related("run", "workspace").filter(
-        pk=job_id, lease_token=token, lease_until__gt=timezone.now(),
+        pk=job_id, lease_token=token,
     ).first()
-    if job is None:
+    if job is None or job.lease_until is None or job.lease_until <= timezone.now():
         raise LeaseLost()
     return job
 
@@ -82,23 +82,52 @@ def retry(job_id, token, *, temporary):
 
 
 @transaction.atomic
-def finish(job_id, token, result):
+def finish(job_id, token, result, *, artifact_envelopes=()):
+    from . import artifacts
     from .api import inspect_contract_values, resolve_ref
 
     job = locked_lease(job_id, token)
+    artifact_envelopes = tuple(artifact_envelopes)
     template = public_result(job.run)
     identity = ("run_id", "workspace_id", "tool_id", "method_id", "method_version", "input_hash")
     if contracts.validate("RunResult", result) or any(result[key] != template[key] for key in identity):
         raise ValueError("Invalid run result or identity.")
     if result["status"] != "succeeded" or result["analysis_status"] not in ("ready", "conditional", "needs_data"):
         raise ValueError("A completed result requires a valid analysis status.")
+    if result["analysis_status"] == "ready" and result["output"] is None:
+        raise ValueError("Ready results require a method output.")
     inspect_contract_values(job.workspace, result)
-    for finding in result["findings"]:
+    artifacts.store(job.run, artifact_envelopes)
+    values = [result, *(item["payload"] for item in artifact_envelopes)]
+    for finding in observed_claims(values):
         if finding["kind"] == "observed" and not any(
-            ref["kind"] == "evidence" and resolve_ref(job.workspace, ref).kind != "assumption"
+            valid_observed_source(job.workspace, ref, resolve_ref)
             for ref in finding["evidence_refs"]
         ):
             raise ValueError("Observed findings require authorized evidence.")
     job.run.status, job.run.result = "succeeded", result
     job.run.save(update_fields=["status", "result"])
     job.delete()
+
+
+def observed_claims(value):
+    if isinstance(value, dict):
+        if value.get("kind") == "observed" and "statement" in value and "evidence_refs" in value:
+            yield value
+        elif value.get("basis") == "observed" and "metric_key" in value and "source_ref" in value:
+            yield {"kind": "observed", "evidence_refs": [value["source_ref"]] if value["source_ref"] else []}
+        for item in value.values():
+            yield from observed_claims(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from observed_claims(item)
+
+
+def valid_observed_source(workspace, ref, resolve_ref):
+    if ref["kind"] == "evidence":
+        return resolve_ref(workspace, ref).kind != "assumption"
+    if ref["kind"] == "observation":
+        return resolve_ref(workspace, ref).evidence.kind != "assumption"
+    if ref["kind"] == "dataset":
+        return not resolve_ref(workspace, ref).payload["synthetic"]
+    return False

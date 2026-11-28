@@ -1,11 +1,11 @@
 from django.db import transaction
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from . import contracts, jobs, models, validation
+from . import artifacts, contracts, jobs, models, preflight as checks, validation
 from .api import (Conflict, InvalidInput, Unavailable, audit, fields, form, inspect_contract_values,
                   validate_contract, workspace_access)
 
@@ -27,23 +27,6 @@ def tools(request, tool_id=None):
     })
 
 
-def checked_request(workspace, body):
-    validate_contract("RunRequest", body)
-    if body["workspace_id"].lower() != str(workspace.pk):
-        raise Http404
-    if len(body["idempotency_key"]) > 120 or len(body["question"]) > 1200:
-        raise InvalidInput("The question or idempotency key is too long.")
-    method = contracts.METHODS[(body["method_id"], body["method_version"])]
-    inspect_contract_values(workspace, body)
-    for ref in body["evidence_refs"]:
-        if ref["kind"] != "evidence":
-            raise InvalidInput({"evidence_refs": "Use evidence references."})
-        inspect_contract_values(workspace, ref)
-    for pk in body["dependency_run_ids"]:
-        get_object_or_404(models.AnalysisRun, workspace=workspace, pk=pk)
-    return method
-
-
 def input_hash(body):
     return contracts.digest({key: value for key, value in body.items() if key != "idempotency_key"})
 
@@ -51,9 +34,10 @@ def input_hash(body):
 @api_view(["POST"])
 def preflight(request, workspace_id):
     workspace, _ = workspace_access(request, workspace_id)
-    method = checked_request(workspace, request.data)
+    method = checks.checked_request(workspace, request.data)
     return Response({
         "availability": method["availability"], "required_for_primary": method["required_for_primary"],
+        "missing_fields": checks.missing_requirements(method, request.data["input"]),
         "limitations": [method["release_gate"]],
     })
 
@@ -71,7 +55,7 @@ def drafts(request, workspace_id, pk=None):
     if (request.method == "PATCH") != (draft is not None):
         return Response({"code": "method_not_allowed"}, status=405)
     body = request.data
-    checked_request(workspace, body)
+    checks.checked_request(workspace, body)
     checksum, key = input_hash(body), body["idempotency_key"]
     duplicate = query.filter(idempotency_key=key).first()
     if duplicate:
@@ -100,7 +84,7 @@ def runs(request, workspace_id, pk=None):
     if pk is not None:
         return Response({"code": "method_not_allowed"}, status=405)
     body = request.data
-    method = checked_request(workspace, body)
+    method = checks.checked_request(workspace, body)
     key, checksum = body["idempotency_key"], input_hash(body)
     duplicate = query.filter(idempotency_key=key).first()
     if duplicate:
@@ -120,17 +104,37 @@ def runs(request, workspace_id, pk=None):
 @api_view(["POST"])
 def scratch(request):
     validate_contract("ScratchRequest", request.data)
+    inspect_contract_values(None, request.data["input"])
     raise Unavailable()
 
 
 @api_view(["GET"])
-def artifact(request, workspace_id, pk):
+def artifact(request, workspace_id, pk, download=False):
     workspace, _ = workspace_access(request, workspace_id)
-    row = get_object_or_404(models.Artifact, workspace=workspace, pk=pk)
-    return Response({
-        "artifact_id": row.pk, "artifact_type": row.artifact_type, "schema_version": row.schema_version,
-        "version": row.version, "workspace_id": workspace.pk, "payload": row.payload,
-    })
+    row = get_object_or_404(models.Artifact, workspace=workspace, pk=pk, artifact_type__in=artifacts.PUBLIC_TYPES)
+    result = artifacts.envelope(row)
+    if download:
+        return JsonResponse(result, headers={
+            "Content-Disposition": f'attachment; filename="artifact-{row.pk}-v{row.version}.json"',
+        })
+    return Response(result)
+
+
+@api_view(["GET"])
+def sources(request, workspace_id, pk):
+    workspace, _ = workspace_access(request, workspace_id)
+    run = get_object_or_404(models.AnalysisRun, workspace=workspace, pk=pk)
+    resolved = {}
+    inspect_contract_values(workspace, run.input_snapshot, resolved)
+    rows = []
+    for (kind, ref_id, version), record in resolved.items():
+        latest = None
+        if isinstance(record, models.Versioned):
+            latest = type(record).objects.filter(
+                workspace=workspace, series=record.series,
+            ).order_by("-version").values_list("version", flat=True).first()
+        rows.append({"kind": kind, "id": ref_id, "version": version, "latest_version": latest})
+    return Response({"refs": rows, "stale": any((row["latest_version"] or 0) > row["version"] for row in rows)})
 
 
 @api_view(["GET", "POST"])
@@ -142,7 +146,7 @@ def decisions(request, workspace_id):
         return Response([fields(row) for row in query.order_by("-created_at", "id")[:200]])
     data = form(validation.DecisionInput, request.data)
     run = get_object_or_404(models.AnalysisRun, workspace=workspace, pk=data["run_id"])
-    if run.status != "succeeded" or not any(
+    if run.status != "succeeded" or run.result["analysis_status"] not in ("ready", "conditional") or not any(
         option["id"] == data["selected_option"] for option in run.result["options"]
     ):
         raise InvalidInput({"selected_option": "Select an option from a completed analysis."})
@@ -154,10 +158,10 @@ def decisions(request, workspace_id):
 @api_view(["POST"])
 @transaction.atomic
 def approve(request, workspace_id, pk):
-    if request.data:
-        raise InvalidInput("Approval takes no client-supplied state.")
     workspace, _ = workspace_access(request, workspace_id, write=True, owner=True)
     decision = get_object_or_404(models.Decision, workspace=workspace, pk=pk)
+    if request.data:
+        raise InvalidInput("Approval takes no client-supplied state.")
     if decision.state == "approved":
         return Response(fields(decision))
     if decision.state != "draft":

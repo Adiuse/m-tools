@@ -40,3 +40,15 @@ pnpm --dir frontend build
 ```
 
 For browser acceptance, run `node frontend/workbench.e2e.mjs` against a development server with a disposable test account. Set `MTOOLS_TEST_EMAIL` and `MTOOLS_TEST_PASSWORD` for that account. Use a local Playwright with Chromium installed and set `PLAYWRIGHT_MODULE` to the Playwright module path if needed. `MTOOLS_BROWSER_URL` defaults to the loopback server above. The test creates isolated, timestamped synthetic workspaces in the development database.
+
+## VS01 audit against the approved documents
+
+| Requirement | Implementation and acceptance coverage |
+|---|---|
+| Full Product Plan §4 and UX §§2–3. Sign-in, two workspaces, manual records, history and navigation. | Browser test signs in, creates and switches between two workspaces, records evidence and a numeric dataset, opens an older source version and checks history, keyboard focus and mobile RTL. Account tests cover activation, reset, CSRF and private session responses. |
+| Development Baseline §§3–4. Canonical types, versioned evidence and data, catalog and preflight. | The v1 contract remains the single registry. Preflight lists missing inputs and checks scoped references with the catalog's dataset bindings. Tests cover incompatible schemas, version and workspace mismatch, the S01 mismatch fixture, and synthetic provenance across dataset revisions. Method-specific applicability and model validation belong to each method's delivery slice. |
+| Architecture §§4–5 and UX result states. Versioned analysis requests and separate decisions. | Results keep the immutable input snapshot and expose source versions on a separate read endpoint. The browser test resumes and revises a draft while preserving two evidence references. PostgreSQL and API tests cover immutable versions, idempotency, atomic result/artifact writes, lease expiry and retry, invalid state transitions and separate owner approval. |
+| Development Baseline §3. Deny-by-default on data delivery. | Workspace authorization applies to artifact reads and the JSON snapshot download, including after membership revocation. Only public contract types are delivered. Tests reject internal connection and sync records and cross-workspace downloads. The four executive report renderers are scoped to VS02. |
+| Workbench scratch and roadmap boundaries. | Scratch is authenticated and validates the input independently of workspace membership. Tests verify absence of run, job and draft writes. All 72 methods remain planned until their own acceptance gates. |
+
+Changes preserve existing contract versions and versioned rows. Django migration 0003 adds PostgreSQL checks for run/result coherence and paired lease fields. Local acceptance uses a disposable PostgreSQL database and a local browser. The account tests use Django's test email backend. Production SMTP and manual GitHub Actions are outside this run.

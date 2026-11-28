@@ -150,7 +150,7 @@ function App() {
           {page === 'history' && <History base={base} t={t} />}
           {page === 'members' && space.role === 'owner' && <Members base={base} t={t} />}
           <div hidden={page !== 'analysis'}>
-            <AnalysisPage workspace={space} methods={methods} t={t} onDirty={setDirty} />
+            <AnalysisPage workspace={space} methods={methods} t={t} onDirty={setDirty} visible={page === 'analysis'} />
           </div>
         </div>}
       </div>

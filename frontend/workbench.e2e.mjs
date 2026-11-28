@@ -64,8 +64,11 @@ try {
   await fill('Search', 'S01');
   await page.getByRole('button', { name: 'S01 Problem diagnosis Planned' }).click();
   await fill('Analysis question', 'Why did visits fall?');
+  await page.getByLabel('Evidence and versions', { exact: true }).selectOption([
+    { label: 'Source ' + tag + ' · 2' }, { label: 'Source ' + tag + ' · 1' },
+  ]);
   await button('Check input').click();
-  await page.getByText('Requirements and limitations').waitFor();
+  await page.getByText('Missing inputs', { exact: false }).waitFor();
   await button('Save draft').click();
   await page.getByText('Draft saved.').waitFor();
   await page.reload();
@@ -73,6 +76,12 @@ try {
   await button('Analysis and drafts').click();
   await page.getByRole('button', { name: 'Why did visits fall? Version 1' }).click();
   assert.equal(await page.getByLabel('Analysis question').inputValue(), 'Why did visits fall?');
+  const sources = page.getByLabel('Evidence and versions', { exact: true });
+  assert.equal(await sources.evaluate((select) => select.selectedOptions.length), 2);
+  await fill('Analysis question', 'Why did visits fall this week?');
+  await button('Save draft').click();
+  await page.getByRole('button', { name: 'Why did visits fall this week? Version 2' }).waitFor();
+  assert.equal(await sources.evaluate((select) => select.selectedOptions.length), 2);
 
   await button('History').click();
   await page.getByText('Dataset recorded').waitFor();
@@ -89,7 +98,7 @@ try {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
   if (process.env.MTOOLS_SCREENSHOT) await page.screenshot({ path: process.env.MTOOLS_SCREENSHOT, fullPage: true });
   assert.deepEqual(errors, []);
-  console.log('PASS: browser sign-in, two workspaces, evidence versions, dataset, draft restore, history, RTL and mobile width.');
+  console.log('PASS: browser sign-in, two workspaces, evidence versions, dataset, preflight, draft restore with source versions, history, RTL and mobile width.');
 } finally {
   await browser.close();
 }

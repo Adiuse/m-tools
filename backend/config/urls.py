@@ -39,6 +39,8 @@ urlpatterns = [
     path("api/workspaces/<uuid:workspace_id>/runs", analysis.runs),
     path("api/workspaces/<uuid:workspace_id>/runs/<uuid:pk>", analysis.runs),
     path("api/workspaces/<uuid:workspace_id>/artifacts/<uuid:pk>", analysis.artifact),
+    path("api/workspaces/<uuid:workspace_id>/artifacts/<uuid:pk>/download", analysis.artifact, {"download": True}),
+    path("api/workspaces/<uuid:workspace_id>/runs/<uuid:pk>/sources", analysis.sources),
     path("api/workspaces/<uuid:workspace_id>/decisions", analysis.decisions),
     path("api/workspaces/<uuid:workspace_id>/decisions/<uuid:pk>/approve", analysis.approve),
 ]
