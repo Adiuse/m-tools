@@ -21,3 +21,5 @@ See the [canonical product policy and architecture (section 0)](docs/marketing-s
 [Full-product development plan](docs/marketing-full-product-development-plan.md): 7 phases, 22 planned PRs (VS00–VS21), 19 capability-oriented delivery slices, explicit coverage and acceptance of the complete approved product. The eight-tool MVP is an intermediate milestone, not the final deliverable.
 
 VS00 records the core backend and frontend lockfiles. Local verification passed on Linux x86_64 with CPython 3.12.16, Node 24.22.3 and PostgreSQL 17.12. See the [development baseline](docs/marketing-development-baseline.md#۵-gate-سازگاری-و-اجرای-محلی) for the verification command and database settings. Product implementation starts in VS01 after VS00 acceptance. Compatibility CI is manual only.
+
+[VS01 workbench setup and verification](docs/workbench-development.md) covers local sign-in, versioned workspace records, catalog and draft flows, and the PostgreSQL and browser acceptance checks.
