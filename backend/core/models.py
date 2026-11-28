@@ -251,3 +251,28 @@ class AuthThrottle(models.Model):
     key = models.CharField(max_length=64, primary_key=True)
     window_end = models.DateTimeField()
     count = models.PositiveIntegerField(default=1)
+
+
+class IntakePreview(TenantRow):
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    kind = models.CharField(max_length=12)
+    checksum = models.CharField(max_length=64)
+    payload = models.JSONField()
+    expires_at = models.DateTimeField()
+    applied_id = models.UUIDField(null=True)
+
+
+class ReportExport(TenantRow):
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    source = models.ForeignKey(Dataset, on_delete=models.PROTECT)
+    request_hash = models.CharField(max_length=64)
+    format = models.CharField(max_length=4)
+    state = models.CharField(max_length=12, default="queued")
+    snapshot = models.JSONField()
+    result = models.BinaryField(null=True)
+    lease_token = models.UUIDField(null=True)
+    lease_until = models.DateTimeField(null=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+
+    class Meta(TenantRow.Meta):
+        constraints = [models.UniqueConstraint(fields=["workspace", "request_hash"], name="export_request_once")]

@@ -3,7 +3,7 @@ from django.http import FileResponse, Http404
 from django.urls import path
 from django.views.decorators.http import require_GET
 
-from core import accounts, analysis, api
+from core import accounts, analysis, api, dataset_intake, exports, profile_intake
 
 
 @require_GET
@@ -32,6 +32,16 @@ urlpatterns = [
     path("api/workspaces/<uuid:workspace_id>/entities/<str:kind>/<uuid:pk>", api.entity),
     path("api/tools", analysis.tools),
     path("api/tools/<str:tool_id>", analysis.tools),
+    path("api/workspaces/<uuid:workspace_id>/intakes/previews", profile_intake.preview),
+    path("api/workspaces/<uuid:workspace_id>/intakes/previews/<uuid:pk>/apply", profile_intake.apply),
+    path("api/dataset-templates", dataset_intake.templates),
+    path("api/tools/<str:tool_id>/templates", dataset_intake.templates),
+    path("api/workspaces/<uuid:workspace_id>/datasets/previews", dataset_intake.preview),
+    path("api/workspaces/<uuid:workspace_id>/datasets/previews/<uuid:pk>/confirm", dataset_intake.confirm),
+    path("api/workspaces/<uuid:workspace_id>/datasets/previews/<uuid:pk>/errors", dataset_intake.errors),
+    path("api/workspaces/<uuid:workspace_id>/exports", exports.start),
+    path("api/workspaces/<uuid:workspace_id>/exports/<uuid:pk>", exports.status),
+    path("api/workspaces/<uuid:workspace_id>/exports/<uuid:pk>/download", exports.status, {"download": True}),
     path("api/scratch", analysis.scratch),
     path("api/workspaces/<uuid:workspace_id>/preflight", analysis.preflight),
     path("api/workspaces/<uuid:workspace_id>/drafts", analysis.drafts),

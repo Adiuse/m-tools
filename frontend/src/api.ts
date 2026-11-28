@@ -10,9 +10,9 @@ export async function api<T>(path: string, method = 'GET', body?: unknown): Prom
     method,
     headers: {
       ...(token ? { 'X-CSRFToken': token } : {}),
-      ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+      ...(body !== undefined && !(body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body),
     cache: 'no-store',
   });
   const result = await response.json().catch(() => ({}));

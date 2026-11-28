@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { api, errorText } from './api';
 import type { Method, Translate, User, Workspace } from './api';
 import { AnalysisPage } from './analysis';
+import { Exports, FileIntake, ProfileIntake } from './intake';
 import { Datasets, EvidenceRecords, History, Members, Profiles } from './records';
 import { SessionForm } from './session';
 import type { AccountLink } from './session';
@@ -45,7 +46,7 @@ function WorkspaceForm({ t, onSave, onCancel }: {
   </form>;
 }
 
-type Page = 'desk' | 'catalog' | 'create' | 'profile' | 'evidence' | 'datasets' | 'analysis' | 'history' | 'members';
+type Page = 'desk' | 'catalog' | 'create' | 'profile' | 'evidence' | 'datasets' | 'analysis' | 'history' | 'members' | 'file-intake' | 'profile-intake' | 'exports';
 
 function App() {
   const [lang, setLang] = useState(() => localStorage.getItem('mtools-language') === 'en' ? 'en' : 'fa');
@@ -103,6 +104,10 @@ function App() {
   const navigation: [Page, string][] = space ? [
     ['profile', t('پروفایل', 'Profile')], ['evidence', t('شواهد', 'Evidence')], ['datasets', t('داده‌ها', 'Datasets')],
     ['analysis', t('تحلیل و پیش‌نویس‌ها', 'Analysis and drafts')], ['history', t('تاریخچه', 'History')],
+    ...(space.role !== 'viewer' ? [
+      ['file-intake', t('ورود فایل', 'Import file')], ['profile-intake', t('منبع پروفایل', 'Profile source')],
+      ['exports', t('گزارش', 'Reports')],
+    ] as [Page, string][] : []),
     ...(space.role === 'owner' ? [['members', t('اعضا', 'Members')] as [Page, string]] : []),
   ] : [['desk', t('میزکار من', 'My workbench')], ['catalog', t('کاتالوگ ابزارها', 'Tool catalog')]];
   const base = space ? '/workspaces/' + space.id : '';
@@ -147,6 +152,9 @@ function App() {
           {page === 'profile' && <Profiles base={base} editable={editable} t={t} />}
           {page === 'evidence' && <EvidenceRecords base={base} editable={editable} t={t} />}
           {page === 'datasets' && <Datasets workspace={space} base={base} editable={editable} t={t} />}
+          {page === 'file-intake' && editable && <FileIntake workspace={space} t={t} />}
+          {page === 'profile-intake' && editable && <ProfileIntake workspace={space} t={t} />}
+          {page === 'exports' && editable && <Exports workspace={space} t={t} />}
           {page === 'history' && <History base={base} t={t} />}
           {page === 'members' && space.role === 'owner' && <Members base={base} t={t} />}
           <div hidden={page !== 'analysis'}>
