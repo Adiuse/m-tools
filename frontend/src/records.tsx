@@ -5,11 +5,12 @@ import { Field, formValues, Message, useTask } from './shared';
 
 type Version = { id: string; version: number; series: string; created_at: string };
 type Evidence = Version & {
-  title: string; kind: string; source_uri: string; collected_at: string; quality_notes: string;
+  title: string; kind: string; source_uri: string; collected_at: string; quality_notes: string; claim_only: boolean;
 };
 type Profile = Version & {
   industry: string; offering: string; objective: string; geography: string; business_model: string;
   company_name: string; target_segment: string; channels: string; public_contact: string; pricing_terms: string;
+  pricing_currency: string; pricing_date: string | null;
 };
 type SeriesRow = {
   series_key: string; period_start: string; value: number | null; unit: string;
@@ -58,7 +59,7 @@ export function Profiles({ base, editable, t }: { base: string; editable: boolea
       {profile && <form key={profile.id} onSubmit={(event) => {
         const data = formValues(event);
         task.run(async () => {
-          const result = await api<Profile>(path + '/' + profile.id, 'PATCH', data);
+          const result = await api<Profile>(path + '/' + profile.id, 'PATCH', { ...data, pricing_date: data.pricing_date || null });
           list.add(result); setSelected(result);
         });
       }}>
@@ -72,8 +73,10 @@ export function Profiles({ base, editable, t }: { base: string; editable: boolea
             ['company_name', t('نام شرکت', 'Company name')], ['target_segment', t('بخش هدف', 'Target segment')],
             ['channels', t('کانال‌ها', 'Channels')], ['public_contact', t('تماس عمومی', 'Public contact')],
             ['pricing_terms', t('شرایط قیمت‌گذاری', 'Pricing terms')],
+            ['pricing_currency', t('ارز قیمت', 'Pricing currency')],
+            ['pricing_date', t('تاریخ قیمت', 'Pricing date')],
           ] as const).map(([key, label]) => <Field label={label} key={key}>
-            <input name={key} defaultValue={profile[key]} readOnly={!editable} />
+            <input name={key} type={key === 'pricing_date' ? 'date' : 'text'} defaultValue={profile[key] ?? ''} readOnly={!editable} />
           </Field>)}
         </details>
         {editable && <button className="primary" disabled={task.busy || profile.id !== list.items[0]?.id}>{t('ذخیرهٔ نسخهٔ جدید', 'Save new version')}</button>}
@@ -94,6 +97,7 @@ export function EvidenceRecords({ base, editable, t }: { base: string; editable:
   return <div className="split">
     <section className="panel">
       <h2>{selected ? selected.title : t('ثبت شاهد', 'Record evidence')}</h2>
+      {selected?.claim_only && <p className="status-tag">{t('اظهار منبع', 'Source claim')}</p>}
       <Message text={list.error || task.error} error />
       {(editable || selected) && <form key={selected?.id ?? 'new'} onSubmit={(event) => {
         const data = formValues(event);
@@ -187,7 +191,7 @@ export function Datasets({ workspace, base, editable, t }: {
         <Field label={t('شاهد مبنا', 'Source evidence')}><select name="evidence_id" required defaultValue={selected?.payload.source_ref.id ?? ''}>
           <option value="" disabled>{t('شاهد را انتخاب کنید', 'Select evidence')}</option>
           {sources.items.filter((source) => source.kind !== 'assumption').map((source) =>
-            <option key={source.id} value={source.id}>{source.title} · {source.version}</option>)}
+            <option key={source.id} value={source.id}>{source.title} · {source.version}{source.claim_only ? ' · ' + t('اظهار منبع', 'Source claim') : ''}</option>)}
         </select></Field>
         <div className="form-grid">
           <Field label={t('جامعه یا دامنه', 'Population or scope')}><input name="population" defaultValue={scope?.population} required /></Field>

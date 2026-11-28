@@ -2,6 +2,7 @@ import csv
 import hashlib
 import io
 import json
+import uuid
 from datetime import timedelta
 from pathlib import Path
 
@@ -11,10 +12,12 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from . import contracts, models
-from .api import Conflict, InvalidInput, audit, dataset_values, fields, workspace_access
+from .api import (Conflict, InvalidInput, audit, dataset_values, fields, validate_dataset_row,
+                  workspace_access, workspace_entities)
 from .intake_files import IntakeError, MAX_COLUMNS, MAX_ROWS, normalize_cell, read_upload, rows_from_file
 
 DEMO_MARK = "# M-Tools synthetic example"
@@ -95,7 +98,7 @@ def templates(request, tool_id=None):
                         headers={"Content-Disposition": f'attachment; filename="{chosen}-v1.csv"'})
 
 
-def parse_rows(raw, extension, spec, metadata, mapping, sheet, delimiter):
+def parse_rows(workspace, raw, extension, spec, metadata, mapping, sheet, delimiter):
     schema_id = metadata["schema_id"]
     rows = iter(rows_from_file(raw, extension, sheet=sheet, delimiter=delimiter))
     header = [str(cell or "").strip() for cell in next(rows, [])]
@@ -105,14 +108,15 @@ def parse_rows(raw, extension, spec, metadata, mapping, sheet, delimiter):
             raise IntakeError("Mark the sample as synthetic before importing it.")
         header = [str(cell or "").strip() for cell in next(rows, [])]
         start = 3
-    if not header or len(header) > MAX_COLUMNS or len(set(header)) != len(header):
+    if not header or not all(header) or len(header) > MAX_COLUMNS or len(set(header)) != len(header):
         raise IntakeError("Use a unique, nonempty header row.")
     aliases = {label: key for key, label in LABELS_FA.items()}
     mapped = [mapping.get(key, aliases.get(key, key)) for key in header]
     properties = spec["properties"]
     if any(key not in properties for key in mapped) or len(set(mapped)) != len(mapped):
         raise IntakeError("Map each column to a distinct schema field.")
-    accepted, errors, seen = [], [], set()
+    accepted, errors, seen, refs = [], [], {}, {}
+    timezone_name = metadata["scope"]["period"]["timezone"]
     for index, row in enumerate(rows, start):
         if index - start >= MAX_ROWS:
             raise IntakeError("The file has too many rows.")
@@ -125,21 +129,22 @@ def parse_rows(raw, extension, spec, metadata, mapping, sheet, delimiter):
             normalized = {}
             for key, column in properties.items():
                 if key in by_key or key in spec["required"]:
-                    normalized[key] = normalize_cell(by_key.get(key), column)
+                    normalized[key] = normalize_cell(by_key.get(key), column, timezone_name)
             if "source_ref" in normalized and normalized["source_ref"] is None:
                 normalized["source_ref"] = metadata["source_ref"]
             issue = contracts.validate("Row_" + schema_id, normalized)
             if issue is not None:
                 field = ".".join(map(str, issue.absolute_path)) or "row"
                 raise IntakeError(f"Invalid or missing value in {field}.")
-            if schema_id == "numeric_series":
-                key = (normalized["series_key"], normalized["period_start"])
-                if key in seen:
-                    raise IntakeError("Duplicate series and date.")
-                seen.add(key)
+            validate_dataset_row(workspace, metadata, normalized, seen, refs)
             accepted.append(normalized)
+        except Http404:
+            errors.append({"row": index, "reason": "A versioned reference is unavailable in this workspace."})
+        except InvalidInput as exc:
+            errors.append({"row": index, "reason": str(exc.detail)})
         except (ValueError, TypeError) as exc:
-            errors.append({"row": index, "reason": str(exc)})
+            reason = str(exc) if isinstance(exc, IntakeError) else "Use a typed value for the selected column."
+            errors.append({"row": index, "reason": reason})
     return accepted, errors
 
 
@@ -148,12 +153,12 @@ def parse_rows(raw, extension, spec, metadata, mapping, sheet, delimiter):
 def preview(request, workspace_id):
     workspace, role = workspace_access(request, workspace_id)
     if role == "viewer":
-        from rest_framework.exceptions import PermissionDenied
         raise PermissionDenied()
     try:
         metadata = json.loads(request.data.get("metadata", "{}"))
         mapping = json.loads(request.data.get("mapping", "{}"))
-        if not isinstance(metadata, dict) or not isinstance(mapping, dict):
+        if (not isinstance(metadata, dict) or not isinstance(mapping, dict)
+                or not all(isinstance(value, str) for value in mapping.values())):
             raise IntakeError("Use valid metadata and column mapping.")
         schema_id = metadata.get("schema_id")
         if schema_id not in row_types() or "source_ref" not in metadata:
@@ -161,10 +166,16 @@ def preview(request, workspace_id):
         upload = request.FILES.get("file")
         raw = read_upload(upload)
         checksum = hashlib.sha256(raw).hexdigest()
-        rows, errors = parse_rows(raw, Path(upload.name).suffix.lower(), row_types()[schema_id], metadata, mapping,
-                                  request.data.get("sheet"), request.data.get("delimiter", ","))
-        metadata.update(workspace_id=str(workspace.pk), schema_version=1, rows=rows)
+        if ("schema_version" in metadata and (type(metadata["schema_version"]) is not int or metadata["schema_version"] != 1)
+                or request.data.get("template_version", "1") != "1"):
+            raise IntakeError("Download the current version of the template.")
+        if "workspace_id" in metadata and metadata["workspace_id"] != str(workspace.pk):
+            raise Http404
+        metadata.update(workspace_id=str(workspace.pk), schema_version=1, rows=[])
         dataset_values(workspace, metadata)
+        rows, errors = parse_rows(workspace, raw, Path(upload.name).suffix.lower(), row_types()[schema_id],
+                                  metadata, mapping, request.data.get("sheet"), request.data.get("delimiter", ","))
+        metadata["rows"] = rows
     except (ValueError, TypeError) as exc:
         raise InvalidInput(str(exc)) from None
     row = models.IntakePreview.objects.create(
@@ -172,7 +183,8 @@ def preview(request, workspace_id):
         payload={"document": metadata, "errors": errors, "mapping": mapping, "file_name": upload.name},
         expires_at=timezone.now() + timedelta(hours=1),
     )
-    return Response({"id": row.pk, "checksum": checksum, "accepted": len(rows), "errors": errors,
+    return Response({"id": row.pk, "checksum": checksum, "template_version": 1, "mapping": mapping,
+                     "accepted": len(rows), "errors": errors,
                      "rows": rows[:20], "synthetic": metadata["synthetic"]}, status=201)
 
 
@@ -193,18 +205,45 @@ def errors(request, workspace_id, pk):
                         headers={"Content-Disposition": 'attachment; filename="validation-errors.csv"'})
 
 
+@api_view(["GET", "POST"])
+@transaction.atomic
+def datasets(request, workspace_id):
+    workspace, _ = workspace_access(request, workspace_id, write=request.method == "POST")
+    body = request.data
+    if request.method == "POST" and isinstance(body, dict) and "preview_id" in body:
+        try:
+            pk = uuid.UUID(body["preview_id"])
+        except (ValueError, TypeError, AttributeError):
+            raise InvalidInput({"preview_id": "Use a staged preview UUID."}) from None
+        if set(body) != {"preview_id", "confirm", "checksum", "title", "mapping", "template_version"}:
+            raise InvalidInput("Confirm the exact mapping and template version from the preview.")
+        return confirm_preview(request, workspace, pk, {key: value for key, value in body.items() if key != "preview_id"})
+    return workspace_entities(request, workspace, "datasets")
+
+
 @api_view(["POST"])
 @transaction.atomic
 def confirm(request, workspace_id, pk):
     workspace, _ = workspace_access(request, workspace_id, write=True)
+    return confirm_preview(request, workspace, pk, request.data)
+
+
+def confirm_preview(request, workspace, pk, body):
     row = get_preview(workspace, request.user, pk, "dataset")
-    body = request.data
-    if (not isinstance(body, dict) or set(body) != {"confirm", "checksum", "title"}
+    if (not isinstance(body, dict) or set(body) not in ({"confirm", "checksum", "title"},
+                                                       {"confirm", "checksum", "title", "template_version", "mapping"})
             or body["confirm"] is not True or body["checksum"] != row.checksum):
         raise InvalidInput("Confirm the staged checksum explicitly.")
+    if "template_version" in body and (
+        type(body["template_version"]) is not int or body["template_version"] != 1 or body["mapping"] != row.payload["mapping"]
+    ):
+        raise Conflict("The confirmed mapping or template version differs from the preview.")
     title = body.get("title")
     if not isinstance(title, str) or not title.strip() or len(title) > 200:
         raise InvalidInput("Enter a dataset title of up to 200 characters.")
+    title = title.strip()
+    from .api import inspect_contract_values
+    inspect_contract_values(workspace, title)
     if row.applied_id:
         existing = get_object_or_404(models.Dataset, workspace=workspace, pk=row.applied_id)
         if existing.title != title.strip():

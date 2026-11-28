@@ -6,7 +6,9 @@ import json
 import math
 import os
 import subprocess
+from datetime import date
 from decimal import Decimal
+from importlib.metadata import version
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -36,24 +38,25 @@ def rows(snapshot, *, compact=False):
     yield ("عنوان" if fa else "Title", model["title"])
     yield ("وضعیت" if fa else "Status", model["status"])
     if include(snapshot, "summary"):
+        yield ("مسئله" if fa else "Question", model["question"])
         yield ("خلاصه" if fa else "Summary", model["executive_summary"])
     yield ("پوشش" if fa else "Coverage", model["coverage"]["status"])
-    yield ("واحد / ارز" if fa else "Unit / currency", model["currency"])
+    yield ("ارز گزارش" if fa else "Reporting currency", model["currency"])
+    yield ("منطقه زمانی" if fa else "Timezone", model["timezone"])
     yield ("نسخه و منبع" if fa else "Source and version", snapshot["source"])
     yield ("شناسهٔ نسخه" if fa else "Snapshot checksum", model["checksum"])
     for card in model["kpi_cards"] if include(snapshot, "kpis") else []:
-        yield (card["metric_key"] + " · " + card["unit"], Decimal(card["value"]) if card["value"] is not None else None)
+        label = " · ".join(part for part in (card["metric_key"], card["unit"], card["currency"]) if part)
+        yield (label, Decimal(card["value"]) if card["value"] is not None else None)
     for text in model["methodology"] if include(snapshot, "methodology") else []:
         yield ("روش" if fa else "Method", text)
     for assumption in model["assumptions"] if include(snapshot, "methodology") else []:
         yield (assumption["label"], assumption["value"])
     for text in model["limitations"]:
         yield ("محدودیت" if fa else "Limitation", text)
-    tables = snapshot.get("tables")
-    if tables is None:
-        tables = [{"title": model["title"], "columns": snapshot["columns"], "rows": snapshot["rows"]}]
-    for table in tables if include(snapshot, "tables") else []:
+    for table in data_tables(snapshot):
         yield (table["title"],)
+        yield from preview_notice(table, fa)
         columns = table["columns"]
         if compact and len(columns) > 6:
             for index, row in enumerate(table["rows"], 1):
@@ -64,8 +67,24 @@ def rows(snapshot, *, compact=False):
             yield from (tuple(row.get(key) for key in columns) for row in table["rows"])
     for chart in snapshot.get("charts", []) if include(snapshot, "charts") else []:
         yield (chart["title"], "دادهٔ نمودار" if fa else "Chart data")
+        yield from preview_notice(chart, fa)
         yield tuple(chart["columns"])
         yield from map(tuple, chart["rows"])
+
+
+def data_tables(snapshot):
+    if not include(snapshot, "tables"):
+        return []
+    if "tables" in snapshot:
+        return snapshot["tables"]
+    return [{"title": snapshot["model"]["title"], "columns": snapshot["columns"], "rows": snapshot["rows"]}]
+
+
+def preview_notice(section, fa):
+    shown = len(section["rows"])
+    total = section.get("total_rows", shown)
+    if shown < total:
+        yield ("ردیف‌های نمایش‌داده‌شده" if fa else "Displayed rows", f"{shown} / {total}")
 
 
 def native_charts(snapshot):
@@ -79,6 +98,8 @@ def docx(snapshot, output):
     from docx.oxml import OxmlElement
     from docx.enum.table import WD_TABLE_DIRECTION
     book = Document()
+    book.sections[0].header.paragraphs[0].text = snapshot["model"]["title"]
+    book.sections[0].footer.paragraphs[0].text = snapshot["model"]["checksum"]
     items = list(rows(snapshot, compact=True))
     table = book.add_table(rows=0, cols=max(2, max(map(len, items))))
     table.style = "Table Grid"
@@ -101,13 +122,44 @@ def xlsx(snapshot, output):
     worksheet = book.add_worksheet("Report")
     if snapshot["model"]["locale"] == "fa":
         worksheet.right_to_left()
-    items = list(rows(snapshot))
-    worksheet.set_column(0, max(1, max(map(len, items)) - 1), 34)
+    sections = [key for key in snapshot.get("include_sections", ["summary", "kpis", "methodology"])
+                if key not in ("tables", "charts")]
+    items = list(rows({**snapshot, "include_sections": sections}))
+    worksheet.set_column(0, 0, 31)
+    worksheet.set_column(1, 1, 62, book.add_format({"text_wrap": True}))
     worksheet.freeze_panes(1, 0)
+
+    def write(sheet, row, column, value):
+        if isinstance(value, int) and not isinstance(value, bool) and abs(value) >= 10 ** 15:
+            value = str(value)
+        if isinstance(value, Decimal) and len(value.as_tuple().digits) > 15:
+            value = format(value, "f")
+        if value is not None:
+            sheet.write(row, column, display(value) if isinstance(value, (dict, list)) else value)
+
     for index, row in enumerate(items):
         for column, value in enumerate(row):
-            if value is not None:
-                worksheet.write(index, column, display(value) if isinstance(value, (dict, list)) else value)
+            write(worksheet, index, column, value)
+    fmt_date = book.add_format({"num_format": "yyyy-mm-dd"})
+    for index, spec in enumerate(data_tables(snapshot), 1):
+        data = book.add_worksheet(f"Data {index}")
+        if snapshot["model"]["locale"] == "fa":
+            data.right_to_left()
+        data.write(0, 0, spec["title"])
+        for row in preview_notice(spec, snapshot["model"]["locale"] == "fa"):
+            data.write_row(1, 0, row)
+        data.write_row(2, 0, spec["columns"])
+        data.freeze_panes(3, 0)
+        data.set_column(0, max(0, len(spec["columns"]) - 1), 21)
+        for row_index, row in enumerate(spec["rows"], 3):
+            for column, key in enumerate(spec["columns"]):
+                value = row.get(key)
+                if value and key in spec.get("date_columns", []):
+                    data.write_datetime(row_index, column, date.fromisoformat(value), fmt_date)
+                else:
+                    write(data, row_index, column, value)
+        if spec["columns"]:
+            data.autofilter(2, 0, 2 + len(spec["rows"]), len(spec["columns"]) - 1)
     for index, spec in enumerate(native_charts(snapshot), 1):
         data = book.add_worksheet(f"Chart {index}")
         if snapshot["model"]["locale"] == "fa":
@@ -222,10 +274,30 @@ def svg_chart(spec):
             + "".join(svg) + '</svg><p>' + legend + '</p></figure>')
 
 
-def pdf(snapshot, output):
+def pdf_command():
     binary = os.environ.get("MTOOLS_PDF_CHROMIUM")
     if not binary:
         raise ValueError("The PDF renderer is not configured.")
+    return binary
+
+
+def renderer_env(directory):
+    allowed = {"PATH", "LANG", "LC_ALL", "TZ", "FONTCONFIG_FILE", "FONTCONFIG_PATH"}
+    return {**{key: value for key, value in os.environ.items() if key in allowed}, "HOME": str(directory)}
+
+
+def renderer_version(format_name):
+    if format_name == "pdf":
+        with TemporaryDirectory(prefix="mtools-renderer-version-") as directory:
+            result = subprocess.run([pdf_command(), "--version"], check=True, timeout=8, text=True,
+                                    stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, env=renderer_env(directory))
+        return ("VS02.1 · " + result.stdout.strip())[:100]
+    package = {"docx": "python-docx", "xlsx": "XlsxWriter", "pptx": "python-pptx"}[format_name]
+    return f"VS02.1 · {package} {version(package)}"
+
+
+def pdf(snapshot, output):
+    binary = pdf_command()
     rtl = snapshot["model"]["locale"] == "fa"
     items = list(rows(snapshot, compact=True))
     columns = max(2, max(map(len, items)))
@@ -253,7 +325,8 @@ def pdf(snapshot, output):
         file = base / "report.pdf"
         args = [binary, "--headless", "--disable-background-networking", "--disable-extensions",
                 "--no-pdf-header-footer", f"--user-data-dir={base / 'browser'}", f"--print-to-pdf={file}"]
-        subprocess.run([*args, page.as_uri()], check=True, timeout=45, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run([*args, page.as_uri()], check=True, timeout=45, env=renderer_env(directory),
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         output.write(file.read_bytes())
 
 

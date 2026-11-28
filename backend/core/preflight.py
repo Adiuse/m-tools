@@ -3,7 +3,7 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 
-from . import contracts, models
+from . import contracts, models, provenance
 from .api import InvalidInput, inspect_contract_values, resolve_ref, validate_contract
 
 
@@ -75,6 +75,10 @@ def checked_request(workspace, body):
             raise InvalidInput({"evidence_refs": "Use evidence references."})
 
     inputs = body["input"]
+    try:
+        provenance.validate_observed(workspace, inputs)
+    except ValueError as exc:
+        raise InvalidInput(str(exc)) from None
     for path, binding in method.get("dataset_requirements", {}).items():
         value = value_at(inputs, path)
         if value is None:
@@ -92,7 +96,21 @@ def checked_request(workspace, body):
         get_object_or_404(models.AnalysisRun, workspace=workspace, pk=pk)
     if method["method_id"] == "S01.diagnose":
         check_metric_scope(workspace, inputs)
+    if method["method_id"] == "M09.network":
+        check_graph_endpoints(workspace, inputs)
     return method
+
+
+def check_graph_endpoints(workspace, inputs):
+    nodes_ref = value_at(inputs, "graph.nodes_ref")
+    edges_ref = value_at(inputs, "graph.edges_ref")
+    if nodes_ref is None or edges_ref is None:
+        return
+    nodes, edges = (resolve_ref(workspace, ref) for ref in (nodes_ref, edges_ref))
+    node_keys = {row["node_key"] for row in nodes.payload["rows"]}
+    if any(row["source_key"] not in node_keys or row["target_key"] not in node_keys
+           for row in edges.payload["rows"]):
+        raise InvalidInput({"graph.edges_ref": "An edge references a node absent from the selected node dataset."})
 
 
 def check_metric_scope(workspace, inputs):

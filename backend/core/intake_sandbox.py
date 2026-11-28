@@ -14,22 +14,42 @@ from .public_source import public_page
 
 
 class TextNodes(HTMLParser):
+    BLOCKS = {"article", "br", "div", "dt", "dd", "li", "p", "section", "tr",
+              "h1", "h2", "h3", "h4", "h5", "h6"}
+    EXCLUDED = {"script", "style", "template", "noscript"}
+
     def __init__(self):
         super().__init__()
         self.lines = []
+        self.parts = []
         self.hidden = 0
 
+    def finish_line(self):
+        if self.parts:
+            self.lines.append(" ".join(self.parts))
+            self.parts.clear()
+
     def handle_starttag(self, tag, attrs):
-        if tag in ("script", "style", "template"):
+        if tag in self.EXCLUDED:
             self.hidden += 1
+        if self.hidden:
+            return
+        if tag in self.BLOCKS:
+            self.finish_line()
+        if tag == "meta":
+            attrs = dict(attrs)
+            if attrs.get("property") == "og:site_name" and attrs.get("content"):
+                self.lines.append("company name: " + attrs["content"])
 
     def handle_endtag(self, tag):
-        if tag in ("script", "style", "template") and self.hidden:
+        if tag in self.EXCLUDED and self.hidden:
             self.hidden -= 1
+        if not self.hidden and tag in self.BLOCKS:
+            self.finish_line()
 
     def handle_data(self, data):
         if not self.hidden and data.strip():
-            self.lines.extend(data.splitlines())
+            self.parts.append(" ".join(data.split()))
 
 
 def units(raw, extension):
@@ -38,6 +58,8 @@ def units(raw, extension):
         if extension == ".html":
             parser = TextNodes()
             parser.feed(text)
+            parser.close()
+            parser.finish_line()
             text = "\n".join(parser.lines)
         yield from ((f"line:{index}", line) for index, line in enumerate(text.splitlines(), 1))
     elif extension in (".xlsx", ".csv"):

@@ -85,10 +85,13 @@ class CompanyProfile(Versioned):
     channels = models.CharField(max_length=240, blank=True, default="")
     public_contact = models.CharField(max_length=240, blank=True, default="")
     pricing_terms = models.CharField(max_length=400, blank=True, default="")
+    pricing_currency = models.CharField(max_length=3, blank=True, default="")
+    pricing_date = models.DateField(null=True, blank=True)
     constraints = models.JSONField(default=list)
 
 
 class Evidence(Versioned):
+    claim_only = models.BooleanField(default=False)
     kind = models.CharField(max_length=16, choices=[(x, x) for x in ("internal", "primary", "secondary", "assumption")])
     title = models.CharField(max_length=200)
     source_uri = models.URLField(blank=True)
@@ -277,6 +280,8 @@ class ReportExport(TenantRow):
     snapshot = models.JSONField()
     result = models.BinaryField(null=True)
     checksum = models.CharField(max_length=64, blank=True, default="")
+    renderer_version = models.CharField(max_length=100, blank=True, default="")
+    error_code = models.CharField(max_length=32, blank=True, default="")
     expires_at = models.DateTimeField(null=True)
     lease_token = models.UUIDField(null=True)
     lease_until = models.DateTimeField(null=True)

@@ -3,17 +3,18 @@ import hashlib
 from datetime import timedelta
 from pathlib import Path
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.decorators import api_view, parser_classes
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError as SerializerValidationError
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 
 from . import contracts, models
 from .accounts import allowed
-from .api import Conflict, InvalidInput, audit, fields, form, workspace_access
+from .api import Conflict, InvalidInput, audit, fields, form, validate_contract, workspace_access
 from .dataset_intake import get_preview
 from .intake_files import IntakeError, read_upload
 from .intake_sandbox import process
@@ -30,11 +31,13 @@ KEYS = {
     "channels": ("channels", "کانال‌ها", "کانال ها"),
     "public_contact": ("public contact", "تماس عمومی"),
     "pricing_terms": ("pricing terms", "شرایط قیمت‌گذاری", "شرایط قیمت گذاری"),
+    "pricing_currency": ("pricing currency", "ارز قیمت"),
+    "pricing_date": ("pricing date", "تاریخ قیمت"),
 }
 
 
 
-def suggestions(raw, extension, profile):
+def suggestions(raw, extension, profile, source=""):
     labels = {label: key for key, names in KEYS.items() for label in names}
     offered = {}
     for anchor, line in process(extension, raw)["lines"]:
@@ -44,11 +47,17 @@ def suggestions(raw, extension, profile):
         if not sep or not name or not content:
             continue
         spec = ProfileInput().fields[name]
-        if len(content) > spec.max_length or any(ord(char) < 32 for char in content):
+        if any(ord(char) < 32 for char in content):
             continue
-        current = getattr(profile, name)
+        try:
+            content = str(spec.run_validation(content))
+        except (SerializerValidationError, ValidationError):
+            continue
+        current_value = getattr(profile, name)
+        current = str(current_value) if current_value is not None else ""
         item = {"field": name, "proposed": content, "current": current,
-                "anchor": anchor, "excerpt_hash": hashlib.sha256(line.encode()).hexdigest(),
+                "anchor": f"{source} · {anchor}" if source else anchor,
+                "excerpt_hash": hashlib.sha256(line.encode()).hexdigest(),
                 "classification": "source_claim", "conflict": bool(current and current != content)}
         if name in offered and offered[name]["proposed"] != content:
             offered[name]["ambiguous"] = True
@@ -93,7 +102,7 @@ def preview(request, workspace_id):
             raw = read_upload(upload)
             extension = Path(upload.name).suffix.lower()
             title = upload.name[:200]
-        output = suggestions(raw, extension, current)
+        output = suggestions(raw, extension, current, source)
     except Exception as exc:
         if isinstance(exc, IntakeError):
             raise InvalidInput(str(exc)) from None
@@ -116,7 +125,9 @@ def apply(request, workspace_id, pk):
     if (not isinstance(body, dict) or set(body) != {"confirm", "checksum", "expected_version", "fields"}
             or body["confirm"] is not True or body["checksum"] != entry.checksum):
         raise InvalidInput("Confirm the reviewed source.")
-    choices = body.get("fields")
+    if type(body["expected_version"]) is not int or body["expected_version"] < 1:
+        raise InvalidInput({"expected_version": "Use a positive profile version."})
+    choices = body["fields"]
     candidate = {item["field"]: item["proposed"] for item in entry.payload["fields"]}
     if (not isinstance(choices, dict) or not choices or set(choices) - candidate.keys()
             or any(not isinstance(value, str) for value in choices.values())):
@@ -133,7 +144,7 @@ def apply(request, workspace_id, pk):
     values = {key: getattr(current, key) for key in ProfileInput().fields}
     checked = form(ProfileInput, {**values, **choices})
     evidence = models.Evidence.objects.create(
-        workspace=workspace, kind="secondary" if entry.payload["source"] else "internal",
+        workspace=workspace, kind="secondary" if entry.payload["source"] else "internal", claim_only=True,
         title=entry.payload["title"], source_uri=entry.payload["source"], collected_at=timezone.localdate(),
         checksum=entry.checksum, created_by=request.user, scope="Company profile review",
         quality_notes="User-reviewed source. " + "; ".join(
@@ -145,7 +156,10 @@ def apply(request, workspace_id, pk):
         workspace=workspace, series=current.series, version=current.version + 1, **checked,
     )
     entry.applied_id = profile.pk
-    entry.payload.update(evidence_id=str(evidence.pk), applied_hash=contracts.digest(choices))
+    entry.payload.update(
+        evidence_id=str(evidence.pk), applied_hash=contracts.digest(choices),
+        review_contract=review_contract(entry, profile, evidence, choices, request.user),
+    )
     entry.save(update_fields=["applied_id", "payload"])
     audit(request, workspace, "profile_intake_applied", profile)
     return Response(applied_profile(entry, profile, evidence, choices), status=201)
@@ -164,3 +178,34 @@ def applied_profile(entry, profile, evidence, choices):
     return {"profile": fields(profile), "evidence": fields(evidence), "anchors": [
         item for item in entry.payload["fields"] if item["field"] in choices
     ]}
+
+
+def review_contract(entry, profile, evidence, choices, reviewer):
+    def ref(kind, record, version=1):
+        return {"kind": kind, "id": str(record.pk), "version": version}
+
+    source_type = "url" if entry.payload["source"] else entry.payload["source_type"]
+    review_fields = []
+    for item in entry.payload["fields"]:
+        name = item["field"]
+        decision = "pending"
+        if name in choices:
+            decision = "accept" if choices[name] == item["proposed"] else "edit"
+        review_fields.append({
+            "field_id": name, "target_entity": "profile", "field_path": name,
+            "proposed_value": item["proposed"], "unit": None, "source_locator": item["anchor"],
+            "excerpt_hash": item["excerpt_hash"], "classification": "observed_claim",
+            "confidence_note": "Explicit source claim; independent verification was not performed.",
+            "conflict": item["conflict"], "validation_status": "valid", "decision": decision,
+        })
+    document = {
+        "kind": "profile", "source_ref": ref("evidence", evidence, evidence.version),
+        "source_hash": entry.checksum, "source_type": "text" if source_type == "txt" else source_type,
+        "parser_version": "1", "model_version": None, "fields": review_fields,
+        "missing_fields": entry.payload["missing_fields"],
+        "warnings": ["Conflicting values: " + name for name in entry.payload.get("ambiguous_fields", [])],
+        "created_by": ref("user", entry.creator), "approved_by": ref("user", reviewer),
+        "applied_refs": [ref("profile", profile, profile.version)],
+    }
+    validate_contract("DraftImportResult", document)
+    return document

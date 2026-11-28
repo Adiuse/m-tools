@@ -192,36 +192,73 @@ def dataset_values(workspace, document):
     if document["source_ref"]["kind"] != "evidence":
         raise InvalidInput({"source_ref": "Supply an evidence reference."})
     evidence = resolve_ref(workspace, document["source_ref"])
-    if evidence.kind == "assumption" and not document["synthetic"]:
+    if (evidence.kind == "assumption" or evidence.claim_only) and not document["synthetic"]:
         raise InvalidInput({"source_ref": "Observed data requires a source other than an assumption."})
+    inspect_contract_values(workspace, document["scope"])
+    inspect_contract_values(workspace, document["columns"])
+    row_state = {}
     refs = {}
-    inspect_contract_values(workspace, document, refs)
     for row in document["rows"]:
-        source_ref = row["source_ref"]
-        if source_ref["kind"] != "evidence":
-            raise InvalidInput({"rows": "Each source must reference evidence."})
-        source = refs[(source_ref["kind"], source_ref["id"], source_ref["version"])]
-        if not document["synthetic"] and source.kind == "assumption":
-            raise InvalidInput({"rows": "Observed rows require evidence."})
-    if document["schema_id"] == "numeric_series":
-        scope = document["scope"]
-        seen = set()
-        for row in document["rows"]:
-            key = (row["series_key"], row["period_start"])
-            if key in seen:
-                raise InvalidInput({"rows": "Each series and date must be unique."})
-            seen.add(key)
-            if row["unit"] != scope["unit"] or not (
-                scope["period"]["start"] <= row["period_start"] < scope["period"]["end_exclusive"]
-            ):
-                raise InvalidInput({"rows": "Row unit and date must match the dataset scope."})
-            value = row["value"]
-            if row["unit"] == "count" and value is not None and (value < 0 or value % 1 != 0):
-                raise InvalidInput({"rows": "Count must be a nonnegative integer."})
+        validate_dataset_row(workspace, document, row, row_state, refs)
     return {
         "evidence": evidence, "schema_id": document["schema_id"], "schema_version": document["schema_version"],
         "row_count": len(document["rows"]), "checksum": contracts.digest(document),
     }
+
+
+def validate_dataset_row(workspace, document, row, seen, refs):
+    inspect_contract_values(workspace, row, refs)
+    source_ref = row["source_ref"]
+    if source_ref["kind"] != "evidence":
+        raise InvalidInput("Each row source must reference evidence.")
+    source = refs[(source_ref["kind"], source_ref["id"], source_ref["version"])]
+    if not document["synthetic"] and (source.kind == "assumption" or source.claim_only):
+        raise InvalidInput("Observed rows require evidence.")
+
+    schema = document["schema_id"]
+    scope = document["scope"]
+    if schema == "numeric_series":
+        key = (row["series_key"], row["period_start"])
+        value = row["value"]
+        period = scope["period"]
+        if row["unit"] != scope["unit"] or not period["start"] <= row["period_start"] < period["end_exclusive"]:
+            raise InvalidInput("Row unit and date must match the dataset scope.")
+        currency_key = ("currency", row["series_key"])
+        if currency_key in seen and seen[currency_key] != row["currency"]:
+            raise InvalidInput("A numeric series must use a consistent currency.")
+    elif schema == "metric_observations":
+        metric_ref = row["metric_ref"]
+        if metric_ref["kind"] != "metric":
+            raise InvalidInput("The observation must reference a metric definition.")
+        metric = refs[(metric_ref["kind"], metric_ref["id"], metric_ref["version"])]
+        if row["unit"] != scope["unit"] or row["unit"] != metric.unit or row["grain"] != scope["grain"] or row["grain"] != metric.grain:
+            raise InvalidInput("Observation unit and grain must match the metric and dataset.")
+        period = row["period"]
+        scope_period = scope["period"]
+        if (period["timezone"] != scope_period["timezone"] or period["start"] < scope_period["start"]
+                or period["end_exclusive"] > scope_period["end_exclusive"]):
+            raise InvalidInput("Observation period must fit within the dataset scope.")
+        value = Decimal(row["value"]) if row["value"] is not None else None
+        if (value is None) != bool(row["missing_reason"]):
+            raise InvalidInput("A missing value requires a reason; a recorded zero is a value.")
+        key = (row["observation_key"],)
+    elif schema == "events":
+        key = (row["event_key"],)
+        value = None
+    elif schema == "graph_nodes":
+        key = (row["node_key"],)
+        value = None
+    else:
+        return
+
+    if value is not None and row["unit"] == "count" and (value < 0 or value % 1 != 0):
+        raise InvalidInput("Count must be a nonnegative integer.")
+    if key in seen:
+        raise InvalidInput("Duplicate dataset row key.")
+    seen[key] = True
+    if schema == "numeric_series":
+        seen[currency_key] = row["currency"]
+
 
 
 def scoped_relations(model, workspace, data):
@@ -246,7 +283,8 @@ def entity_values(kind, model, request, workspace, previous=None):
         inspect_contract_values(workspace, data)
     scoped_relations(model, workspace, data)
     if kind == "evidence":
-        data.update(created_by=request.user, checksum=contracts.digest(data))
+        data.update(created_by=request.user, checksum=contracts.digest(data),
+                    claim_only=previous.claim_only if previous is not None else False)
     elif kind == "datasets":
         if previous is not None and isinstance(data["payload"], dict) and (
             previous.payload["synthetic"] != data["payload"].get("synthetic")
@@ -256,8 +294,14 @@ def entity_values(kind, model, request, workspace, previous=None):
     elif kind == "observations":
         evidence = models.Evidence.objects.get(pk=data["evidence_id"])
         dataset = models.Dataset.objects.filter(pk=data.get("dataset_id")).first()
-        if evidence.kind == "assumption" or (dataset is not None and dataset.payload["synthetic"]):
+        if evidence.kind == "assumption" or evidence.claim_only or (dataset is not None and dataset.payload["synthetic"]):
             raise InvalidInput("Observed values require evidence and non-synthetic data.")
+        identifying = ("metric_id", "period_start", "period_end")
+        if previous is not None and (
+            any(data[key] != getattr(previous, key) for key in identifying)
+            or data.get("dimensions", {}) != previous.dimensions
+        ):
+            raise InvalidInput("Create a new observation when its metric, period or dimensions change.")
         value = data["value"]
         metric = models.MetricDefinition.objects.get(pk=data["metric_id"])
         if metric.unit == "count" and value is not None and (value < 0 or value != value.to_integral_value()):
@@ -290,6 +334,10 @@ def entity_model(kind):
 @transaction.atomic
 def entities(request, workspace_id, kind):
     workspace, _ = workspace_access(request, workspace_id, write=request.method == "POST")
+    return workspace_entities(request, workspace, kind)
+
+
+def workspace_entities(request, workspace, kind):
     model = entity_model(kind)
     query = model.objects.filter(workspace=workspace)
     if request.method == "GET":

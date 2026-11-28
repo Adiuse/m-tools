@@ -25,7 +25,7 @@ urlpatterns = [
     path("api/workspaces", api.workspaces),
     path("api/workspaces/<uuid:workspace_id>/memberships", api.memberships),
     path("api/workspaces/<uuid:workspace_id>/history", api.history),
-    path("api/workspaces/<uuid:workspace_id>/datasets", api.entities, {"kind": "datasets"}),
+    path("api/workspaces/<uuid:workspace_id>/datasets", dataset_intake.datasets),
     path("api/workspaces/<uuid:workspace_id>/actions", api.entities, {"kind": "actions"}),
     path("api/workspaces/<uuid:workspace_id>/outcomes", api.entities, {"kind": "outcomes"}),
     path("api/workspaces/<uuid:workspace_id>/entities/<str:kind>", api.entities),

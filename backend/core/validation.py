@@ -41,6 +41,8 @@ class ProfileInput(StrictSerializer):
     channels = serializers.CharField(max_length=240, allow_blank=True, required=False)
     public_contact = serializers.CharField(max_length=240, allow_blank=True, required=False)
     pricing_terms = serializers.CharField(max_length=400, allow_blank=True, required=False)
+    pricing_currency = serializers.RegexField(r"^[A-Z]{3}$", allow_blank=True, required=False)
+    pricing_date = serializers.DateField(allow_null=True, required=False)
     constraints = serializers.ListField(child=serializers.CharField(max_length=500), max_length=100, required=False)
 
 

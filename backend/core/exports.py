@@ -12,7 +12,7 @@ from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from . import artifacts, contracts, models, reporting
+from . import artifacts, contracts, models, provenance, reporting
 from .api import InvalidInput, inspect_contract_values, resolve_ref, validate_contract, workspace_access
 
 
@@ -60,22 +60,37 @@ def freeze(workspace, model, template):
     model = {key: value for key, value in model.items() if key != "checksum"}
     model["checksum"] = contracts.digest(model)
     validate_contract("ReportViewModel", model)
-    inspect_contract_values(workspace, model)
+    refs = {}
+    inspect_contract_values(workspace, model, refs)
+    if model["status"] != "demo" and provenance.has_synthetic_source(refs.values()):
+        raise InvalidInput("Reports using synthetic data must carry demo status.")
+    try:
+        provenance.validate_observed(workspace, model)
+    except ValueError as exc:
+        raise InvalidInput(str(exc)) from None
     limit = 40 if template == "detailed" else 8
     tables, charts = [], []
+    report_refs = [*model["artifact_refs"], *model["evidence_refs"]]
 
     def dataset_for(item):
         ref = item["dataset_ref"]
         if ref["kind"] != "dataset":
             raise InvalidInput({"dataset_ref": "Select a versioned dataset."})
-        return resolve_ref(workspace, ref)
+        report_refs.append(ref)
+        dataset = resolve_ref(workspace, ref)
+        report_refs.append(dataset.payload["source_ref"])
+        report_refs.extend(row["source_ref"] for row in dataset.payload["rows"][:limit])
+        return dataset
 
     for table in model["tables"]:
         dataset = dataset_for(table)
         columns = [key for key in contracts.SCHEMA["$defs"]["Row_" + dataset.schema_id]["properties"]
                    if key != "source_ref"]
         data = dataset.payload["rows"][:limit]
+        fields = contracts.SCHEMA["$defs"]["Row_" + dataset.schema_id]["properties"]
         tables.append({"title": table["title"], "columns": columns,
+                       "date_columns": [key for key in columns if fields[key].get("format") == "date"],
+                       "total_rows": dataset.row_count,
                        "rows": [{key: row.get(key) for key in columns} for row in data]})
     for spec in model["charts"]:
         dataset = dataset_for(spec)
@@ -84,20 +99,23 @@ def freeze(workspace, model, template):
         if len(set(keys)) != len(keys) or any(key not in properties or key == "source_ref" for key in keys):
             raise InvalidInput({"charts": "The chart columns must match the source dataset."})
         chart_rows = [[row.get(key) for key in keys] for row in dataset.payload["rows"][:limit]]
-        numeric = bool(chart_rows) and all(
+        numeric = len(keys) > 1 and bool(chart_rows) and all(
             type(value) in (int, float) or value is None for row in chart_rows for value in row[1:]
         )
         charts.append({"title": spec["title"], "type": spec["type"],
                        "columns": [keys[0], *(spec["legend"] or keys[1:])][:len(keys)]
                        if len(spec["legend"]) == len(keys) - 1 else keys,
-                       "rows": chart_rows, "numeric": numeric})
+                       "rows": chart_rows, "total_rows": dataset.row_count, "numeric": numeric})
     sources = []
-    for ref in [*model["artifact_refs"], *model["evidence_refs"]]:
+    unique_refs = {}
+    for ref in report_refs:
+        unique_refs.setdefault((ref["kind"], ref["id"], ref["version"]), ref)
+    for ref in unique_refs.values():
         record = resolve_ref(workspace, ref)
         title = getattr(record, "title", "")
         sources.append(f"{ref['kind']} · {ref['id']} · v{ref['version']}" + (f" · {title}" if title else ""))
     return {"model": model, "template": template, "source": " | ".join(sources),
-            "tables": tables, "charts": charts}
+            "tables": tables, "charts": charts, "source_refs": list(unique_refs.values())}
 
 
 def public(row):
@@ -106,7 +124,8 @@ def public(row):
         workspace_id=row.workspace_id, series=source.series, version__gt=source.version,
     ).exists()
     return {"id": row.pk, "format": row.format, "state": row.state, "snapshot": row.snapshot["model"],
-            "stale": newer, "expires_at": row.expires_at, "checksum": row.checksum}
+            "stale": newer, "expires_at": row.expires_at, "checksum": row.checksum,
+            "renderer_version": row.renderer_version, "error_code": row.error_code or None}
 
 
 @api_view(["GET", "POST"])
@@ -192,6 +211,7 @@ def status(request, workspace_id, pk, download=False):
     lifetime = row.expires_at or row.created_at + timedelta(hours=1)
     if lifetime <= timezone.now():
         return Response({"code": "report_expired"}, status=410)
+    inspect_contract_values(workspace, row.snapshot.get("source_refs", []))
     return HttpResponse(bytes(row.result), content_type=reporting.FORMAT_MIME[row.format],
                         headers={"Content-Disposition": f'attachment; filename="report-{row.pk}.{row.format}"'})
 
@@ -206,7 +226,8 @@ def claim():
         if row.attempts >= 3:
             row.state, row.expires_at = "failed", now + timedelta(hours=1)
             row.lease_token = row.lease_until = None
-            row.save(update_fields=["state", "expires_at", "lease_token", "lease_until"])
+            row.error_code = "lease_exhausted"
+            row.save(update_fields=["state", "expires_at", "lease_token", "lease_until", "error_code"])
             continue
         row.state, row.lease_token, row.lease_until = "running", uuid.uuid4(), now + timedelta(minutes=2)
         row.attempts += 1
@@ -217,10 +238,11 @@ def claim():
 
 def prune_expired():
     now = timezone.now()
-    expired = list(models.ReportExport.objects.filter(expires_at__lte=now).exclude(state="running")
+    past_deadline = Q(expires_at__lte=now) | Q(state="succeeded", expires_at__isnull=True, created_at__lte=now - timedelta(hours=1))
+    expired = list(models.ReportExport.objects.filter(past_deadline).exclude(state="running")
                    .order_by("expires_at").values_list("pk", flat=True)[:100])
     if expired:
-        models.ReportExport.objects.filter(pk__in=expired, expires_at__lte=now).exclude(state="running").delete()
+        models.ReportExport.objects.filter(past_deadline, pk__in=expired).exclude(state="running").delete()
     abandoned = list(models.IntakePreview.objects.filter(expires_at__lte=now, applied_id__isnull=True)
                      .order_by("expires_at").values_list("pk", flat=True)[:100])
     if abandoned:
@@ -234,17 +256,22 @@ def process_one():
     authorized = models.Membership.objects.filter(
         workspace_id=row.workspace_id, user_id=row.creator_id, active=True, role__in=["owner", "editor"],
     ).exists()
-    result, retry = None, False
+    result, retry, version = None, False, ""
+    error_code = "" if authorized else "membership_required"
     if authorized:
         try:
+            inspect_contract_values(row.workspace, row.snapshot.get("source_refs", []))
+            version = reporting.renderer_version(row.format)
             result = reporting.render(row.snapshot, row.format)
         except (OSError, subprocess.TimeoutExpired):
             retry = row.attempts < 3
+            error_code = "renderer_unavailable"
         except Exception:
-            pass
+            error_code = "render_failed"
     state = "succeeded" if result else "queued" if retry else "failed"
     models.ReportExport.objects.filter(pk=row.pk, lease_token=row.lease_token, lease_until__gt=timezone.now()).update(
         state=state, result=result, checksum=hashlib.sha256(result).hexdigest() if result else "",
+        renderer_version=version, error_code=error_code,
         expires_at=timezone.now() + timedelta(hours=1) if not retry else None, lease_until=None, lease_token=None,
     )
     return True

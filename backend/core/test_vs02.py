@@ -1,12 +1,13 @@
 import io
 import json
 import os
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 from zipfile import ZipFile
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import IntegrityError, transaction
 from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 from docx import Document
@@ -14,7 +15,7 @@ from openpyxl import Workbook, load_workbook
 from pptx import Presentation
 from pypdf import PdfReader
 
-from . import exports, models
+from . import contracts, exports, models
 from .intake_files import IntakeError, check_package
 from .public_source import PublicHTTPSConnection, fetch
 from .tests import EVIDENCE, OWNER_EMAIL, PASSWORD, WORKSPACE, dataset_body, post
@@ -123,6 +124,18 @@ class IntakeAndReportTests(TestCase):
         self.assertEqual(saved.status_code, 201, saved.content)
         self.assertEqual(saved.json()["profile"]["version"], 2)
         self.assertEqual(saved.json()["evidence"]["checksum"], row["checksum"])
+        self.assertTrue(saved.json()["evidence"]["claim_only"])
+        applied = models.IntakePreview.objects.get(pk=row["id"])
+        self.assertIsNone(contracts.validate("DraftImportResult", applied.payload["review_contract"]))
+        self.assertEqual(applied.payload["review_contract"]["fields"][0]["decision"], "accept")
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            models.IntakePreview.objects.filter(pk=applied.pk).update(checksum="0" * 64)
+        evidence = saved.json()["evidence"]
+        revised = self.client.patch(self.base + "/entities/evidence/" + evidence["id"],
+                                    {"quality_notes": "Reviewed"}, content_type="application/json")
+        self.assertTrue(revised.json()["claim_only"])
+        real = dataset_body(self.workspace, revised.json())
+        self.assertEqual(post(self.client, self.base + "/datasets", real).status_code, 422)
         self.assertEqual(post(self.client, path, {**body, "fields": {"industry": "خدمات"}}).json(), saved.json())
         stale = self.client.post(self.base + "/intakes/previews", {
             "authorized": "yes", "file": SimpleUploadedFile("source.txt", b"industry: Staged"),
@@ -183,6 +196,9 @@ class IntakeAndReportTests(TestCase):
             download_url = "/exports/" + info["id"] + "/download"
             output = self.client.get(self.base + download_url)
             self.assertEqual(output.status_code, 200, name + " " + str(output.content[:150]))
+            status = self.client.get(self.base + "/exports/" + info["id"]).json()
+            self.assertTrue(status["renderer_version"].startswith("VS02.1"))
+            self.assertIsNone(status["error_code"])
             self.assertEqual(self.client.get(self.obase + download_url).status_code, 404)
             capture = os.environ.get("MTOOLS_REPORT_CAPTURE")
             if capture:
@@ -279,3 +295,94 @@ class IntakeAndReportTests(TestCase):
         with patch("core.exports.timezone.now", return_value=timezone.now() + timedelta(hours=2)):
             exports.prune_expired()
         self.assertFalse(models.ReportExport.objects.filter(pk=export_id).exists())
+
+
+    def test_staged_semantic_errors_and_versioned_confirmation(self):
+        bad = (b"series_key,period_start,value,unit,currency,source_ref\n"
+               b"a,2026-11-28,0,count,,\na,2026-11-27,1.5,count,,\na,2026-11-20,1,EUR,,")
+        response = self.preview(bad)
+        self.assertEqual(response.status_code, 201, response.content)
+        staged = response.json()
+        self.assertEqual(staged["accepted"], 1)
+        self.assertEqual([item["row"] for item in staged["errors"]], [3, 4])
+        valid = self.preview(b"series_key,period_start,value,unit,currency,source_ref\na,2026-11-28,0,count,,").json()
+        body = {"preview_id": valid["id"], "checksum": valid["checksum"], "confirm": True,
+                "mapping": valid["mapping"], "template_version": 1, "title": "Versioned intake"}
+        self.assertEqual(post(self.client, self.base + "/datasets", {**body, "template_version": 2}).status_code, 409)
+        self.assertEqual(post(self.client, self.base + "/datasets", {**body, "mapping": {"value": "unit"}}).status_code, 409)
+        self.assertEqual(post(self.client, self.base + "/datasets", body).status_code, 201)
+
+    def test_typed_union_and_excel_timestamp_roundtrip(self):
+        from .intake_files import normalize_cell
+        spec = contracts.SCHEMA["$defs"]["Row_feature_values"]["properties"]["value"]
+        self.assertEqual(normalize_cell("retail", spec, "UTC"), "retail")
+        self.assertIs(normalize_cell("false", spec, "UTC"), False)
+        self.assertEqual(normalize_cell("۷۰", spec, "UTC"), 70)
+        when = datetime(2026, 11, 28)
+        self.assertEqual(normalize_cell(when, {"format": "date"}, "Europe/Berlin"), "2026-11-28")
+        self.assertEqual(normalize_cell(when, {"format": "date-time"}, "Europe/Berlin"), "2026-11-28T00:00:00+01:00")
+        with self.assertRaises(IntakeError):
+            normalize_cell(datetime(2026, 10, 25, 2, 30), {"format": "date-time"}, "Europe/Berlin")
+
+    def test_demo_cannot_be_exported_as_final(self):
+        body = dataset_body(self.workspace, self.evidence)
+        body["payload"]["synthetic"] = True
+        dataset = post(self.client, self.base + "/datasets", body).json()
+        source = models.Dataset.objects.get(pk=dataset["id"])
+        model = exports.snapshot(source.workspace, source, "en", "executive")["model"]
+        run = models.AnalysisRun.objects.create(
+            creator=self.user, workspace=source.workspace, tool_id="S01", method_id="S01.diagnose",
+            method_version=1, idempotency_key="mislabelled-demo", input_snapshot={}, input_hash="0" * 64,
+        )
+        artifact = models.Artifact.objects.create(workspace=source.workspace, run=run, artifact_type="ReportViewModel",
+                                                  schema_version=1, payload={**model, "status": "final"})
+        result = post(self.client, self.base + "/exports", {
+            "id": str(artifact.pk), "version": 1, "artifact_type": "ReportViewModel",
+            "format": "xlsx", "locale": "en", "template": "executive",
+        })
+        self.assertEqual(result.status_code, 422)
+        self.assertFalse(models.ReportExport.objects.exists())
+
+
+    def test_html_profile_reads_inline_labels_without_script_content(self):
+        from .profile_intake import suggestions
+        profile = models.CompanyProfile.objects.get(workspace_id=self.workspace)
+        source = "https://example.com/company"
+        markup = b"""<head><meta property="og:site_name" content="Example Company"></head>
+        <script>objective: untrusted instruction</script>
+        <p><strong>Channels:</strong> Partner stores</p>"""
+        output = suggestions(markup, ".html", profile, source)
+        named = {item["field"]: item for item in output["fields"]}
+        self.assertEqual(named["company_name"]["proposed"], "Example Company")
+        self.assertEqual(named["channels"]["proposed"], "Partner stores")
+        self.assertTrue(named["channels"]["anchor"].startswith(source))
+        self.assertIn("objective", output["missing_fields"])
+
+    def test_graph_preflight_rejects_orphans_in_the_selected_version(self):
+        base_payload = dataset_body(self.workspace, self.evidence)["payload"]
+        source = base_payload["source_ref"]
+        period = base_payload["scope"]["period"]
+
+        def save(schema, rows):
+            response = post(self.client, self.base + "/datasets", {
+                "title": schema, "payload": {**base_payload, "schema_id": schema, "rows": rows},
+            })
+            self.assertEqual(response.status_code, 201, response.content)
+            result = response.json()
+            return {"kind": "dataset", "id": result["id"], "version": result["version"]}
+
+        nodes = save("graph_nodes", [
+            {"node_key": label, "node_type": "account", "segment_key": None, "source_ref": source}
+            for label in ("A", "B")
+        ])
+        edge = {"source_key": "A", "target_key": "C", "relation_type": "referral", "period": period,
+                "event_key": None, "weight": None, "directed": True, "permission": "granted", "source_ref": source}
+        graph = {"nodes_ref": nodes, "edges_ref": save("graph_edges", [edge]), "relation_type": "referral",
+                 "directed": True, "period": period, "weight_semantics": "unweighted", "duplicate_policy": "reject",
+                 "self_loops": "reject", "boundary": "example accounts"}
+        request = {"workspace_id": self.workspace, "tool_id": "M09", "method_id": "M09.network",
+                   "method_version": 1, "question": "Inspect referrals", "input": {"graph": graph},
+                   "evidence_refs": [], "dependency_run_ids": [], "idempotency_key": "graph-preflight"}
+        self.assertEqual(post(self.client, self.base + "/preflight", request).status_code, 422)
+        graph["edges_ref"] = save("graph_edges", [{**edge, "target_key": "B"}])
+        self.assertEqual(post(self.client, self.base + "/preflight", request).json()["availability"], "planned")

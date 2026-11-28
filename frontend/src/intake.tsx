@@ -3,7 +3,7 @@ import { api, errorText } from './api';
 import type { Translate, Workspace } from './api';
 import { Field, formValues, Message, useTask } from './shared';
 
-type Evidence = { id: string; title: string; version: number; kind: string };
+type Evidence = { id: string; title: string; version: number; kind: string; claim_only: boolean };
 type ReportSource = { id: string; title: string; version: number; synthetic: boolean; artifact_type: string };
 type Props = { workspace: Workspace; t: Translate };
 
@@ -21,6 +21,7 @@ function useRows<T>(path: string, t: Translate) {
 
 type Preview = {
   id: string; checksum: string; accepted: number; synthetic: boolean;
+  template_version: number; mapping: Record<string, string>;
   errors: { row: number; reason: string }[]; rows: Record<string, unknown>[];
 };
 
@@ -67,7 +68,7 @@ export function FileIntake({ workspace, t }: Props) {
         <Field label={t('جداکنندهٔ CSV', 'CSV delimiter')}><select name="delimiter"><option value=",">,</option><option value=";">;</option><option value={'\t'}>Tab</option></select></Field>
         <Field label={t('شاهد مبنا', 'Source evidence')}><select name="evidence" required defaultValue="">
           <option value="" disabled>{t('انتخاب کنید', 'Select')}</option>
-          {evidence.records.map((item) => <option key={item.id} value={item.id}>{item.title} · {item.version}</option>)}
+          {evidence.records.map((item) => <option key={item.id} value={item.id}>{item.title} · {item.version}{item.claim_only ? ' · ' + t('اظهار منبع', 'Source claim') : ''}</option>)}
         </select></Field>
         <Field label={t('جامعه یا دامنه', 'Population or scope')}><input name="population" required /></Field>
         <Field label={t('دانه‌بندی', 'Grain')}><input name="grain" defaultValue="day" required /></Field>
@@ -92,7 +93,8 @@ export function FileIntake({ workspace, t }: Props) {
       <form onSubmit={(event) => {
         event.preventDefault();
         task.run(async () => {
-          await api(base + '/datasets/previews/' + staged.id + '/confirm', 'POST', { checksum: staged.checksum, title, confirm: true });
+          await api(base + '/datasets', 'POST', { preview_id: staged.id, checksum: staged.checksum, title,
+            mapping: staged.mapping, template_version: staged.template_version, confirm: true });
           setSaved(true);
         });
       }}>
